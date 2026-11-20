@@ -62,6 +62,16 @@ def _esperar_codigo(desde: int) -> str | None:
     return None
 
 
+def _sin_secretos(texto: str, codigo: str) -> str:
+    limpio = ANSI.sub("", texto).replace("\r", "")
+    for parte in {codigo, *codigo.split("#")}:
+        if len(parte) > 6:
+            limpio = limpio.replace(parte, "[CODIGO]")
+    limpio = TOKEN.sub("[TOKEN]", limpio)
+    lineas = [l.rstrip() for l in limpio.splitlines() if l.strip()]
+    return "\n".join(lineas[-40:]) or "(no mostró nada)"
+
+
 class Terminal:
     """Ejecuta un programa como si estuviera en una terminal real."""
 
@@ -130,11 +140,18 @@ def generar() -> bool:
         if not codigo:
             _mensaje("Se acabó el tiempo sin recibir el código. Vuelve a lanzar el diagnóstico para intentarlo otra vez.")
             return False
+        inicio_respuesta = len(term.texto)
         term.escribir(codigo)
-        token = term.leer_hasta(TOKEN, 90)
+        token = term.leer_hasta(TOKEN, 45)
         if not token:
-            print("No apareció el token tras enviar el código.")
-            _mensaje("El código no funcionó (puede que haya caducado). Vuelve a lanzar el diagnóstico y responde con el código nuevo.")
+            term.escribir("")  # por si pide confirmar con Enter
+            token = term.leer_hasta(TOKEN, 45)
+        if not token:
+            respuesta = _sin_secretos(term.texto[inicio_respuesta:], codigo)
+            print("No apareció el token. Lo que mostró Claude Code:\n" + respuesta)
+            _mensaje("No recibí el token. Esto es lo que respondió Claude Code (sin claves), "
+                     "mándaselo a Claude en el chat:\n\n" + respuesta[-1500:])
+            _mensaje("Para reintentar: lanza otra vez el diagnóstico y usa el enlace NUEVO que te llegue.")
             return False
         _mensaje(
             "Este es tu token. Guárdalo ya como secreto en GitHub:\n"
