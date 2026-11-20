@@ -1,0 +1,167 @@
+name: Bot de videos
+
+on:
+  # Instalación: se ejecuta sola cuando subes explicativos-bot.zip
+  push:
+    paths:
+      - "explicativos-bot.zip"
+  schedule:
+    # Producir un video cada día a las 11:17 UTC (7:17 a. m. en República Dominicana)
+    - cron: "17 11 * * *"
+    # Revisar los botones de Telegram cada 20 minutos
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+    inputs:
+      tarea:
+        description: "¿Qué hago?"
+        type: choice
+        default: producir
+        options:
+          - producir
+          - aprobaciones
+          - diagnostico
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  instalar:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Descomprimir el bot
+        run: |
+          test -f explicativos-bot.zip || { echo "No encuentro explicativos-bot.zip"; exit 1; }
+          rm -rf /tmp/bot && mkdir -p /tmp/bot
+          unzip -q explicativos-bot.zip -d /tmp/bot
+          origen=/tmp/bot/explicativos-bot
+          test -d "$origen" || origen=/tmp/bot
+          rm -rf "$origen/.github"
+          cp -a "$origen"/. ./
+          rm -f explicativos-bot.zip inicio.txt
+          git config user.name "bot-explicativos"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A
+          git commit -m "Instalar el bot de videos"
+          git push
+          echo "Bot instalado"
+
+  producir:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '17 11 * * *') ||
+      (github.event_name == 'workflow_dispatch' && inputs.tarea == 'producir')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    concurrency:
+      group: estado-del-bot
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Instalar ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Instalar dependencias de Python
+        run: pip install -r requirements.txt
+      - name: Recuperar caché de Remotion
+        uses: actions/cache@v4
+        with:
+          path: remotion/node_modules
+          key: remotion-${{ hashFiles('remotion/package.json') }}
+      - name: Instalar Remotion
+        working-directory: remotion
+        run: npm install --no-audit --no-fund
+      - name: Producir
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: python -m bot.producir
+      - name: Guardar memoria
+        if: always()
+        run: |
+          git config user.name "bot-explicativos"
+          git config user.email "bot@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "Memoria: video $(date -u +%Y-%m-%d)"
+          git pull --rebase --autostash || true
+          git push || true
+      - name: Guardar guion y fotogramas para revisar
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trabajo
+          path: |
+            salida/*/guion.json
+            salida/*/fotos/*.png
+            remotion/src/escenas/*.tsx
+          retention-days: 7
+          if-no-files-found: ignore
+
+  aprobaciones:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '*/20 * * * *') ||
+      (github.event_name == 'workflow_dispatch' && inputs.tarea == 'aprobaciones')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: estado-del-bot
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: ¿Ya está instalado?
+        id: listo
+        run: test -f bot/aprobaciones.py && echo "si=1" >> "$GITHUB_OUTPUT" || echo "El bot aún no está instalado"
+      - uses: actions/setup-python@v5
+        if: steps.listo.outputs.si == '1'
+        with:
+          python-version: "3.12"
+      - name: Procesar botones
+        if: steps.listo.outputs.si == '1'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pip install -q requests pyyaml
+          python -m bot.aprobaciones
+      - name: Guardar memoria
+        if: always() && steps.listo.outputs.si == '1'
+        run: |
+          git config user.name "bot-explicativos"
+          git config user.email "bot@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "Memoria: aprobaciones $(date -u +%Y-%m-%dT%H:%M)"
+          git pull --rebase --autostash || true
+          git push || true
+
+  diagnostico:
+    if: github.event_name == 'workflow_dispatch' && inputs.tarea == 'diagnostico'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q anthropic requests pyyaml
+      - name: Probar claves
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+        run: python -m bot.diagnostico
