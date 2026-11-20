@@ -68,6 +68,12 @@ def revisar_meta():
 
 
 def main():
+    tiene_telegram = os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID")
+    if not os.environ.get("ANTHROPIC_API_KEY") and tiene_telegram:
+        # Sin clave de Claude todavía: ayudamos a crear el token de la suscripción.
+        from .token_suscripcion import generar
+        print("No hay ANTHROPIC_API_KEY: inicio la creación del token de suscripción por Telegram.")
+        sys.exit(0 if generar() else 1)
     revisar_claude()
     revisar_telegram()
     revisar_meta()
