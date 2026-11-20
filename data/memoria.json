@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "20261120-1851",
+    "fecha": "2026-11-20",
+    "publicado_en": "2026-11-20T19:44:30+00:00",
+    "titulo": "Si se te moja el celular, NO hagas esto",
+    "tema": "Lo que casi todos hacen mal cuando se les moja el celular: el arroz no lo salva",
+    "subtema": "tecnología que usamos sin entender (celular)",
+    "estructura": "MITO TACHADO: lo que casi todos hacen mal ante una situación cotidiana, cada mito se tacha con su razón, y al final lo que de verdad funciona",
+    "paleta": "cocina",
+    "variante": "B",
+    "tipo_gancho": "afirmación polémica",
+    "gancho": "Si metiste tu celular mojado en arroz, pudiste empeorarlo",
+    "nota_revisor": 4.4,
+    "video_fb": "2352309705583023",
+    "metricas": {}
+  }
+]
