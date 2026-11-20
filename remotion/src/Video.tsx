@@ -2,12 +2,12 @@
 // "tablero" grande y la cámara viaja de una a otra sin cortes.
 import React from 'react';
 import {AbsoluteFill, Audio, Easing, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
-import {loadFont} from '@remotion/google-fonts/Nunito';
+import {fuente} from './fuente';
 import {ANCHO, ALTO, EscenaRespaldo, Palabra, Paleta} from './lib';
 import {ESCENAS} from './escenas';
 import {Subtitulos} from './Subtitulos';
 
-const {fontFamily} = loadFont('normal', {weights: ['700', '800', '900'], subsets: ['latin', 'latin-ext']});
+const {fontFamily} = fuente;
 
 export type EscenaPlan = {
   componente: string;
@@ -16,15 +16,25 @@ export type EscenaPlan = {
   palabras: Palabra[];
   rotulo: string;
   clave?: number | null; // segundo (dentro de la escena) de la palabra clave
+  clave_palabra?: string;
+  camara?: string;
+  grafico?: Grafico | null;
 };
 
 export type PlanVideo = {
+  motor?: '2d' | '3d';
   audio: string;
   musica: string;
   subtitulos: boolean;
   paleta: Paleta;
+  portada?: string;
   escenas: EscenaPlan[];
 };
+
+export type Grafico =
+  | {tipo: 'barras'; items: {etiqueta: string; valor: number; unidad: string}[]}
+  | {tipo: 'mitos'; items: string[]}
+  | {tipo: 'contador'; valor: number; etiqueta: string};
 
 // Posición de cada escena en el tablero: avanza a la derecha en zigzag.
 const posicion = (i: number) => ({x: i * (ANCHO + 120), y: i % 2 === 0 ? 0 : -300});

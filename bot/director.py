@@ -10,7 +10,8 @@ def sortear_estilo(cfg: dict) -> dict:
     recientes = {
         (m.get("paleta"), m.get("tipo_gancho"), m.get("estructura")) for m in memoria()[-12:]
     }
-    paletas = list(cfg["estilo"]["paletas"].keys())
+    grupo = "paletas_3d" if cfg["produccion"].get("motor") == "3d" else "paletas"
+    paletas = list(cfg["estilo"][grupo].keys())
     for _ in range(50):
         combo = (
             random.choice(paletas),
@@ -20,7 +21,7 @@ def sortear_estilo(cfg: dict) -> dict:
         if combo not in recientes:
             break
     nombre, gancho, estructura = combo
-    colores = cfg["estilo"]["paletas"][nombre]
+    colores = cfg["estilo"][grupo][nombre]
     return {
         "paleta": nombre,
         "colores": {"fondo": colores[0], "tinta": colores[1], "acentos": colores[2:]},
@@ -49,7 +50,7 @@ Temas ya usados (no los repitas ni hagas variantes cercanas):
 
 Para este video ya se sorteó:
 - Tipo de gancho: {estilo['tipo_gancho']}
-- Estructura: {estilo['estructura']}
+- Formato ganador (el tema DEBE encajar en él): {estilo['estructura']}
 
 Propón 3 temas candidatos concretos (no genéricos: "por qué el pan se pone duro y no blando
 como las galletas" en vez de "la ciencia del pan"), cada uno con su ángulo sorprendente, y elige

@@ -6,6 +6,22 @@ from .claude import Claude, extraer_codigo
 from .config import ESCENAS, REMOTION, prompt
 from . import render
 
+RESPALDO_3D = """import React from 'react';
+import {EscenaProps, EscenaRespaldo3D} from '../lib3d';
+
+export const {nombre}: React.FC<EscenaProps> = (props) => <EscenaRespaldo3D {...props} />;
+"""
+
+ENCUADRES = ["picado", "frente", "picado_izq", "cerca"]
+
+
+def encuadre(indice: int) -> str:
+    """Encuadre de cámara de cada escena (va rotando para dar dinamismo)."""
+    return ENCUADRES[indice % len(ENCUADRES)]
+
+
+MOTOR = {"actual": "2d"}  # lo fija producir al empezar ("3d" o "2d")
+
 RESPALDO = """import React from 'react';
 import {EscenaProps, EscenaRespaldo} from '../lib';
 
@@ -14,10 +30,12 @@ export const {nombre}: React.FC<EscenaProps> = (props) => <EscenaRespaldo {...pr
 
 
 def _system(cfg: dict, nombre: str) -> str:
-    lib = (REMOTION / "src" / "lib.tsx").read_text(encoding="utf-8")
-    ejemplo = (ESCENAS / "Ejemplo.tsx").read_text(encoding="utf-8")
-    return (prompt("escena.md")
-            .replace("{estilo}", cfg["estilo"]["descripcion"].strip())
+    tres = MOTOR["actual"] == "3d"
+    lib = (REMOTION / "src" / ("lib3d.tsx" if tres else "lib.tsx")).read_text(encoding="utf-8")
+    ejemplo = (ESCENAS / ("Ejemplo3D.tsx" if tres else "Ejemplo.tsx")).read_text(encoding="utf-8")
+    estilo = cfg["estilo"]["descripcion_3d" if tres else "descripcion"].strip()
+    return (prompt("escena3d.md" if tres else "escena.md")
+            .replace("{estilo}", estilo)
             .replace("{lib}", lib)
             .replace("{ejemplo}", ejemplo)
             .replace("{nombre}", nombre))
@@ -39,12 +57,11 @@ Escena número {indice + 1}. Dura {tiempos['duracion']:.2f} segundos.
 Voz de esta escena: «{escena['voz']}»
 Palabras con su tiempo dentro de la escena: {palabras}
 Palabra clave (momento visual principal): {escena.get('palabra_clave', '')}
-Rótulo: «{escena.get('rotulo', '')}»
+Rótulo: «{escena.get('rotulo', '')}»{(chr(10) + "Encuadre de cámara de esta escena: " + encuadre(indice)) if MOTOR['actual'] == '3d' else ''}{(chr(10) + "Tarjeta de datos que el video pone encima (no la dibujes tú): " + str(escena.get('grafico'))) if escena.get('grafico') else ''}
 Lo que debe mostrar: {escena['visual']}
-Paleta sorteada: fondo {estilo['colores']['fondo']}, tinta {estilo['colores']['tinta']}, acentos {', '.join(estilo['colores']['acentos'])}
+Paleta sorteada: fondo {estilo['colores']['fondo']}, tinta {estilo['colores']['tinta']}, acentos {', '.join(estilo['colores']['acentos'])}{' (acentos: objeto principal, secundario, resalte, extra, suelo)' if MOTOR['actual'] == '3d' else ''}
 
-Las escenas vecinas comparten el mismo tablero y la cámara viaja entre ellas: mantén un fondo
-coherente con la paleta para que el paso sea fluido."""
+{"Todas las escenas están en el mismo mundo: el cielo, el suelo, el sol y las sombras ya los pone el video. Tú construyes solo lo de tu escenario." if MOTOR["actual"] == "3d" else "Las escenas vecinas comparten el mismo tablero y la cámara viaja entre ellas: mantén un fondo coherente con la paleta para que el paso sea fluido."}"""
 
 
 def dibujar(claude: Claude, cfg: dict, nombre: str, escena: dict, tiempos: dict, guion: dict,
@@ -76,18 +93,21 @@ def reparar(claude: Claude, cfg: dict, nombre: str, error: str) -> None:
 
 
 def usar_respaldo(nombre: str):
-    (ESCENAS / f"{nombre}.tsx").write_text(RESPALDO.replace("{nombre}", nombre), encoding="utf-8")
+    plantilla = RESPALDO_3D if MOTOR["actual"] == "3d" else RESPALDO
+    (ESCENAS / f"{nombre}.tsx").write_text(plantilla.replace("{nombre}", nombre), encoding="utf-8")
 
 
 def escribir_indice(nombres: list[str]):
     lineas = ["// Generado por el bot. No editar a mano.",
               "import type React from 'react';",
               "import type {EscenaProps} from '../lib';",
-              "import {Ejemplo} from './Ejemplo';"]
+              "import {Ejemplo} from './Ejemplo';",
+              "import {Ejemplo3D} from './Ejemplo3D';"]
     lineas += [f"import {{{n}}} from './{n}';" for n in nombres]
     lineas.append("")
     lineas.append("export const ESCENAS: Record<string, React.FC<EscenaProps>> = {")
     lineas.append("  Ejemplo,")
+    lineas.append("  Ejemplo3D,")
     lineas += [f"  {n}," for n in nombres]
     lineas.append("};")
     (ESCENAS / "index.ts").write_text("\n".join(lineas) + "\n", encoding="utf-8")
@@ -99,7 +119,7 @@ _REPAROS: dict = {}
 def limpiar_escenas_viejas():
     _REPAROS.clear()
     for f in ESCENAS.glob("*.tsx"):
-        if f.name != "Ejemplo.tsx":
+        if f.name not in ("Ejemplo.tsx", "Ejemplo3D.tsx"):
             f.unlink()
 
 

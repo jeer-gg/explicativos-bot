@@ -48,14 +48,69 @@ def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
     for nombre, t, fuente in zip(nombres, tiempos_variante["escenas"], fuentes):
         escenas.append({"componente": nombre, "inicio": t["inicio"], "duracion": t["duracion"],
                         "palabras": t["palabras"], "rotulo": fuente.get("rotulo", "") or "",
-                        "clave": momento_clave(t["palabras"], fuente.get("palabra_clave", ""))})
+                        "clave": momento_clave(t["palabras"], fuente.get("palabra_clave", "")),
+                        "clave_palabra": fuente.get("palabra_clave", "") or "",
+                        "camara": estudio.encuadre(len(escenas)),
+                        "grafico": grafico_valido(fuente.get("grafico"))})
     return {
+        "motor": cfg["produccion"].get("motor", "2d"),
         "audio": tiempos_variante["audio"],
         "musica": cfg["produccion"].get("musica", "") or "",
         "subtitulos": cfg["produccion"].get("subtitulos", True),
         "paleta": estilo["colores"],
+        "portada": (guion.get("portada") or "").upper()[:60],
         "escenas": escenas,
     }
+
+
+def grafico_valido(g):
+    """Solo deja pasar gráficos con la forma que el video sabe dibujar."""
+    if not isinstance(g, dict):
+        return None
+    tipo, items = g.get("tipo"), g.get("items")
+    try:
+        if tipo == "barras" and isinstance(items, list) and 2 <= len(items) <= 4:
+            return {"tipo": "barras", "items": [{"etiqueta": str(i.get("etiqueta", ""))[:18],
+                                                  "valor": float(i["valor"]),
+                                                  "unidad": str(i.get("unidad", ""))[:6]} for i in items]}
+        if tipo == "mitos" and isinstance(items, list) and 1 <= len(items) <= 4:
+            return {"tipo": "mitos", "items": [str(i)[:14] for i in items]}
+        if tipo == "contador":
+            return {"tipo": "contador", "valor": float(g["valor"]), "etiqueta": str(g.get("etiqueta", ""))[:20]}
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None
+    return None
+
+
+def preparar_motor(cfg: dict, trabajo) -> None:
+    """Comprueba que el 3D se dibuja en esta máquina; si no, sigue en 2D y avisa."""
+    p = cfg["produccion"]
+    if p.get("motor", "2d") == "3d":
+        estudio.MOTOR["actual"] = "3d"
+        estudio.limpiar_escenas_viejas()
+        estudio.escribir_indice([])
+        colores = next(iter(cfg["estilo"]["paletas_3d"].values()))
+        plan = {"motor": "3d", "audio": "sfx/whoosh.mp3", "musica": "", "subtitulos": False,
+                "paleta": {"fondo": colores[0], "tinta": colores[1], "acentos": colores[2:]},
+                "escenas": [{"componente": "Ejemplo3D", "inicio": 0, "duracion": 3, "palabras": [],
+                             "rotulo": "", "clave": None}]}
+        ok, salida = render.empaquetar()
+        if ok:
+            ruta = render.guardar_plan(plan, "prueba")
+            destino = trabajo / "fotos" / "prueba3d.png"
+            for gl in ("swangle", "swiftshader", "angle"):
+                render.OPCIONES.update(gl=gl, concurrencia=p.get("concurrencia_3d", "50%"))
+                ok, salida = render.foto(ruta, 45, destino)
+                if ok and render.imagen_vacia(destino):
+                    ok, salida = False, "La imagen 3D salió vacía."
+                if ok:
+                    print("3D funcionando con", gl)
+                    return
+        print("El 3D no funcionó:", salida[-1500:])
+        telegram.aviso_seguro("El 3D no funcionó en esta ejecución; hago el video en 2D.\n" + salida[-600:])
+        p["motor"] = "2d"
+    render.OPCIONES.update(gl=None, concurrencia="100%")
+    estudio.MOTOR["actual"] = "2d"
 
 
 def tomar_fotos(planes, rutas_plan, trabajo, guion, nombres_por_variante):
@@ -96,6 +151,7 @@ def producir():
     trabajo = SALIDA / id_video
     trabajo.mkdir(parents=True, exist_ok=True)
     sfx.generar()
+    preparar_motor(cfg, trabajo)
 
     try:
         estadisticas.actualizar()
@@ -118,6 +174,9 @@ def producir():
     except ValueError:
         cfg["produccion"]["velocidad_voz"] = "+18%"
         tiempos = narrar_guion(guion, cfg, trabajo / "voz", PUBLICO)
+    from .voz import AVISOS
+    for aviso in AVISOS:
+        telegram.aviso_seguro(aviso)
 
     # 4. Estudio: una escena por llamada
     n = len(guion["escenas"])
@@ -243,7 +302,8 @@ def producir():
     shutil.rmtree(trabajo / "voz", ignore_errors=True)
 
     # Quedarse escuchando los botones para publicar al instante (sin esperar al reloj de GitHub)
-    minutos = min(cfg["aprobacion"].get("escuchar_minutos", 30), 84 - (time.monotonic() - INICIO) / 60)
+    limite = cfg["produccion"].get("tiempo_maximo_min", 90) - 6
+    minutos = min(cfg["aprobacion"].get("escuchar_minutos", 30), limite - (time.monotonic() - INICIO) / 60)
     if minutos > 2:
         telegram.aviso_seguro(f"Toca un botón en los próximos {int(minutos)} minutos y lo hago al momento. "
                               "Después también funciona, pero puede tardar hasta una hora.")

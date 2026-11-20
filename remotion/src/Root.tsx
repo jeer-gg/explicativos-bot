@@ -1,6 +1,9 @@
 import React from 'react';
 import {Composition} from 'remotion';
 import {Video, PlanVideo} from './Video';
+import {Video3D} from './Video3D';
+
+const Principal: React.FC<PlanVideo> = (plan) => (plan.motor === '3d' ? <Video3D {...plan} /> : <Video {...plan} />);
 
 const FPS = 30;
 
@@ -15,7 +18,7 @@ const ejemplo: PlanVideo = {
 export const Root: React.FC = () => (
   <Composition
     id="Video"
-    component={Video as unknown as React.FC<Record<string, unknown>>}
+    component={Principal as unknown as React.FC<Record<string, unknown>>}
     width={1080}
     height={1920}
     fps={FPS}

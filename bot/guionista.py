@@ -17,7 +17,7 @@ def escribir_guion(claude: Claude, cfg: dict, tema: dict, estilo: dict) -> dict:
     usuario = f"""Tema: {tema['tema']}
 Ángulo: {tema['angulo']}
 Tipo de gancho: {estilo['tipo_gancho']}
-Estructura: {estilo['estructura']}
+Formato ganador: {estilo['estructura']}
 
 Reglas:
 - La voz arranca en el segundo 0: la primera frase ES el gancho, de 6 a 12 palabras.
@@ -36,6 +36,18 @@ Reglas:
   hay, qué hacen, qué se mueve, qué metáfora visual explica la idea. Sin texto largo en pantalla
   (máximo 3 palabras de rótulo por escena).
 - Escribe números como se pronuncian si pueden leerse mal ("dos mil" en vez de "2.000").
+- Formato: sigue al pie de la letra la estructura sorteada; es un formato probado con cientos
+  de miles de vistas.
+- Lo visual es protagonista: casi siempre un OBJETO o lugar cotidiano grande y detallado que se
+  arma, se abre en corte, se compara o se transforma (no gente hablando). Cada escena dice
+  qué pieza aparece, qué parte se señala con una etiqueta corta, qué se mide o qué flecha se ve.
+- "portada": el título grande que aparece al inicio y en la miniatura, de 3 a 6 palabras en
+  mayúsculas, que dé ganas de ver (como «ESTE TRIÁNGULO NO ES DE ADORNO» o «SI TE QUEMAS
+  COCINANDO...»). Debe decir lo mismo que la primera frase, no otra cosa.
+- "grafico" (opcional, en 2 o 3 escenas como máximo): una tarjeta con datos que aparece en
+  pantalla. Tipos: {{"tipo": "barras", "items": [{{"etiqueta": "un panel", "valor": 450, "unidad": "W"}}, ...]}}
+  (2 a 4 barras), {{"tipo": "mitos", "items": ["hielo", "pasta", "mantequilla"]}} (se tachan con
+  una X roja), {{"tipo": "contador", "valor": 1839, "etiqueta": "año"}}. Usa solo datos verificados.
 - Incluye la versión B del gancho: otra primera escena con un tipo de gancho distinto.
 - Define una dirección de arte común: el mismo protagonista y el mismo mundo visual en todas
   las escenas, para que el video se sienta como un solo plano continuo.
@@ -44,9 +56,11 @@ Devuelve JSON:
 {{
  "titulo": "título corto para Facebook (máx. 60 caracteres)",
  "descripcion": "descripción de 1 a 2 frases que invite a ver",
+ "portada": "TÍTULO DE 3 A 6 PALABRAS",
  "escenas": [
    {{"voz": "texto narrado", "visual": "descripción detallada de la ilustración y su animación",
      "rotulo": "0 a 3 palabras o vacío", "palabra_clave": "palabra de la voz donde ocurre el momento visual principal",
+     "grafico": null,
      "datos": [{{"afirmacion": "...", "fuente": "url o referencia"}}]}}
  ],
  "gancho_b": {{"voz": "...", "visual": "...", "rotulo": "...", "palabra_clave": "...", "tipo": "..."}},
@@ -78,7 +92,10 @@ def verificar_guion(claude: Claude, guion: dict) -> dict:
     if not revisado.get("escenas") or len(revisado["escenas"]) != len(guion["escenas"]):
         return guion
     # Conserva lo que el verificador no debía tocar.
-    for clave in ("titulo", "descripcion", "gancho_b", "direccion_arte"):
+    for clave in ("titulo", "descripcion", "portada", "gancho_b", "direccion_arte"):
         if not revisado.get(clave) and guion.get(clave):
             revisado[clave] = guion[clave]
+    for nueva, vieja in zip(revisado["escenas"], guion["escenas"]):
+        if vieja.get("grafico") and not nueva.get("grafico"):
+            nueva["grafico"] = vieja["grafico"]
     return revisado

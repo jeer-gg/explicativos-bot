@@ -6,6 +6,13 @@ from pathlib import Path
 
 from .config import REMOTION
 
+# Opciones que fija producir según el motor: en 3D hace falta WebGL por software (sin GPU).
+OPCIONES = {"gl": None, "concurrencia": "100%"}
+
+
+def _gl():
+    return [f"--gl={OPCIONES['gl']}"] if OPCIONES["gl"] else []
+
 
 def _npx(*args, timeout=1800):
     proc = subprocess.run(["npx", "--no-install", "remotion", *args], cwd=REMOTION,
@@ -27,14 +34,14 @@ def guardar_plan(plan: dict, nombre: str) -> Path:
 def foto(plan_ruta: Path, fotograma: int, destino: Path) -> tuple[bool, str]:
     destino.parent.mkdir(parents=True, exist_ok=True)
     return _npx("still", "build", "Video", str(destino.resolve()),
-                f"--frame={fotograma}", f"--props={plan_ruta.resolve()}", timeout=300)
+                f"--frame={fotograma}", f"--props={plan_ruta.resolve()}", *_gl(), timeout=600)
 
 
 def renderizar(plan_ruta: Path, destino: Path) -> tuple[bool, str]:
     destino.parent.mkdir(parents=True, exist_ok=True)
     return _npx("render", "build", "Video", str(destino.resolve()),
                 f"--props={plan_ruta.resolve()}", "--codec=h264", "--crf=18",
-                "--concurrency=100%", timeout=3600)
+                f"--concurrency={OPCIONES['concurrencia']}", *_gl(), timeout=5400)
 
 
 def preparar_para_facebook(origen: Path, destino: Path):
@@ -58,3 +65,13 @@ def escena_con_error(salida: str, nombres: list[str]) -> str | None:
         if re.search(rf"\b{nombre}\b", salida):
             return nombre
     return None
+
+
+def imagen_vacia(ruta: Path) -> bool:
+    """True si la imagen no tiene dibujo (solo un color o un degradado de cielo: el 3D no se dibujó)."""
+    datos = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", str(ruta), "-vf", "scale=48:48,format=gray",
+                            "-f", "rawvideo", "-"], capture_output=True, check=True).stdout
+    if len(datos) < 48 * 48:
+        return True
+    saltos = [abs(datos[f * 48 + c + 1] - datos[f * 48 + c]) for f in range(48) for c in range(47)]
+    return sum(saltos) / len(saltos) < 1.5

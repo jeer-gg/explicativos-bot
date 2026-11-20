@@ -28,7 +28,20 @@ produccion:
   # Voces gratis de Edge TTS. Ejemplos: es-MX-JorgeNeural, es-MX-DaliaNeural,
   # es-DO-EmilioNeural, es-DO-RamonaNeural, es-US-AlonsoNeural
   voz: "es-MX-JorgeNeural"
-  velocidad_voz: "+15%"
+  velocidad_voz: "+15%"          # solo para la voz de respaldo (Edge)
+  # Voz principal: Google Gemini (gratis con la clave GEMINI_API_KEY de Google AI Studio)
+  voz_motor: "gemini"             # "gemini" o "edge"
+  voz_gemini: "Puck"              # otras: Charon, Fenrir, Orus, Kore, Aoede, Leda...
+  modelos_voz_gemini: ["gemini-3.8-flash-tts", "gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts"]
+  estilo_voz_gemini: >
+    Narra en español latinoamericano neutro como un narrador de videos explicativos virales:
+    voz cercana, enérgica y con curiosidad, ritmo rápido y continuo, sin pausas largas,
+    con énfasis natural en las palabras importantes. Lee exactamente este texto:
+  whisper_modelo: "base"          # para saber en qué momento se dice cada palabra
+  # Animación: "3d" (escenas 3D con luces y sombras) o "2d" (ilustración plana)
+  motor: "3d"
+  concurrencia_3d: "50%"
+  tiempo_maximo_min: 170          # debe ser menor que timeout-minutes del trabajo producir
   # Dos versiones del gancho (A y B) para que elijas la mejor.
   ab_gancho: true
   # Música de fondo: pon un .mp3 con licencia en remotion/public/musica/ y
@@ -44,7 +57,21 @@ estilo:
     Plasaber": personajes simpáticos con contorno grueso, fondos con detalles,
     sombras planas, todo en movimiento suave. Sin emojis. Sin párrafos de texto
     en pantalla. Gráfico, claro y fiel a la realidad.
-  # Paletas que se sortean (fondo, tinta, 4 colores de acento).
+  descripcion_3d: >
+    Animación 3D ilustrada, de día y luminosa, con contornos finos de dibujo y sombreado
+    suave tipo caricatura. El protagonista suele ser un OBJETO cotidiano grande y detallado
+    que llena la pantalla, que se arma pieza por pieza, se abre en corte o se compara con
+    números; a veces con ojos simpáticos. Etiquetas cortas que señalan partes, medidas,
+    flechas. Cámara cercana en picado que gira y se acerca. Sin emojis. Fiel a la realidad.
+  # Paletas para 3D (fondo oscuro, texto claro; acentos: protagonista, gente, luz, extra).
+  paletas_3d:  # cielo, texto, [objeto principal, secundario, resalte, extra, suelo]
+    pasto:    ["#8EC9F0", "#1B1B1F", "#E8642C", "#F2EDE4", "#2F7DE1", "#E8C547", "#7DBE4B"]
+    madera:   ["#BFD9EA", "#1B1B1F", "#3E8E7E", "#F4EFE6", "#2F7DE1", "#E85D4A", "#D9B48A"]
+    concreto: ["#A9D4F5", "#1B1B1F", "#F2A33A", "#ECE7DF", "#E5484D", "#3BA6A0", "#C9C3BA"]
+    arena:    ["#9FD0EE", "#1B1B1F", "#5B6CF0", "#F5F0E8", "#F28C28", "#2BB673", "#E3CFA3"]
+    cocina:   ["#CFE6F2", "#1B1B1F", "#D94A3D", "#F7F3EC", "#1E88E5", "#F6B93B", "#BFD3DE"]
+    noche:    ["#121417", "#F2EEE6", "#1FB5A5", "#A9ADB3", "#FFC27A", "#F25C3B", "#2A2E35"]
+  # Paletas para 2D (fondo, tinta, 4 colores de acento).
   paletas:
     calida:   ["#FFF4E0", "#1E1B2E", "#FF6B35", "#F7B32B", "#2EC4B6", "#E71D36"]
     fresca:   ["#E8F6F3", "#14213D", "#00A6A6", "#F49D37", "#EF3E36", "#5C80BC"]
@@ -60,11 +87,17 @@ ganchos:
     - "afirmación que parece falsa pero es cierta"
     - "situación cotidiana con giro inesperado"
     - "error común que casi todos cometen"
+    - "título que niega lo obvio («esto NO está de adorno»)"
+    - "advertencia directa («si te pasa X, NO hagas Y»)"
+    - "comparación imposible con número («va más lento que un tren»)"
+  # Formatos ganadores (sacados de Reels con cientos de miles de vistas). Se sortea uno por video.
   estructuras:
-    - "problema, explicación paso a paso, remate curioso"
-    - "mito, por qué parece cierto, la realidad"
-    - "pregunta, tres causas, conclusión"
-    - "historia mini con personaje, explicación, aplicación práctica"
+    - "NO ESTÁ DE ADORNO: un detalle de un objeto cotidiano que parece decoración pero cumple una función clave; se muestra el objeto, se quita el detalle, se ve qué pasaría sin él y se explica por qué está ahí"
+    - "PIEZA POR PIEZA: se construye desde cero un objeto o lugar cotidiano, pieza por pieza, explicando para qué sirve cada parte y qué pasaría si faltara"
+    - "MITO TACHADO: lo que casi todos hacen mal ante una situación cotidiana, cada mito se tacha con su razón, y al final lo que de verdad funciona"
+    - "CON NÚMEROS: una comparación con números grandes en pantalla (barras que crecen, contadores, medidas) que cambia cómo ves algo cotidiano"
+    - "POR DENTRO: vista en corte de algo cotidiano para ver lo que pasa adentro (aire, agua, fuerzas, calor) con flechas que lo muestran"
+    - "LA MISMA IDEA: cómo un objeto evolucionó desde su versión más antigua hasta la que usas hoy, mostrando que el principio es el mismo"
 
 aprobacion:
   # true = te llega a Telegram y tú decides. false = publica solo (versión A).

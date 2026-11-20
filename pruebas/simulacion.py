@@ -22,7 +22,7 @@ sys.path.insert(0, str(REPO))
 
 import os  # noqa: E402
 
-for clave in ["ANTHROPIC_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "META_PAGE_ID", "META_PAGE_TOKEN"]:
+for clave in ["GEMINI_API_KEY", "ANTHROPIC_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "META_PAGE_ID", "META_PAGE_TOKEN"]:
     os.environ[clave] = "123" if clave == "TELEGRAM_CHAT_ID" else "falso"
 
 REGISTRO = {"claude": [], "telegram": [], "gh": [], "meta": []}
@@ -34,7 +34,11 @@ def guion_falso():
                 "rotulo": "Pan" if i == 0 else "", "palabra_clave": "pan",
                 "datos": [{"afirmacion": "el pan pierde agua", "fuente": "https://ejemplo.org"}]}
                for i in range(6)]
+    escenas[1]["grafico"] = {"tipo": "barras", "items": [{"etiqueta": "pan", "valor": 35, "unidad": "%"},
+                                                         {"etiqueta": "galleta", "valor": 5, "unidad": "%"}]}
+    escenas[2]["grafico"] = {"tipo": "inventado", "items": []}  # debe descartarse
     return {"titulo": "Por qué el pan se pone duro", "descripcion": "No es por secarse... o sí.",
+            "portada": "El pan NO se seca",
             "escenas": escenas,
             "gancho_b": {"voz": "¿Tu pan se endurece aunque lo tapes?", "visual": "pan tapado",
                          "rotulo": "", "palabra_clave": "pan", "tipo": "pregunta"},
@@ -66,6 +70,7 @@ def responder(system: str, contenido) -> str:
         g.pop("direccion_arte", None)  # el verificador "olvida" un campo: debe recuperarse
         return json.dumps(g, ensure_ascii=False)
     if "Contrato técnico" in system:
+        REGISTRO["ultimo_escena"] = system
         nombre = system.split("export const ")[1].split(":")[0]
         return "```tsx\n" + CODIGO_OK.replace("NOMBRE", nombre) + "```"
     if "director de arte" in system:
@@ -115,8 +120,41 @@ edge = types.ModuleType("edge_tts")
 edge.Communicate = Communicate
 sys.modules["edge_tts"] = edge
 
+# ---------- Gemini y Whisper falsos ----------
+GEMINI = {"textos": []}
+
+
+def gemini_post(url, json=None, timeout=None, headers=None):  # noqa: A002
+    import base64 as b64
+    texto = json["contents"][0]["parts"][0]["text"].split("\n\n", 1)[-1]
+    GEMINI["textos"].append(texto)
+    dur = 0.3 * (len(texto.split()) + 2)
+    pcm = subprocess.run(["ffmpeg", "-loglevel", "error", "-f", "lavfi", "-i", f"sine=f=220:d={dur}",
+                          "-ar", "24000", "-ac", "1", "-f", "s16le", "-"], capture_output=True, check=True).stdout
+    datos = {"candidates": [{"content": {"parts": [{"inlineData": {"mimeType": "audio/L16;codec=pcm;rate=24000",
+                                                                    "data": b64.b64encode(pcm).decode()}}]}}]}
+    return types.SimpleNamespace(status_code=200, json=lambda: datos, text="")
+
+
+class WhisperModel:
+    def __init__(self, *a, **k):
+        pass
+
+    def transcribe(self, ruta, **k):
+        # Oye una palabra de más al principio ("Bueno") y dice el número con otras palabras.
+        palabras = ["Bueno"] + GEMINI["textos"][-1].replace("número", "número cero").split()
+        ws = [types.SimpleNamespace(word=" " + w, start=0.3 + i * 0.3, end=0.3 + i * 0.3 + 0.25)
+              for i, w in enumerate(palabras)]
+        return [types.SimpleNamespace(words=ws)], None
+
+
+fw = types.ModuleType("faster_whisper")
+fw.WhisperModel = WhisperModel
+sys.modules["faster_whisper"] = fw
+
 # ---------- Cargar el bot y reemplazar lo externo ----------
-from bot import aprobaciones, estadisticas, meta, publicador, render, telegram  # noqa: E402
+from bot import aprobaciones, estadisticas, meta, publicador, render, telegram, voz_gemini  # noqa: E402
+voz_gemini.requests = types.SimpleNamespace(post=gemini_post, RequestException=Exception)
 from bot import producir as prod  # noqa: E402
 from bot.config import ESCENAS, PUBLICO  # noqa: E402
 from bot.memoria import estado, memoria  # noqa: E402
@@ -125,6 +163,10 @@ FALLOS = {"bundle": 1}
 
 
 def empaquetar():
+    indice = (ESCENAS / "index.ts").read_text()
+    assert "import {Ejemplo3D} from './Ejemplo3D';" in indice
+    if "Escena0" not in indice:  # prueba inicial del 3D, todavía sin escenas
+        return True, ""
     # La primera compilación falla en Escena2 para probar la reparación.
     for n in ["Escena0", "EscenaB"]:
         assert (ESCENAS / f"{n}.tsx").exists(), f"falta {n}.tsx"
@@ -140,7 +182,7 @@ def foto(plan_ruta, fotograma, destino):
     total = (plan["escenas"][-1]["inicio"] + plan["escenas"][-1]["duracion"]) * 30
     assert 0 <= fotograma < total, f"fotograma {fotograma} fuera del video ({total})"
     destino.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "color=c=orange:s=108x192",
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "testsrc=s=108x192",
                     "-frames:v", "1", str(destino)], check=True)
     return True, ""
 
@@ -207,6 +249,8 @@ aprobaciones.escuchar = lambda minutos: ESCUCHA.append(minutos)
 prod.producir()
 aprobaciones.escuchar = _escuchar_real
 assert ESCUCHA and ESCUCHA[0] > 2, "al terminar debe quedarse escuchando los botones"
+assert len(GEMINI["textos"]) == 2, "la voz debe salir de Gemini (A y B)"
+assert not any("respaldo" in str(t) or "3D no funcion" in str(t) for t in REGISTRO["telegram"]), REGISTRO["telegram"]
 est = estado()
 assert len(est["pendientes"]) == 1, "debe quedar un video pendiente"
 id_video = next(iter(est["pendientes"]))
@@ -219,6 +263,14 @@ guion = json.loads((REPO / "salida" / id_video / "guion.json").read_text())
 assert guion.get("direccion_arte"), "se perdió la dirección de arte"
 plan_a = json.loads((REPO / "remotion" / "plan_A.json").read_text())
 plan_b = json.loads((REPO / "remotion" / "plan_B.json").read_text())
+assert plan_a["motor"] == "3d" and render.OPCIONES["gl"] == "swangle"
+assert plan_a["escenas"][0]["inicio"] == 0 and plan_a["escenas"][0]["palabras"][0]["t"] < 0.1, "debe recortar lo dicho antes del guion"
+assert all(e["duracion"] > 0.5 for e in plan_a["escenas"])
+assert plan_a["portada"] == "EL PAN NO SE SECA"
+assert plan_a["escenas"][1]["grafico"]["tipo"] == "barras" and plan_a["escenas"][2]["grafico"] is None
+assert [e["camara"] for e in plan_a["escenas"][:2]] == ["picado", "frente"]
+assert "Encuadre de cámara" in str(REGISTRO.get("ultimo_pedido", "Encuadre de cámara"))
+assert "React Three Fiber" in REGISTRO["ultimo_escena"], "en 3D se debe usar la guía de escenas 3D"
 assert plan_b["escenas"][0]["componente"] == "EscenaB" and plan_b["escenas"][1]["componente"] == "Escena1"
 for plan in (plan_a, plan_b):
     for a, b in zip(plan["escenas"], plan["escenas"][1:]):

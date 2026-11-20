@@ -8,7 +8,8 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
     Devuelve {"escenas": {"Escena0": {"nota": 8, "problemas": "..."}}, "comentario": "..."}
     """
     contenido = [{"type": "text", "text": (
-        f"Video: «{guion['titulo']}». Estilo buscado: {cfg['estilo']['descripcion'].strip()}\n"
+        f"Video: «{guion['titulo']}». Estilo buscado: "
+        f"{cfg['estilo']['descripcion_3d' if cfg['produccion'].get('motor') == '3d' else 'descripcion'].strip()}\n"
         "De cada escena te muestro dos fotogramas lado a lado (izquierda: al empezar; derecha: más "
         "adelante), tal como se verán con subtítulos. "
         "Para cada escena revisa: que la ilustración sea elaborada y atractiva (no simple), "

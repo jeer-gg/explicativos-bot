@@ -1,4 +1,4 @@
-"""Voz con Edge TTS (gratis) y marcas de tiempo por palabra.
+"""Voz: Google Gemini (natural, gratis con clave de AI Studio) o Edge TTS de respaldo.
 
 La voz se genera ANTES que las animaciones: su duración decide cuánto dura
 cada escena, y las marcas de tiempo permiten animar justo cuando se dice algo.
@@ -71,6 +71,25 @@ def unir_audios(partes: list, destino: Path):
 
 
 def narrar_guion(guion: dict, cfg: dict, carpeta_trabajo: Path, publico: Path) -> dict:
+    """Usa Gemini si hay clave; si falla, Edge TTS."""
+    import os
+    if cfg["produccion"].get("voz_motor", "edge") == "gemini":
+        if not os.environ.get("GEMINI_API_KEY"):
+            AVISOS.append("Falta el secreto GEMINI_API_KEY: usé la voz de respaldo.")
+        else:
+            try:
+                from .voz_gemini import narrar_guion_gemini
+                return narrar_guion_gemini(guion, cfg, carpeta_trabajo, publico)
+            except Exception as e:  # noqa: BLE001
+                print("Gemini falló:", e)
+                AVISOS.append(f"La voz de Gemini falló ({str(e)[:300]}); usé la voz de respaldo.")
+    return narrar_guion_edge(guion, cfg, carpeta_trabajo, publico)
+
+
+AVISOS: list = []
+
+
+def narrar_guion_edge(guion: dict, cfg: dict, carpeta_trabajo: Path, publico: Path) -> dict:
     """Narra todas las escenas y devuelve, por variante, audio y tiempos.
 
     Resultado: {"A": {"audio": "voz_A.wav", "escenas": [{inicio, duracion, palabras}]}, "B": ...}

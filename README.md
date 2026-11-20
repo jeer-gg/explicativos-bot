@@ -43,6 +43,10 @@ Abre el enlace, autoriza con tu cuenta de Claude, pega el código y copia el tok
 por `sk-ant-oat`. Guárdalo en el mismo secreto `ANTHROPIC_API_KEY`: el bot detecta solo que
 es un token de suscripción y usa Claude Code. Comparte el límite de uso de tu plan.
 
+### 1c. Voz natural con Google Gemini (gratis)
+En https://aistudio.google.com/apikey crea una clave y guárdala como secreto `GEMINI_API_KEY`.
+Si falta o falla, el bot usa la voz de respaldo (Edge) y te avisa por Telegram.
+
 ### 2. Bot de Telegram
 1. En Telegram, abre **@BotFather** y envía `/newbot`. Ponle nombre y usuario.
 2. Copia el **token** que te da.
@@ -76,6 +80,7 @@ En tu repo: **Settings → Secrets and variables → Actions → New repository 
 | Nombre | Valor |
 | --- | --- |
 | `ANTHROPIC_API_KEY` | la clave de Claude |
+| `GEMINI_API_KEY` | la clave de Google AI Studio (voz) |
 | `TELEGRAM_BOT_TOKEN` | el token de @BotFather |
 | `TELEGRAM_CHAT_ID` | tu Id de @userinfobot |
 | `META_PAGE_ID` | el id de tu página |
@@ -96,6 +101,12 @@ los videos a Telegram. Recomendado: haz las primeras pruebas con una página de 
 prueba.
 
 ---
+
+## Animación 3D
+Con `produccion.motor: "3d"` cada escena es un escenario 3D (React Three Fiber) iluminado por un
+reflector, y la cámara viaja entre escenarios en un plano continuo. GitHub no tiene tarjeta
+gráfica, así que se dibuja por software (`--gl=swangle`): tarda más. Al empezar, el bot prueba el
+3D; si no funciona, hace ese video en 2D y te avisa.
 
 ## Uso diario
 
