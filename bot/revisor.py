@@ -9,11 +9,17 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
     """
     contenido = [{"type": "text", "text": (
         f"Video: «{guion['titulo']}». Estilo buscado: {cfg['estilo']['descripcion'].strip()}\n"
-        "Te muestro un fotograma de cada escena tal como se verá (incluye subtítulos). "
+        "De cada escena te muestro dos fotogramas lado a lado (izquierda: al empezar; derecha: más "
+        "adelante), tal como se verán con subtítulos. "
         "Para cada escena revisa: que la ilustración sea elaborada y atractiva (no simple), "
         "que se entienda la idea de la voz, que sea fiel a la realidad, que nada importante "
         "quede tapado por los subtítulos o cortado en los bordes, que no haya texto roto ni "
-        "elementos superpuestos por error, y que no haya emojis."
+        "elementos superpuestos por error, que no haya emojis, que la ilustración llene todo el "
+        "cuadro vertical sin franjas vacías, y que lo importante esté en el centro (se debe "
+        "entender aunque se recorte arriba y abajo al formato 4:5 del feed), que el plano sea cercano "
+        "(el protagonista grande, no un cuarto vacío visto de lejos), que desde el inicio de la "
+        "escena ya se vea una ilustración completa y rica, y que entre los dos fotogramas haya "
+        "un cambio visible (movimiento, acción)."
     )}]
     for f in fotos:
         contenido.append({"type": "text", "text": f"\n{f['nombre']}. Voz: «{f['voz']}». Debía mostrar: {f['visual']}"})

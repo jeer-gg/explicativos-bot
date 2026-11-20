@@ -201,7 +201,12 @@ meta.metricas = lambda vid: {"fb_reels_total_plays": 4321}
 
 # ---------- 1) Producir ----------
 print("== Producir ==")
+ESCUCHA = []
+_escuchar_real = aprobaciones.escuchar
+aprobaciones.escuchar = lambda minutos: ESCUCHA.append(minutos)
 prod.producir()
+aprobaciones.escuchar = _escuchar_real
+assert ESCUCHA and ESCUCHA[0] > 2, "al terminar debe quedarse escuchando los botones"
 est = estado()
 assert len(est["pendientes"]) == 1, "debe quedar un video pendiente"
 id_video = next(iter(est["pendientes"]))
@@ -227,11 +232,11 @@ print("Pendiente:", id_video, "| videos:", videos)
 
 # ---------- 2) Tocar "Publicar B" en Telegram ----------
 print("== Aprobar en Telegram ==")
-telegram.actualizaciones = lambda offset: [] if offset > 10 else [
+telegram.actualizaciones = lambda offset, espera=0: [] if offset > 10 else [
     {"update_id": 7, "callback_query": {"id": "x", "from": {"id": 999}, "data": f"pub:{id_video}:A"}},
     {"update_id": 10, "callback_query": {"id": "y", "from": {"id": 123}, "data": f"pub:{id_video}:B"}},
 ]
-aprobaciones.procesar()
+aprobaciones.escuchar(1)  # debe salir solo en cuanto no quedan pendientes
 assert REGISTRO["meta"] and REGISTRO["meta"][0][0] == "B.mp4", "debía publicarse la versión B"
 assert ("boton", "No autorizado") in REGISTRO["telegram"], "un desconocido no debe poder publicar"
 assert estado()["telegram_offset"] == 11

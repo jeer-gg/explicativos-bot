@@ -10,7 +10,8 @@ from pathlib import Path
 
 import edge_tts
 
-PAUSA = 0.25  # segundos de aire al final de cada escena
+PAUSA = 0.06  # aire mínimo entre escenas: la voz encadena una escena con la siguiente
+MARGEN = 0.04  # margen antes de la primera palabra y después de la última
 
 
 async def _tts(texto: str, voz: str, velocidad: str, destino: Path) -> list:
@@ -50,7 +51,15 @@ def narrar_escena(texto: str, voz: str, velocidad: str, carpeta: Path, nombre: s
     crudo = carpeta / f"{nombre}.mp3"
     palabras = asyncio.run(_tts(texto, voz, velocidad, crudo))
     con_pausa = carpeta / f"{nombre}.wav"
-    _ffmpeg("-i", str(crudo), "-af", f"apad=pad_dur={PAUSA}", "-ar", "48000", "-ac", "2", str(con_pausa))
+    # Recorta el silencio que Edge TTS deja al principio y al final, y desplaza las marcas de tiempo.
+    if palabras:
+        inicio = max(0.0, palabras[0]["t"] - MARGEN)
+        fin = palabras[-1]["t"] + palabras[-1]["d"] + MARGEN
+        palabras = [{**p, "t": round(p["t"] - inicio, 3)} for p in palabras]
+        recorte = ["-ss", f"{inicio:.3f}", "-to", f"{fin:.3f}"]
+    else:
+        recorte = []
+    _ffmpeg("-i", str(crudo), *recorte, "-af", f"apad=pad_dur={PAUSA}", "-ar", "48000", "-ac", "2", str(con_pausa))
     return {"archivo": con_pausa, "duracion": duracion(con_pausa), "palabras": palabras}
 
 

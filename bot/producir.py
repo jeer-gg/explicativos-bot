@@ -4,8 +4,12 @@ Uso: python -m bot.producir
 """
 import json
 import shutil
+import subprocess
+import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
+
+INICIO = time.monotonic()
 from datetime import datetime, timezone
 
 from . import estadisticas, estudio, render, revisor, sfx, telegram
@@ -18,14 +22,33 @@ from .publicador import publicar, subir_pendiente
 from .voz import narrar_guion
 
 
+def _normal(s: str) -> str:
+    import unicodedata
+    s = unicodedata.normalize("NFD", s.lower())
+    return "".join(c for c in s if c.isalnum() and unicodedata.category(c) != "Mn")
+
+
+def momento_clave(palabras: list, clave: str):
+    """Segundo (dentro de la escena) en que se dice la palabra clave."""
+    objetivo = _normal(clave or "")
+    if not objetivo:
+        return None
+    for p in palabras:
+        w = _normal(p["w"])
+        if w and (w == objetivo or (len(w) > 3 and (w in objetivo or objetivo in w))):
+            return p["t"]
+    return None
+
+
 def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
-    rotulos = [e.get("rotulo", "") for e in guion["escenas"]]
+    fuentes = list(guion["escenas"])
     if variante == "B":
-        rotulos[0] = guion["gancho_b"].get("rotulo", "")
+        fuentes[0] = guion["gancho_b"]
     escenas = []
-    for nombre, t, rotulo in zip(nombres, tiempos_variante["escenas"], rotulos):
+    for nombre, t, fuente in zip(nombres, tiempos_variante["escenas"], fuentes):
         escenas.append({"componente": nombre, "inicio": t["inicio"], "duracion": t["duracion"],
-                        "palabras": t["palabras"], "rotulo": rotulo or ""})
+                        "palabras": t["palabras"], "rotulo": fuente.get("rotulo", "") or "",
+                        "clave": momento_clave(t["palabras"], fuente.get("palabra_clave", ""))})
     return {
         "audio": tiempos_variante["audio"],
         "musica": cfg["produccion"].get("musica", "") or "",
@@ -44,9 +67,20 @@ def tomar_fotos(planes, rutas_plan, trabajo, guion, nombres_por_variante):
             if nombre in vistas:
                 continue
             vistas.add(nombre)
-            fotograma = int((esc["inicio"] + esc["duracion"] * 0.62) * 30)
+            # Dos momentos de la escena (inicio y avance) unidos lado a lado en una sola imagen
             destino = trabajo / "fotos" / f"{nombre}.png"
-            ok, salida = render.foto(rutas_plan[variante], fotograma, destino)
+            momentos = []
+            ok, salida = True, ""
+            for j, frac in enumerate((0.12, 0.68)):
+                fotograma = int((esc["inicio"] + esc["duracion"] * frac) * 30)
+                parte = trabajo / "fotos" / f"{nombre}_{j}.png"
+                ok, salida = render.foto(rutas_plan[variante], fotograma, parte)
+                if not ok:
+                    break
+                momentos.append(parte)
+            if ok:
+                subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(momentos[0]), "-i", str(momentos[1]),
+                                "-filter_complex", "[0][1]hstack=inputs=2,scale=1080:-2", str(destino)], check=True)
             fuente = guion["gancho_b"] if (variante == "B" and i == 0) else guion["escenas"][i]
             if ok:
                 fotos.append({"nombre": nombre, "ruta": destino, "voz": fuente["voz"], "visual": fuente["visual"]})
@@ -100,11 +134,11 @@ def producir():
 
     estudio.limpiar_escenas_viejas()
 
-    def dibujar_una(nombre, comentarios="", previo=""):
+    def dibujar_una(nombre, comentarios="", previo="", foto=None):
         esc, t, i = datos_escena(nombre)
         print("Dibujando", nombre)
         return nombre, estudio.dibujar(claude, cfg, nombre, esc, t, guion, i, estilo,
-                                       comentarios=comentarios, codigo_previo=previo)
+                                       comentarios=comentarios, codigo_previo=previo, foto=foto)
 
     # Se dibujan varias escenas a la vez para ahorrar tiempo.
     with ThreadPoolExecutor(max_workers=4) as hilos:
@@ -141,8 +175,10 @@ def producir():
         if not flojas or ronda == cfg["claude"]["rondas_revision"]:
             break
         with ThreadPoolExecutor(max_workers=4) as hilos:
+            fotos_por_nombre = {f["nombre"]: f["ruta"] for f in fotos}
             rehechas = hilos.map(lambda kv: dibujar_una(kv[0], kv[1].get("problemas", ""),
-                                                        codigos.get(kv[0], "")), flojas.items())
+                                                        codigos.get(kv[0], ""), fotos_por_nombre.get(kv[0])),
+                                 flojas.items())
             codigos.update(dict(rehechas))
         estudio.compilar(claude, cfg, todos)
 
@@ -205,6 +241,14 @@ def producir():
 
     # Liberar espacio: los videos ya están guardados como release
     shutil.rmtree(trabajo / "voz", ignore_errors=True)
+
+    # Quedarse escuchando los botones para publicar al instante (sin esperar al reloj de GitHub)
+    minutos = min(cfg["aprobacion"].get("escuchar_minutos", 30), 84 - (time.monotonic() - INICIO) / 60)
+    if minutos > 2:
+        telegram.aviso_seguro(f"Toca un botón en los próximos {int(minutos)} minutos y lo hago al momento. "
+                              "Después también funciona, pero puede tardar hasta una hora.")
+        from .aprobaciones import escuchar
+        escuchar(minutos)
 
 
 if __name__ == "__main__":

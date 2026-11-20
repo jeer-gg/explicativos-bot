@@ -48,12 +48,16 @@ coherente con la paleta para que el paso sea fluido."""
 
 
 def dibujar(claude: Claude, cfg: dict, nombre: str, escena: dict, tiempos: dict, guion: dict,
-            indice: int, estilo: dict, comentarios: str = "", codigo_previo: str = "") -> str:
+            indice: int, estilo: dict, comentarios: str = "", codigo_previo: str = "", foto=None) -> str:
     pedido = _pedido(escena, tiempos, guion, indice, estilo)
     if comentarios:
         pedido += (f"\n\nEsta es una versión anterior de la escena:\n```tsx\n{codigo_previo}\n```\n"
                    f"Problemas detectados que debes corregir: {comentarios}\n"
                    "Rehaz la escena corrigiéndolos y subiendo la calidad de la ilustración.")
+    if foto:
+        from .claude import imagen
+        pedido = [{"type": "text", "text": pedido + "\n\nAsí se veía la versión anterior "
+                   "(izquierda: inicio de la escena; derecha: más adelante):"}, imagen(foto)]
     texto = claude.texto(_system(cfg, nombre), pedido, modelo=claude.modelo_escenas, max_tokens=12000)
     codigo = extraer_codigo(texto)
     (ESCENAS / f"{nombre}.tsx").write_text(codigo, encoding="utf-8")

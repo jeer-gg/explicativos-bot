@@ -38,7 +38,7 @@ export const Subtitulos: React.FC<{plan: PlanVideo}> = ({plan}) => {
         position: 'absolute',
         left: 60,
         right: 60,
-        bottom: 330,
+        bottom: 380,
         textAlign: 'center',
         transform: `scale(${0.85 + 0.15 * pop})`,
       }}
@@ -51,7 +51,7 @@ export const Subtitulos: React.FC<{plan: PlanVideo}> = ({plan}) => {
             style={{
               display: 'inline-block',
               margin: '0 12px',
-              fontSize: 78,
+              fontSize: 84,
               fontWeight: 900,
               letterSpacing: -1,
               color: dicha ? resalte : '#FFFFFF',

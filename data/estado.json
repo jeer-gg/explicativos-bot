@@ -1,27 +1,4 @@
 {
   "telegram_offset": 0,
-  "pendientes": {
-    "20261120-0725": {
-      "titulo": "Por qué tu celular se arrastra al cargar el final",
-      "descripcion": "Crees que el cargador está fallando, pero tu celular te está salvando la batería. Descubre las tres razones por las que el último veinte por ciento va tan lento.",
-      "hashtags": [
-        "#ciencia",
-        "#curiosidades",
-        "#aprende",
-        "#explicacion"
-      ],
-      "tema": "Por qué el celular carga rapidísimo hasta el 80% y luego el último 20% se arrastra como tortuga",
-      "subtema": "tecnología que usamos sin entender",
-      "estructura": "pregunta, tres causas, conclusión",
-      "paleta": "papel",
-      "tipo_gancho": "situación cotidiana con giro inesperado",
-      "tipo_gancho_b": "pregunta directa",
-      "ganchos": {
-        "A": "Tu celular carga muy rápido hasta cerca del ochenta, y luego se arrastra.",
-        "B": "¿Por qué el último veinte por ciento tarda una eternidad?"
-      },
-      "nota_media": 5.8,
-      "creado": "2026-11-20T07:45:51+00:00"
-    }
-  }
+  "pendientes": {}
 }

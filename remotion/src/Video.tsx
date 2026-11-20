@@ -15,6 +15,7 @@ export type EscenaPlan = {
   duracion: number; // segundos
   palabras: Palabra[];
   rotulo: string;
+  clave?: number | null; // segundo (dentro de la escena) de la palabra clave
 };
 
 export type PlanVideo = {
@@ -31,7 +32,7 @@ const posicion = (i: number) => ({x: i * (ANCHO + 120), y: i % 2 === 0 ? 0 : -30
 const SUAVE = Easing.bezier(0.65, 0, 0.35, 1);
 
 const camara = (frame: number, fps: number, plan: PlanVideo) => {
-  const T = Math.round(0.55 * fps); // duración del viaje entre escenas
+  const T = Math.round(0.42 * fps); // duración del viaje entre escenas (rápido)
   const inicios = plan.escenas.map((e) => Math.round(e.inicio * fps));
   let actual = 0;
   for (let i = 0; i < inicios.length; i++) if (frame >= inicios[i] - Math.round(T * 0.4)) actual = i;
@@ -46,10 +47,17 @@ const camara = (frame: number, fps: number, plan: PlanVideo) => {
   // Se aleja un poco en el viaje (nunca demasiado) y se acerca despacio dentro de la escena.
   const viaje = 1 - 0.13 * Math.sin(Math.PI * p);
   const acercar = 1 + 0.035 * Math.min(1, local / Math.max(1, durEsc));
+  // "Golpe" de cámara: un pequeño acercamiento elástico justo en la palabra clave.
+  const clave = plan.escenas[actual].clave;
+  const golpe = clave == null ? 0 : (() => {
+    const f = local - Math.round(clave * fps);
+    if (f < 0 || f > 18) return 0;
+    return Math.sin((f / 18) * Math.PI) * 0.06;
+  })();
   return {
     x: desde.x + (hasta.x - desde.x) * p,
     y: desde.y + (hasta.y - desde.y) * p,
-    zoom: viaje * acercar,
+    zoom: viaje * acercar * (1 + golpe),
     actual,
     inicios,
   };
@@ -110,6 +118,13 @@ export const Video: React.FC<PlanVideo> = (plan) => {
 
       <Audio src={staticFile(plan.audio)} />
       {plan.musica ? <Audio src={staticFile(`musica/${plan.musica}`)} volume={0.07} loop /> : null}
+      {plan.escenas.map((e, i) =>
+        e.clave == null ? null : (
+          <Sequence key={`pop${i}`} from={Math.round((e.inicio + e.clave) * fps)} durationInFrames={Math.round(0.3 * fps)}>
+            <Audio src={staticFile('sfx/pop.mp3')} volume={0.22} />
+          </Sequence>
+        ),
+      )}
       {plan.escenas.slice(1).map((e, i) => (
         <Sequence key={i} from={Math.max(0, Math.round((e.inicio - 0.3) * fps))} durationInFrames={Math.round(0.6 * fps)}>
           <Audio src={staticFile('sfx/whoosh.mp3')} volume={0.32} />

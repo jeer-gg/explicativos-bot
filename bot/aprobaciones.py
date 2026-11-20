@@ -26,11 +26,23 @@ def caducar_pendientes(horas: int = 72):
             telegram.aviso_seguro(f"Descarté «{info.get('titulo')}» porque pasaron 3 días sin aprobarlo.")
 
 
-def procesar():
-    caducar_pendientes()
+def escuchar(minutos: float):
+    """Atiende los botones al instante mientras quede algún video pendiente y no se acabe el tiempo."""
+    import time
+    limite = time.monotonic() + minutos * 60
+    while estado()["pendientes"]:
+        quedan = int(limite - time.monotonic())
+        if quedan < 5:
+            break
+        procesar(espera=min(50, quedan), caducar=False)
+
+
+def procesar(espera: int = 0, caducar: bool = True):
+    if caducar:
+        caducar_pendientes()
     chat_autorizado = secreto("TELEGRAM_CHAT_ID")
     est = estado()
-    updates = telegram.actualizaciones(est.get("telegram_offset", 0))
+    updates = telegram.actualizaciones(est.get("telegram_offset", 0), espera)
     for up in updates:
         est["telegram_offset"] = up["update_id"] + 1
         guardar_estado(est)
@@ -54,7 +66,7 @@ def procesar():
                 video_fb = publicar(id_video, variante, Path(ruta))
                 telegram.mensaje(f"Publicado en Facebook (versión {variante}). ID: {video_fb}")
             except Exception as e:  # noqa: BLE001
-                telegram.aviso_seguro(f"No pude publicar: {e}\nEl video sigue pendiente; toca el botón otra vez para reintentar.")
+                telegram.aviso_seguro(f"No pude publicar: {str(e)[-1200:]}\nEl video sigue pendiente; toca el botón otra vez para reintentar.")
                 print(traceback.format_exc())
         elif accion in ("rehacer", "descartar"):
             e = estado()

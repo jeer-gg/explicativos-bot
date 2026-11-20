@@ -34,10 +34,11 @@ def video(ruta, texto: str, botones: list | None = None):
         mensaje(f"No pude enviar el video por Telegram ({r.status_code}). {texto}", botones)
 
 
-def actualizaciones(offset: int) -> list:
-    r = requests.get(_url("getUpdates"), params={"offset": offset, "timeout": 0,
+def actualizaciones(offset: int, espera: int = 0) -> list:
+    """espera > 0: Telegram mantiene la conexión abierta hasta que toques un botón (máx. espera s)."""
+    r = requests.get(_url("getUpdates"), params={"offset": offset, "timeout": espera,
                                                  "allowed_updates": json.dumps(["callback_query"])},
-                     timeout=60)
+                     timeout=espera + 30)
     r.raise_for_status()
     return r.json().get("result", [])
 

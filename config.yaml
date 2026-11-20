@@ -21,14 +21,14 @@ canal:
 
 produccion:
   # Duración objetivo del Reel en segundos (Facebook acepta de 3 a 90).
-  duracion_min: 45
-  duracion_max: 80
-  escenas_min: 6
-  escenas_max: 9
+  duracion_min: 40
+  duracion_max: 70
+  escenas_min: 8
+  escenas_max: 11
   # Voces gratis de Edge TTS. Ejemplos: es-MX-JorgeNeural, es-MX-DaliaNeural,
   # es-DO-EmilioNeural, es-DO-RamonaNeural, es-US-AlonsoNeural
   voz: "es-MX-JorgeNeural"
-  velocidad_voz: "+8%"
+  velocidad_voz: "+15%"
   # Dos versiones del gancho (A y B) para que elijas la mejor.
   ab_gancho: true
   # Música de fondo: pon un .mp3 con licencia en remotion/public/musica/ y
@@ -69,6 +69,7 @@ ganchos:
 aprobacion:
   # true = te llega a Telegram y tú decides. false = publica solo (versión A).
   activa: true
+  escuchar_minutos: 30  # minutos que el bot espera tu botón para publicar al instante
 
 publicacion:
   hashtags: ["#ciencia", "#curiosidades", "#aprende", "#explicacion"]
@@ -81,7 +82,7 @@ claude:
   # Búsqueda web para verificar datos (recomendado).
   busqueda_web: true
   # Tope de llamadas a la API por video, para controlar el gasto.
-  max_llamadas: 45
+  max_llamadas: 75
   # Rondas máximas en que el revisor puede pedir rehacer escenas.
-  rondas_revision: 2
+  rondas_revision: 3
   nota_minima: 7

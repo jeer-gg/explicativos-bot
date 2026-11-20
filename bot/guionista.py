@@ -22,7 +22,14 @@ Estructura: {estilo['estructura']}
 Reglas:
 - La voz arranca en el segundo 0: la primera frase ES el gancho, de 6 a 12 palabras.
 - Entre {palabras_min} y {palabras_max} palabras en total, en {p['escenas_min']} a {p['escenas_max']} escenas.
-- Cada escena dura entre 5 y 10 segundos de voz y muestra UNA idea visual clara.
+- Cada escena dura entre 3 y 7 segundos de voz y muestra UNA idea visual clara. Muchas escenas
+  cortas mantienen la atención mejor que pocas largas.
+- Habla corrida, como un narrador entusiasta que no se detiene: frases que se encadenan con
+  "y", "pero", "porque", "así que". Evita puntos y comas innecesarios, porque cada signo crea
+  una pausa en la voz. Nada de frases de relleno.
+- Retención: en los primeros 5 segundos promete algo concreto que se revela al final ("y lo
+  más raro es lo que pasa al final"), mete una vuelta de tuerca o dato inesperado cada 2 o 3
+  escenas, y termina con un remate que haga querer verlo otra vez o comentar.
 - Nada de "hola", "en este video" ni "suscríbete". Termina con un remate curioso o una
   pregunta que invite a comentar.
 - La descripción visual de cada escena debe ser concreta y dibujable: qué personajes u objetos
