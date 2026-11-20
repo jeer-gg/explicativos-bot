@@ -144,6 +144,39 @@ def tomar_fotos(planes, rutas_plan, trabajo, guion, nombres_por_variante):
     return fotos, errores
 
 
+def _revisar(cfg, claude, planes, rutas_plan, trabajo, guion, todos, codigos, dibujar_una, nota_min, notas):
+    for ronda in range(cfg["claude"]["rondas_revision"] + 1):
+        fotos, errores = tomar_fotos(planes, rutas_plan, trabajo, guion, None)
+        for nombre, salida in errores.items():
+            print(f"{nombre} falla al renderizar; la reparo.")
+            estudio.reparar(claude, cfg, nombre, salida)
+        if errores:
+            estudio.compilar(claude, cfg, todos)
+            fotos, errores = tomar_fotos(planes, rutas_plan, trabajo, guion, None)
+            for nombre in errores:
+                estudio.usar_respaldo(nombre)
+            if errores:
+                estudio.compilar(claude, cfg, todos)
+        if not fotos:
+            break
+        resultado = revisor.revisar(claude, cfg, guion, fotos)
+        notas.clear()
+        notas.update({k: v for k, v in resultado.get("escenas", {}).items() if k in todos})
+        print(f"Ronda {ronda}: notas", {k: v.get("nota") for k, v in notas.items()})
+        flojas = {k: v for k, v in notas.items() if float(v.get("nota", 10)) < nota_min}
+        # Para no gastar de más: como mucho las 4 peores por ronda
+        flojas = dict(sorted(flojas.items(), key=lambda kv: float(kv[1].get("nota", 10)))[:4])
+        if not flojas or ronda == cfg["claude"]["rondas_revision"]:
+            break
+        with ThreadPoolExecutor(max_workers=4) as hilos:
+            fotos_por_nombre = {f["nombre"]: f["ruta"] for f in fotos}
+            rehechas = hilos.map(lambda kv: dibujar_una(kv[0], kv[1].get("problemas", ""),
+                                                        codigos.get(kv[0], ""), fotos_por_nombre.get(kv[0])),
+                                 flojas.items())
+            codigos.update(dict(rehechas))
+        estudio.compilar(claude, cfg, todos)
+
+
 def producir():
     cfg = cargar_config()
     claude = Claude()
@@ -210,36 +243,29 @@ def producir():
         planes["B"] = armar_plan(cfg, tiempos["B"], nombres_b, guion, estilo, "B")
     rutas_plan = {v: render.guardar_plan(p, v) for v, p in planes.items()}
 
+    from .claude import LimiteDeSuscripcion
+
+    def compilar_seguro():
+        """Compila; si ya no queda uso de Claude, cambia por respaldo las escenas que fallen."""
+        try:
+            estudio.compilar(claude, cfg, todos)
+        except LimiteDeSuscripcion:
+            for _ in range(len(todos)):
+                ok, salida = render.empaquetar()
+                culpable = None if ok else render.escena_con_error(salida, todos)
+                if ok or not culpable:
+                    return
+                estudio.usar_respaldo(culpable)
+
     # 5. Revisor: mira fotogramas reales y pide rehacer lo flojo
     nota_min = cfg["claude"]["nota_minima"]
     notas = {}
-    for ronda in range(cfg["claude"]["rondas_revision"] + 1):
-        fotos, errores = tomar_fotos(planes, rutas_plan, trabajo, guion, None)
-        for nombre, salida in errores.items():
-            print(f"{nombre} falla al renderizar; la reparo.")
-            estudio.reparar(claude, cfg, nombre, salida)
-        if errores:
-            estudio.compilar(claude, cfg, todos)
-            fotos, errores = tomar_fotos(planes, rutas_plan, trabajo, guion, None)
-            for nombre in errores:
-                estudio.usar_respaldo(nombre)
-            if errores:
-                estudio.compilar(claude, cfg, todos)
-        if not fotos:
-            break
-        resultado = revisor.revisar(claude, cfg, guion, fotos)
-        notas = {k: v for k, v in resultado.get("escenas", {}).items() if k in todos}
-        print(f"Ronda {ronda}: notas", {k: v.get("nota") for k, v in notas.items()})
-        flojas = {k: v for k, v in notas.items() if float(v.get("nota", 10)) < nota_min}
-        if not flojas or ronda == cfg["claude"]["rondas_revision"]:
-            break
-        with ThreadPoolExecutor(max_workers=4) as hilos:
-            fotos_por_nombre = {f["nombre"]: f["ruta"] for f in fotos}
-            rehechas = hilos.map(lambda kv: dibujar_una(kv[0], kv[1].get("problemas", ""),
-                                                        codigos.get(kv[0], ""), fotos_por_nombre.get(kv[0])),
-                                 flojas.items())
-            codigos.update(dict(rehechas))
-        estudio.compilar(claude, cfg, todos)
+    try:
+        _revisar(cfg, claude, planes, rutas_plan, trabajo, guion, todos, codigos, dibujar_una, nota_min, notas)
+    except LimiteDeSuscripcion:
+        telegram.aviso_seguro("Se acabó el límite de uso de Claude a mitad de la revisión; "
+                              "termino el video con las escenas que ya están hechas.")
+        compilar_seguro()
 
     # 6. Render final
     videos = []

@@ -43,7 +43,7 @@ def sintetizar(texto: str, cfg: dict, destino: Path) -> Path:
         for intento in range(3):
             try:
                 r = requests.post(URL.format(modelo=modelo), json=cuerpo, timeout=300,
-                                  headers={"x-goog-api-key": os.environ["GEMINI_API_KEY"]})
+                                  headers={"x-goog-api-key": os.environ["GEMINI_API_KEY"].strip()})
             except requests.RequestException as e:
                 errores.append(f"{modelo}: {e}")
                 time.sleep(5)
@@ -52,6 +52,9 @@ def sintetizar(texto: str, cfg: dict, destino: Path) -> Path:
                 time.sleep(20 * (intento + 1))
                 continue
             if r.status_code != 200:
+                if "API key not valid" in r.text or "API_KEY_INVALID" in r.text:
+                    raise RuntimeError("Google rechazó la clave GEMINI_API_KEY (no es válida). "
+                                       "Créala de nuevo en aistudio.google.com/apikey y vuelve a guardarla en GitHub.")
                 errores.append(f"{modelo}: {r.status_code} {r.text[:200]}")
                 break
             partes = r.json()["candidates"][0]["content"]["parts"]
@@ -73,7 +76,14 @@ def escuchar_palabras(ruta: Path, cfg: dict, pista: str) -> list:
     from faster_whisper import WhisperModel
     if _WHISPER is None:
         _WHISPER = WhisperModel(cfg["produccion"].get("whisper_modelo", "base"), device="cpu", compute_type="int8")
-    segmentos, _ = _WHISPER.transcribe(str(ruta), language="es", word_timestamps=True,
+    # Se le pasa el audio ya decodificado (16 kHz mono) para no depender de PyAV, cuyas
+    # versiones nuevas rompen faster-whisper ("unexpected keyword argument 'metadata_errors'").
+    import subprocess
+    import numpy as np
+    crudo = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", str(ruta), "-ac", "1", "-ar", "16000",
+                            "-f", "f32le", "-"], capture_output=True, check=True).stdout
+    audio = np.frombuffer(crudo, dtype=np.float32).copy()
+    segmentos, _ = _WHISPER.transcribe(audio, language="es", word_timestamps=True,
                                        initial_prompt=pista[:400], vad_filter=False)
     return [{"w": w.word.strip(), "ini": w.start, "fin": w.end} for s in segmentos for w in (s.words or [])]
 

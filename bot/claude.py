@@ -106,7 +106,7 @@ class Claude:
             error = proc.stderr[-1500:] + " " + (texto if datos.get("is_error") else "")
             if proc.returncode == 0 and not datos.get("is_error") and texto:
                 return texto
-            if re.search(r"usage limit|limit reached|hit your limit|rate.?limit|l[ií]mite", error, re.I):
+            if re.search(r"usage limit|limit reached|hit your .{0,20}limit|rate.?limit|l[ií]mite", error, re.I):
                 raise LimiteDeSuscripcion(
                     "Se agotó el límite de uso de tu suscripción de Claude. El bot lo intentará "
                     "en el próximo horario; también puedes lanzarlo a mano cuando se renueve.")

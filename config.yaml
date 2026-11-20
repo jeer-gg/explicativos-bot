@@ -117,5 +117,5 @@ claude:
   # Tope de llamadas a la API por video, para controlar el gasto.
   max_llamadas: 75
   # Rondas máximas en que el revisor puede pedir rehacer escenas.
-  rondas_revision: 3
+  rondas_revision: 2
   nota_minima: 7
