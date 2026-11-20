@@ -1,0 +1,87 @@
+# Configuración del bot de videos explicativos.
+# Puedes editar este archivo desde el iPhone en github.com (botón del lápiz).
+
+canal:
+  nombre: "Explicativos de la vida cotidiana"
+  idioma: "español latino neutro, cercano, con humor ligero"
+  publico: "adultos de 25 a 55 años en Latinoamérica y República Dominicana"
+  # Subtemas que el director rota. Puedes añadir o quitar.
+  subtemas:
+    - "ciencia de cosas cotidianas (cocina, casa, clima)"
+    - "el cuerpo humano en el día a día (sin consejos médicos)"
+    - "el dinero en la vida diaria (inflación, intereses, precios)"
+    - "por qué las cosas son como son (diseños, costumbres, objetos)"
+    - "psicología cotidiana (hábitos, memoria, decisiones)"
+    - "tecnología que usamos sin entender (celular, wifi, GPS)"
+  # Temas prohibidos: el director nunca los elegirá.
+  prohibidos:
+    - "consejos médicos, dosis o tratamientos"
+    - "política partidista"
+    - "consejos de inversión concretos"
+
+produccion:
+  # Duración objetivo del Reel en segundos (Facebook acepta de 3 a 90).
+  duracion_min: 45
+  duracion_max: 80
+  escenas_min: 6
+  escenas_max: 9
+  # Voces gratis de Edge TTS. Ejemplos: es-MX-JorgeNeural, es-MX-DaliaNeural,
+  # es-DO-EmilioNeural, es-DO-RamonaNeural, es-US-AlonsoNeural
+  voz: "es-MX-JorgeNeural"
+  velocidad_voz: "+8%"
+  # Dos versiones del gancho (A y B) para que elijas la mejor.
+  ab_gancho: true
+  # Música de fondo: pon un .mp3 con licencia en remotion/public/musica/ y
+  # escribe aquí su nombre (por ejemplo "fondo.mp3"). Vacío = sin música.
+  musica: ""
+  # Subtítulos cortos (3 palabras) para quien ve sin sonido.
+  subtitulos: true
+
+estilo:
+  descripcion: >
+    Ilustración vectorial plana pero elaborada, al estilo de los videos
+    explicativos animados en español tipo "La Ciencia de lo Obvio" y "Píldora
+    Plasaber": personajes simpáticos con contorno grueso, fondos con detalles,
+    sombras planas, todo en movimiento suave. Sin emojis. Sin párrafos de texto
+    en pantalla. Gráfico, claro y fiel a la realidad.
+  # Paletas que se sortean (fondo, tinta, 4 colores de acento).
+  paletas:
+    calida:   ["#FFF4E0", "#1E1B2E", "#FF6B35", "#F7B32B", "#2EC4B6", "#E71D36"]
+    fresca:   ["#E8F6F3", "#14213D", "#00A6A6", "#F49D37", "#EF3E36", "#5C80BC"]
+    papel:    ["#F5EFE6", "#22223B", "#E07A5F", "#3D405B", "#81B29A", "#F2CC8F"]
+    noche:    ["#1B263B", "#F1FAEE", "#FFB703", "#FB8500", "#8ECAE6", "#E63946"]
+    pastel:   ["#FDF6FF", "#2B2D42", "#B388EB", "#FF8FAB", "#72DDF7", "#FFD166"]
+
+ganchos:
+  # Tipos de gancho que se sortean para el primer segundo.
+  tipos:
+    - "pregunta que todos se han hecho"
+    - "dato sorprendente con número"
+    - "afirmación que parece falsa pero es cierta"
+    - "situación cotidiana con giro inesperado"
+    - "error común que casi todos cometen"
+  estructuras:
+    - "problema, explicación paso a paso, remate curioso"
+    - "mito, por qué parece cierto, la realidad"
+    - "pregunta, tres causas, conclusión"
+    - "historia mini con personaje, explicación, aplicación práctica"
+
+aprobacion:
+  # true = te llega a Telegram y tú decides. false = publica solo (versión A).
+  activa: true
+
+publicacion:
+  hashtags: ["#ciencia", "#curiosidades", "#aprende", "#explicacion"]
+
+claude:
+  # Modelo para ideas, guion y revisión.
+  modelo: "claude-sonnet-5-5"
+  # Modelo para dibujar las escenas (más capaz = mejor ilustración).
+  modelo_escenas: "claude-opus-5-5"
+  # Búsqueda web para verificar datos (recomendado).
+  busqueda_web: true
+  # Tope de llamadas a la API por video, para controlar el gasto.
+  max_llamadas: 45
+  # Rondas máximas en que el revisor puede pedir rehacer escenas.
+  rondas_revision: 2
+  nota_minima: 7

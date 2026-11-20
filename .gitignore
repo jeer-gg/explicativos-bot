@@ -1,0 +1,8 @@
+salida/
+__pycache__/
+remotion/node_modules/
+remotion/build/
+remotion/plan_*.json
+remotion/public/voz_*.wav
+remotion/public/sfx/
+remotion/src/escenas/Escena*.tsx

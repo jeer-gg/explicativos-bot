@@ -1,0 +1,77 @@
+"""Guion con investigación y verificación de datos."""
+import json
+
+from .claude import Claude
+
+
+def escribir_guion(claude: Claude, cfg: dict, tema: dict, estilo: dict) -> dict:
+    p = cfg["produccion"]
+    canal = cfg["canal"]
+    system = (
+        "Eres guionista de videos explicativos animados cortos para Facebook Reels en "
+        f"{canal['idioma']}. Escribes como se habla, con frases cortas, ritmo rápido y humor ligero. "
+        "Cada dato que afirmas debe ser cierto y tener fuente confiable. Investiga antes de escribir."
+    )
+    palabras_max = int(p["duracion_max"] * 2.6)
+    palabras_min = int(p["duracion_min"] * 2.4)
+    usuario = f"""Tema: {tema['tema']}
+Ángulo: {tema['angulo']}
+Tipo de gancho: {estilo['tipo_gancho']}
+Estructura: {estilo['estructura']}
+
+Reglas:
+- La voz arranca en el segundo 0: la primera frase ES el gancho, de 6 a 12 palabras.
+- Entre {palabras_min} y {palabras_max} palabras en total, en {p['escenas_min']} a {p['escenas_max']} escenas.
+- Cada escena dura entre 5 y 10 segundos de voz y muestra UNA idea visual clara.
+- Nada de "hola", "en este video" ni "suscríbete". Termina con un remate curioso o una
+  pregunta que invite a comentar.
+- La descripción visual de cada escena debe ser concreta y dibujable: qué personajes u objetos
+  hay, qué hacen, qué se mueve, qué metáfora visual explica la idea. Sin texto largo en pantalla
+  (máximo 3 palabras de rótulo por escena).
+- Escribe números como se pronuncian si pueden leerse mal ("dos mil" en vez de "2.000").
+- Incluye la versión B del gancho: otra primera escena con un tipo de gancho distinto.
+- Define una dirección de arte común: el mismo protagonista y el mismo mundo visual en todas
+  las escenas, para que el video se sienta como un solo plano continuo.
+
+Devuelve JSON:
+{{
+ "titulo": "título corto para Facebook (máx. 60 caracteres)",
+ "descripcion": "descripción de 1 a 2 frases que invite a ver",
+ "escenas": [
+   {{"voz": "texto narrado", "visual": "descripción detallada de la ilustración y su animación",
+     "rotulo": "0 a 3 palabras o vacío", "palabra_clave": "palabra de la voz donde ocurre el momento visual principal",
+     "datos": [{{"afirmacion": "...", "fuente": "url o referencia"}}]}}
+ ],
+ "gancho_b": {{"voz": "...", "visual": "...", "rotulo": "...", "palabra_clave": "...", "tipo": "..."}},
+ "direccion_arte": {{
+   "protagonista": "aspecto exacto del personaje o objeto que guía el video (forma, colores, ropa, rasgos) para dibujarlo igual en todas las escenas",
+   "secundarios": "otros personajes u objetos que se repiten, con su aspecto",
+   "ambiente": "lugar o mundo visual común del video",
+   "metafora": "la metáfora visual central que explica el tema"
+ }}
+}}"""
+    return claude.json(system, usuario, max_tokens=6000, web=True)
+
+
+def verificar_guion(claude: Claude, guion: dict) -> dict:
+    """Revisa cada afirmación. Corrige o elimina lo que no se pueda sostener."""
+    system = (
+        "Eres verificador de datos. Revisas guiones de divulgación antes de publicarse. "
+        "Compruebas cada afirmación con fuentes confiables y corriges lo exagerado o falso, "
+        "manteniendo el mismo tono, ritmo y longitud aproximada."
+    )
+    usuario = (
+        "Revisa este guion. Si una afirmación es falsa, dudosa o exagerada, reescribe esa parte "
+        "de la voz para que sea correcta. No cambies lo que ya es correcto. Devuelve el guion "
+        "completo con la misma estructura JSON, añadiendo el campo \"verificacion\": "
+        "{\"cambios\": [\"...\"], \"confianza\": \"alta|media|baja\"}.\n\n"
+        + json.dumps(guion, ensure_ascii=False, indent=1)
+    )
+    revisado = claude.json(system, usuario, max_tokens=7000, web=True)
+    if not revisado.get("escenas") or len(revisado["escenas"]) != len(guion["escenas"]):
+        return guion
+    # Conserva lo que el verificador no debía tocar.
+    for clave in ("titulo", "descripcion", "gancho_b", "direccion_arte"):
+        if not revisado.get(clave) and guion.get(clave):
+            revisado[clave] = guion[clave]
+    return revisado
