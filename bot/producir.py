@@ -208,8 +208,12 @@ def producir():
 
 
 if __name__ == "__main__":
+    from .claude import LimiteDeSuscripcion
     try:
         producir()
+    except LimiteDeSuscripcion as e:
+        telegram.aviso_seguro(f"No se hizo el video de hoy: {e}")
+        raise
     except Exception:
         error = traceback.format_exc()
         print(error)

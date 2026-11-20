@@ -22,12 +22,11 @@ def revisar_claude():
     if not clave:
         return informar("Claude", False, "falta el secreto ANTHROPIC_API_KEY")
     try:
-        import anthropic
-        from .config import cargar_config
-        modelo = cargar_config()["claude"]["modelo"]
-        r = anthropic.Anthropic(api_key=clave).messages.create(
-            model=modelo, max_tokens=20, messages=[{"role": "user", "content": "Responde: listo"}])
-        informar("Claude", True, f"el modelo {modelo} responde")
+        from .claude import Claude
+        c = Claude()
+        respuesta = c.texto("Eres una prueba de conexión.", "Responde solo: listo", max_tokens=20)
+        modo = "tu suscripción (Claude Code)" if c.suscripcion else "la API (pago por uso)"
+        informar("Claude", bool(respuesta.strip()), f"responde usando {modo}")
     except Exception as e:  # noqa: BLE001
         informar("Claude", False, str(e)[:300])
 

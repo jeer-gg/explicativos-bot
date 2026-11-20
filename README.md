@@ -36,6 +36,13 @@ cuando estés en GitHub o en Meta for Developers.
 2. Copia la clave (empieza por `sk-ant-`). Solo se muestra una vez.
 3. En **Billing**, carga saldo. Puedes poner un límite mensual de gasto.
 
+### 1b. O usar tu suscripción de Claude (sin pagar API)
+En una terminal (computadora o Codespace) ejecuta:
+`npm install -g @anthropic-ai/claude-code && claude setup-token`
+Abre el enlace, autoriza con tu cuenta de Claude, pega el código y copia el token que empieza
+por `sk-ant-oat`. Guárdalo en el mismo secreto `ANTHROPIC_API_KEY`: el bot detecta solo que
+es un token de suscripción y usa Claude Code. Comparte el límite de uso de tu plan.
+
 ### 2. Bot de Telegram
 1. En Telegram, abre **@BotFather** y envía `/newbot`. Ponle nombre y usuario.
 2. Copia el **token** que te da.
