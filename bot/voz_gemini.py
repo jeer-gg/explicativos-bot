@@ -215,7 +215,34 @@ def inicio_del_guion(tokens: list[str], oidas: list[dict]) -> float | None:
                     aciertos += 1
             if aciertos >= min(3, len(primeras) - desde):
                 candidatos.append((i, max(0.0, oidas[i]["ini"] + ajuste)))
-    return candidatos[0][1] if candidatos else None
+    if candidatos:
+        return candidatos[0][1]
+    return _inicio_tolerante(tokens, oidas)
+
+
+def _parecidas(a: str, b: str) -> bool:
+    return bool(a and b) and (a == b or difflib.SequenceMatcher(None, a, b).ratio() >= 0.75)
+
+
+def _inicio_tolerante(tokens: list[str], oidas: list[dict]) -> float | None:
+    """Plan B: palabras en inglés, siglas o números («Black Friday», «SSD», «27») que Whisper
+    escribe distinto. Busca, en las primeras 15 palabras del guion, el primer tramo de 2 palabras
+    seguidas que se oyen parecidas, y calcula hacia atrás dónde empezó el guion."""
+    guion = [_normal(t) for t in tokens[:15]]
+    oidas_n = [_normal(o["w"]) for o in oidas[:120]]
+    for j, w in enumerate(guion[:-1]):
+        if not w:
+            continue
+        for i in range(len(oidas_n) - 1):
+            if _parecidas(oidas_n[i], w) and _parecidas(oidas_n[i + 1], guion[j + 1]):
+                # Retrocede por las palabras oídas justo antes (habla seguida, sin pausa), que son las
+                # del guion que no se reconocieron; una sigla puede oírse como varias («ese ese de»).
+                k, pasos = i, 0
+                while k > 0 and pasos < 3 * j and oidas[k]["ini"] - oidas[k - 1]["fin"] < 0.45:
+                    k -= 1
+                    pasos += 1
+                return max(0.0, oidas[k]["ini"])
+    return None
 
 
 AIRE_INICIAL = 0.18  # silencio limpio antes de la primera palabra (que no se coma la primera sílaba)
@@ -237,8 +264,13 @@ def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, 
         oidas = escuchar_palabras(crudo, cfg, texto)
         inicio = inicio_del_guion(tokens, oidas)
         if inicio is None:
-            print("No se encontró el comienzo del guion en el audio; se repite la voz.")
-            continue
+            # Último recurso: si el audio sí dice casi todo el guion, se usa desde la primera palabra
+            if oidas and cobertura(tokens, oidas) >= 0.6:
+                inicio = oidas[0]["ini"]
+                print("No se reconoció el comienzo exacto, pero el audio dice el guion; se usa.")
+            else:
+                print("No se encontró el comienzo del guion en el audio; se repite la voz.")
+                continue
         # Recorta lo que haya antes del guion (instrucciones leídas, silencio) con margen
         limpio = carpeta / f"limpio_{nombre}_{intento}.wav"
         corte = max(0.0, inicio - 0.12)
