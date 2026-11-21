@@ -1,0 +1,165 @@
+{
+  "fecha": "2026-11-20",
+  "tendencias": [
+    {
+      "tendencia": "El Buen Fin 2026 en México (13 al 16 de noviembre) dejó dudas: algunos productos bajaron solo 109 pesos y otros subieron de precio.",
+      "fuente": "https://www.unotv.com/ciencia-y-tecnologia/realmente-hay-ofertas-algunos-productos-bajaron-solo-109-pesos-y-otros-subieron-en-el-buen-fin-2026/",
+      "preguntas": [
+        {
+          "pregunta": "¿Por qué un precio que termina en .99 nos parece mucho más barato?",
+          "angulo": "El cerebro lee de izquierda a derecha y se queda con el primer dígito, así que 299 se registra como «doscientos y algo».",
+          "subtema": "psicología cotidiana"
+        },
+        {
+          "pregunta": "¿Cómo hacen las tiendas para que un descuento del 40% no sea tan descuento?",
+          "angulo": "Si primero suben el precio de lista, un 40% de descuento puede dejarte en el precio normal. Se ve con una línea de tiempo del precio.",
+          "subtema": "el dinero en la vida diaria"
+        },
+        {
+          "pregunta": "¿Por qué comprar a meses sin intereses a veces sale más caro de lo que parece?",
+          "angulo": "Pagar en cuotas hace que el gasto se sienta menor, así que compramos más. Además, el dinero de mañana vale distinto al de hoy.",
+          "subtema": "el dinero en la vida diaria"
+        },
+        {
+          "pregunta": "¿Por qué cuesta tanto no comprar algo cuando dice «solo por hoy»?",
+          "angulo": "La escasez y la urgencia activan el miedo a perder, que pesa más que la ilusión de ganar.",
+          "subtema": "psicología cotidiana"
+        }
+      ]
+    },
+    {
+      "tendencia": "Frentes fríos y lluvias por humedad del Caribe en México y la Península de Yucatán, con el fin de la temporada de huracanes.",
+      "fuente": "https://www.xataka.com.mx/ecologia-y-naturaleza/dos-frentes-frios-bajaran-temperaturas-mexico-provocaran-lluvias-puntuales-varios-estados",
+      "preguntas": [
+        {
+          "pregunta": "¿Por qué sentimos más frío con viento aunque el termómetro marque lo mismo?",
+          "angulo": "El viento se lleva la capa delgada de aire tibio pegada a tu piel. La temperatura real no cambia, pero la sensación sí.",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Por qué se empañan las ventanas y los lentes cuando hace frío?",
+          "angulo": "El aire caliente y húmedo toca una superficie fría y el vapor se vuelve gotitas.",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Por qué la ropa tarda más en secarse en días húmedos o nublados?",
+          "angulo": "El aire ya cargado de vapor «recibe» menos agua, así que la evaporación se frena.",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Por qué huele a tierra mojada antes y durante la lluvia?",
+          "angulo": "El olor tiene nombre, petricor. Lo producen compuestos del suelo y bacterias, y las gotas lo lanzan al aire.",
+          "subtema": "ciencia de cosas cotidianas"
+        }
+      ]
+    },
+    {
+      "tendencia": "Fútbol de la semana: Pumas vs Tigres en México, Atlético Nacional vs Pereira en Colombia y Valencia vs Real Madrid, con cientos de miles de búsquedas.",
+      "fuente": "https://trends.google.com/trending?geo=CO&hl=es",
+      "preguntas": [
+        {
+          "pregunta": "¿Por qué el balón de fútbol está hecho de pentágonos y hexágonos?",
+          "angulo": "Es una forma cercana a una esfera con piezas planas que se pueden coser. Se ve bien animando el balón desarmado.",
+          "subtema": "por qué las cosas son como son"
+        },
+        {
+          "pregunta": "¿Por qué la transmisión del partido llega con segundos de retraso y un vecino grita el gol antes?",
+          "angulo": "Cada paso (cámara, compresión, internet, streaming) suma retraso, y a veces llegan a 30 segundos o más.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Por qué el césped de una cancha se ve con rayas claras y oscuras?",
+          "angulo": "No son colores distintos. Depende de hacia dónde se dobla el pasto y cómo refleja la luz.",
+          "subtema": "por qué las cosas son como son"
+        },
+        {
+          "pregunta": "¿Por qué nos ponemos nerviosos y nos duele el estómago viendo un partido si no estamos jugando?",
+          "angulo": "El cerebro responde al estrés de «nuestro equipo» casi como al propio. Es la misma respuesta de alerta del cuerpo.",
+          "subtema": "el cuerpo humano en el día a día"
+        }
+      ]
+    },
+    {
+      "tendencia": "Infonavit, el instituto de vivienda, es lo más buscado en México (más de 100 mil búsquedas).",
+      "fuente": "https://trends.google.com/trendingsearches/daily?geo=MX&hl=es",
+      "preguntas": [
+        {
+          "pregunta": "¿Por qué un crédito de casa a 20 años termina costando casi el doble?",
+          "angulo": "Los primeros pagos son casi todo interés y el capital baja despacio. Una gráfica animada de la cuota lo muestra.",
+          "subtema": "el dinero en la vida diaria"
+        },
+        {
+          "pregunta": "¿Qué es la inflación y por qué mi dinero rinde menos cada año?",
+          "angulo": "Una canasta de productos que costaba 100 hoy cuesta más. El dinero no cambió, cambió lo que alcanza a comprar.",
+          "subtema": "el dinero en la vida diaria"
+        },
+        {
+          "pregunta": "¿Por qué el interés compuesto se llama «la fuerza más poderosa» si parece tan lento al inicio?",
+          "angulo": "Crece sobre lo ya crecido, así que la curva despega tarde y de golpe. La regla del 72 sirve para estimarlo.",
+          "subtema": "el dinero en la vida diaria"
+        },
+        {
+          "pregunta": "¿Por qué los ladrillos y bloques de las casas tienen huecos?",
+          "angulo": "Los huecos atrapan aire, aíslan del calor y del frío, y ahorran material y peso.",
+          "subtema": "por qué las cosas son como son"
+        }
+      ]
+    },
+    {
+      "tendencia": "Viral en TikTok: la canción «Matcha Latte» de Grupo Firme con Octavio Cuadras y la moda de los tragos de matcha.",
+      "fuente": "https://www.excelsior.com.mx/TIKTOK",
+      "preguntas": [
+        {
+          "pregunta": "¿Por qué una canción pegajosa se nos queda repitiendo en la cabeza todo el día?",
+          "angulo": "Se llama «gusano del oído». El cerebro rellena los pedazos sin terminar, y los ritmos repetitivos lo enganchan.",
+          "subtema": "psicología cotidiana"
+        },
+        {
+          "pregunta": "¿Por qué el algoritmo de TikTok parece saber lo que nos gusta?",
+          "angulo": "Se fija más en cuánto tiempo te quedas viendo un video que en tus likes.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Por qué el matcha se bate en vez de mezclarse con cuchara?",
+          "angulo": "El polvo de té no se disuelve, queda suspendido. Batirlo lo reparte y forma espuma.",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Por qué el café o el té nos quitan el sueño?",
+          "angulo": "La cafeína bloquea los receptores de la adenosina, la molécula que va acumulando el cansancio. Se cuenta sin dar consejos médicos.",
+          "subtema": "el cuerpo humano en el día a día"
+        }
+      ]
+    },
+    {
+      "tendencia": "Cuenta regresiva para el Black Friday (27 de noviembre) y las compras navideñas, con luces y adornos ya en las tiendas.",
+      "fuente": "https://es.digitaltrends.com/ofertas/el-buen-fin-2026-fechas-ofertas-tecnologia-consejos/",
+      "preguntas": [
+        {
+          "pregunta": "¿Por qué las lucecitas de Navidad se enredan solas en la caja?",
+          "angulo": "Un cable largo que se agita dentro de una caja casi siempre termina en nudos. Hay estudios de física sobre eso.",
+          "subtema": "por qué las cosas son como son"
+        },
+        {
+          "pregunta": "¿Por qué si se funde un foco de la serie de luces se apaga toda la tira?",
+          "angulo": "En un circuito en serie la corriente tiene un solo camino. Un foco roto lo corta, y las tiras nuevas usan LED y trucos para evitarlo.",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Por qué el wifi de la casa se pone lento cuando todos están conectados?",
+          "angulo": "Los dispositivos se turnan el ancho de banda y el aire compartido. Es como una sola caja de pago en el súper.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Por qué las tiendas ponen lo básico al fondo y los antojos en la caja?",
+          "angulo": "El diseño del local te obliga a recorrer más pasillos y a ver más productos.",
+          "subtema": "por qué las cosas son como son"
+        }
+      ]
+    }
+  ],
+  "usadas": [
+    "¿Por qué las lucecitas de Navidad se enredan solas en la caja?"
+  ],
+  "clasicos": 0
+}
