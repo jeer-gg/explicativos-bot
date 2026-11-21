@@ -44,6 +44,9 @@ cuando ayuda, la paleta sorteada y movimiento constante.
   - Por dentro: el objeto partido por la mitad (corte) y `Flecha` mostrando aire, agua o fuerzas.
   - Con números: `Medida` para tamaños; los números grandes van en la tarjeta de datos del video.
 - Fiel a la realidad: proporciones y funcionamiento correctos.
+- PROHIBIDO inventar datos: en carteles, etiquetas, medidas, calendarios o pantallas solo van
+  números, años, porcentajes o medidas que aparecen en la voz de ESTA escena. Si la voz no da
+  un número, no pongas ninguno (usa palabras o solo la imagen).
 - Desde el fotograma 0 la escena ya se ve completa (es la miniatura): el objeto y el ambiente,
   no los textos ni los datos, que esperan a su palabra. Excepción: en "pieza por
   pieza" ya hay una base o las primeras piezas visibles desde el inicio.

@@ -34,7 +34,8 @@ def _system(cfg: dict, nombre: str) -> str:
     lib = (REMOTION / "src" / ("lib3d.tsx" if tres else "lib.tsx")).read_text(encoding="utf-8")
     ejemplo = (ESCENAS / ("Ejemplo3D.tsx" if tres else "Ejemplo.tsx")).read_text(encoding="utf-8")
     estilo = cfg["estilo"]["descripcion_3d" if tres else "descripcion"].strip()
-    return (prompt("escena3d.md" if tres else "escena.md")
+    from .autocontrol import texto_reglas
+    return (prompt("escena3d.md" if tres else "escena.md").replace("Responde SOLO con", texto_reglas("escenas") + "\nResponde SOLO con")
             .replace("{estilo}", estilo)
             .replace("{lib}", lib)
             .replace("{ejemplo}", ejemplo)
@@ -106,6 +107,8 @@ def reparar(claude: Claude, cfg: dict, nombre: str, error: str) -> None:
 
 
 def usar_respaldo(nombre: str):
+    from .autocontrol import ESTADO_VIDEO
+    ESTADO_VIDEO["respaldos"].append(nombre)
     plantilla = RESPALDO_3D if MOTOR["actual"] == "3d" else RESPALDO
     (ESCENAS / f"{nombre}.tsx").write_text(plantilla.replace("{nombre}", nombre), encoding="utf-8")
 

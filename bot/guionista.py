@@ -5,6 +5,11 @@ from . import aprendizaje
 from .claude import Claude
 
 
+def _reglas_guion() -> str:
+    from .autocontrol import texto_reglas
+    return texto_reglas("guion")
+
+
 def _bloque_serie(tema: dict, estilo: dict) -> str:
     """Instrucciones extra para historias en partes y continuaciones."""
     parte = tema.get("serie")
@@ -48,7 +53,7 @@ def escribir_guion(claude: Claude, cfg: dict, tema: dict, estilo: dict) -> dict:
 Ángulo: {tema['angulo']}{(chr(10) + "Tendencia del momento que lo inspira: " + tema['tendencia'] + " (menciónala en la primera frase para enganchar, sin inventar detalles: verifica con la búsqueda web)") if tema.get('tendencia') else ""}
 Tipo de gancho: {estilo['tipo_gancho']}
 Formato ganador: {estilo['estructura']}
-{_bloque_serie(tema, estilo)}{aprendizaje.texto_lecciones()}
+{_bloque_serie(tema, estilo)}{aprendizaje.texto_lecciones()}{_reglas_guion()}
 Reglas:
 - La voz arranca en el segundo 0: la primera frase ES el gancho, de 6 a 12 palabras.
 - Entre {palabras_min} y {palabras_max} palabras en total, en {p['escenas_min']} a {p['escenas_max']} escenas.

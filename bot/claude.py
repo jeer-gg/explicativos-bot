@@ -108,8 +108,7 @@ class Claude:
                 return texto
             if re.search(r"usage limit|limit reached|hit your .{0,20}limit|rate.?limit|l[ií]mite", error, re.I):
                 raise LimiteDeSuscripcion(
-                    "Se agotó el límite de uso de tu suscripción de Claude. El bot lo intentará "
-                    "en el próximo horario; también puedes lanzarlo a mano cuando se renueve.")
+                    "Se agotó el límite de uso de tu suscripción de Claude. [" + error.strip()[-200:] + "]")
             if re.search(r"invalid|unauthori|expired|401|authentication", error, re.I):
                 raise RuntimeError("El token de tu suscripción no es válido o caducó. "
                                    "Genera otro con `claude setup-token`. Detalle: " + error[-500:])

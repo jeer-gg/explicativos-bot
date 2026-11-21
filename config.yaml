@@ -162,6 +162,6 @@ claude:
   # Rondas máximas en que el revisor puede pedir rehacer escenas.
   rondas_revision: 3
   nota_minima: 7
-  # En modo automático, un video con nota final por debajo de esto NO se publica solo:
-  # te llega a Telegram con botones para publicarlo igual o descartarlo.
-  nota_para_publicar: 6.5
+  # En modo automático todos los videos se programan solos. Si pones un número (por ejemplo 6.5),
+  # los que saquen menos te llegarán a Telegram para decidir en vez de publicarse solos.
+  nota_para_publicar: 0

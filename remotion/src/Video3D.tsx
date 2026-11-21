@@ -163,7 +163,7 @@ const Sonidos: React.FC<{plan: PlanVideo}> = ({plan}) => {
   const n = plan.escenas.length;
   const ultima = plan.escenas[n - 1];
   const efectos: React.ReactNode[] = [];
-  efectos.push(<Efecto key="impacto" nombre="impacto" en={0} vol={0.42} />);
+  efectos.push(<Efecto key="impacto" nombre="impacto" en={0} vol={0.2} dur={0.5} />);
   if (plan.portada) efectos.push(<Efecto key="swish" nombre="swish" en={DURACION_PORTADA - 0.2} vol={0.14} />);
   plan.escenas.forEach((e, i) => {
     // Transición: se alternan cuatro barridos distintos y uno de cada tres pasos va en silencio.

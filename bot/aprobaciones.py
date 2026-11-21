@@ -37,9 +37,18 @@ def escuchar(minutos: float):
         procesar(espera=min(50, quedan), caducar=False)
 
 
+def relanzar_si_toca():
+    """Si un video quedó a medias por el límite de Claude y ya se renovó, se relanza."""
+    from . import reanudar
+    if reanudar.toca_reintentar():
+        print("Se renovó el límite: relanzo la producción")
+        subprocess.run(["gh", "workflow", "run", "bot.yml", "-f", "tarea=producir"], check=False)
+
+
 def procesar(espera: int = 0, caducar: bool = True):
     if caducar:
         caducar_pendientes()
+        relanzar_si_toca()
     chat_autorizado = secreto("TELEGRAM_CHAT_ID")
     est = estado()
     updates = telegram.actualizaciones(est.get("telegram_offset", 0), espera)

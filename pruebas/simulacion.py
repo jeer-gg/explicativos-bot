@@ -68,6 +68,11 @@ def responder(system: str, contenido) -> str:
                                                           "por_que": "curioso"}})
     if "guionista" in system:
         return "Aquí va:\n```json\n" + json.dumps(guion_falso(), ensure_ascii=False) + "\n```"
+    if "control de calidad" in system:
+        REGISTRO["control"] = REGISTRO.get("control", 0) + 1
+        return json.dumps({"problemas": [{"problema": "etiqueta cortada en el borde",
+                                          "regla": "Las etiquetas deben quedar completas dentro del cuadro, lejos de los bordes.",
+                                          "area": "escenas", "grave": False}], "nota_final": 7})
     if "editor de Reels virales" in system:
         REGISTRO["pulir"] = True
         return json.dumps({"candidatos": [
@@ -162,7 +167,9 @@ class WhisperModel:
     def transcribe(self, ruta, **k):
         # Oye una palabra de más al principio ("Bueno") y dice el número con otras palabras.
         palabras = ["Bueno"] + GEMINI["textos"][-1].replace("número", "número cero").split()
-        ws = [types.SimpleNamespace(word=" " + w, start=0.3 + i * 0.3, end=0.3 + i * 0.3 + 0.25)
+        dur = len(ruta) / 16000 if not isinstance(ruta, str) else 0.3 * (len(palabras) + 2)
+        paso = min(0.3, (dur - 0.5) / max(1, len(palabras)))  # las palabras caben en el audio real
+        ws = [types.SimpleNamespace(word=" " + w, start=0.3 + i * paso, end=0.3 + i * paso + paso * 0.8)
               for i, w in enumerate(palabras)]
         return [types.SimpleNamespace(words=ws)], None
 
@@ -276,6 +283,8 @@ aprobaciones.escuchar = _escuchar_real
 assert ESCUCHA and ESCUCHA[0] > 2, "al terminar debe quedarse escuchando los botones"
 assert len(GEMINI["textos"]) == 1, "una sola versión, con voz de Gemini"
 assert REGISTRO.get("pulir"), "debe pulir el gancho"
+assert REGISTRO.get("control") == 1, "debe revisar el video terminado"
+assert any("Control de calidad" in str(t) for t in REGISTRO["telegram"])
 assert GEMINI["voz_creada"]["voice"]["type"] == "prompted" and GEMINI["voz_creada"]["store"] is True
 assert all(v == {"voice": "voice_prueba123"} for v in GEMINI["voces_usadas"]), "siempre la voz de marca"
 assert any(t[0] == "audio" for t in REGISTRO["telegram"]), "debe enviar la muestra de la voz"
@@ -293,7 +302,7 @@ guion = json.loads((REPO / "salida" / id_video / "guion.json").read_text())
 assert guion.get("direccion_arte"), "se perdió la dirección de arte"
 plan_a = json.loads((REPO / "remotion" / "plan_A.json").read_text())
 assert plan_a["motor"] == "3d" and render.OPCIONES["gl"] == "swangle"
-assert plan_a["escenas"][0]["inicio"] == 0 and plan_a["escenas"][0]["palabras"][0]["t"] < 0.1, "debe recortar lo dicho antes del guion"
+assert plan_a["escenas"][0]["inicio"] == 0 and plan_a["escenas"][0]["palabras"][0]["t"] < 0.3, "debe recortar lo dicho antes del guion"
 assert all(e["duracion"] > 0.5 for e in plan_a["escenas"])
 assert plan_a["portada"] == "EL AGUA ENDURECE EL PAN", plan_a["portada"]
 assert guion["escenas"][0]["voz"].startswith("Tu pan se pone duro por culpa")
@@ -349,6 +358,10 @@ guardar_estado(est)
 aprobaciones.procesar()
 assert "viejo" not in estado()["pendientes"], "los pendientes viejos deben caducar"
 
+# Las reglas aprendidas deben llegar a las instrucciones del siguiente video
+from bot.autocontrol import texto_reglas  # noqa: E402
+assert "etiquetas deben quedar completas" in texto_reglas("escenas")
+
 # ---------- 5) Modo automático: produce, programa en el mejor horario y deja cancelar ----------
 print("== Automático ==")
 from datetime import datetime, timezone as tz  # noqa: E402
@@ -382,5 +395,45 @@ aprobaciones.procesar()
 assert BORRADOS == ["fb_prog"] and memoria()[-1].get("cancelado")
 assert estado().get("reemplazo", {}).get("titulo_cancelado"), "debe pedir un video de reemplazo"
 assert any("otro" in str(t) and "horario" in str(t) for t in REGISTRO["telegram"])
+
+# ---------- 6) Se acaba el límite de Claude a mitad del video y sigue solo después ----------
+print("== Límite de Claude y reanudación ==")
+from bot import reanudar, estudio as est_mod  # noqa: E402
+from bot.claude import LimiteDeSuscripcion  # noqa: E402
+_dibujar_real = est_mod.dibujar
+FALLA = {"hecho": False}
+
+
+def dibujar_con_limite(claude, cfg, nombre, *a, **k):
+    if nombre == "Escena3" and not FALLA["hecho"]:
+        FALLA["hecho"] = True
+        raise LimiteDeSuscripcion("Se agotó el límite. [You've hit your 5-hour limit · resets 1:50pm (UTC)]")
+    return _dibujar_real(claude, cfg, nombre, *a, **k)
+
+
+est_mod.dibujar = dibujar_con_limite
+try:
+    prod.producir()
+    raise AssertionError("debía cortarse por el límite")
+except LimiteDeSuscripcion as e:
+    cuando = reanudar.guardar_por_limite(str(e))
+assert (cuando.hour, cuando.minute) == (13, 55), cuando
+guardado = json.loads(reanudar.EN_CURSO.read_text())
+assert guardado["guion"] and guardado["tema"] and len(guardado["escenas"]) >= 1, "debe guardar el avance"
+assert estado()["reintentar_desde"]
+# La revisión de cada 20 minutos lo relanza cuando ya pasó la hora
+e = estado(); e["reintentar_desde"] = "2000-01-01T00:00:00+00:00"; from bot.memoria import guardar_estado as _ge; _ge(e)  # noqa: E702
+assert reanudar.toca_reintentar() and not reanudar.toca_reintentar(), "relanza una sola vez"
+# Su horario ya pasó: al terminar debe publicarse en el momento
+guardado["inicio"] = "2000-01-01T08:00:00+00:00"
+reanudar.EN_CURSO.write_text(json.dumps(guardado))
+guiones_antes = sum(1 for c in REGISTRO["claude"] if "guionista" in c)
+antes = len(REGISTRO["meta"])
+prod.producir()
+assert sum(1 for c in REGISTRO["claude"] if "guionista" in c) == guiones_antes, "no debe reescribir el guion"
+assert REGISTRO["meta"][antes][3] is None, "su horario ya pasó: se publica en el momento"
+assert not reanudar.EN_CURSO.exists(), "al terminar se borra el avance"
+assert any("ya había pasado" in str(t) for t in REGISTRO["telegram"])
+est_mod.dibujar = _dibujar_real
 
 print("\nSIMULACIÓN CORRECTA. Archivos en", TMP)

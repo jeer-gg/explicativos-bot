@@ -26,6 +26,11 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
         "un cambio visible (movimiento, acción). En la PRIMERA escena exige además un gancho visual "
         "que detenga el scroll desde el fotograma 0 (es la miniatura)."
     )}]
+    from .autocontrol import texto_reglas
+    reglas = texto_reglas("escenas", 12)
+    if reglas:
+        contenido.append({"type": "text", "text": "Comprueba especialmente estos errores que ya se "
+                          "cometieron antes y baja mucho la nota si se repiten:" + reglas})
     for f in fotos:
         contenido.append({"type": "text", "text": f"\n{f['nombre']}. Voz: «{f['voz']}». Debía mostrar: {f['visual']}"})
         contenido.append(imagen(f["ruta"]))

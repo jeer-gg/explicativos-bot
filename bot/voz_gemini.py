@@ -82,8 +82,13 @@ def sintetizar(texto: str, cfg: dict, destino: Path) -> Path:
     voz_id = voz_de_marca(cfg)
     voz = ({"voice": voz_id} if voz_id
            else {"prebuiltVoiceConfig": {"voiceName": p.get("voz_gemini", "Laomedeia")}})
+    # Formato recomendado para Gemini TTS: notas de dirección + transcripción. Solo se lee la
+    # transcripción (antes, al ir todo junto, a veces leía las instrucciones en voz alta).
+    prompt = (f"### NOTAS DEL DIRECTOR (no se leen en voz alta)\n{indicacion}\n\n"
+              f"### TRANSCRIPCIÓN (lee solo esto, palabra por palabra, desde la primera)\n{texto}"
+              if indicacion else texto)
     cuerpo = {
-        "contents": [{"parts": [{"text": f"{indicacion}\n\n{texto}" if indicacion else texto}]}],
+        "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
             "responseModalities": ["AUDIO"],
             "speechConfig": {"voiceConfig": voz},
@@ -181,30 +186,95 @@ def alinear(tokens: list[str], oidas: list[dict]) -> list[tuple[float, float]]:
     return tiempos
 
 
+def cobertura(tokens: list[str], oidas: list[dict]) -> float:
+    """Qué parte del guion se oyó tal cual (0 a 1)."""
+    a = [_normal(t) for t in tokens]
+    b = [_normal(o["w"]) for o in oidas]
+    iguales = sum(i2 - i1 for op, i1, i2, _, _ in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes()
+                  if op == "equal")
+    return iguales / max(1, len(a))
+
+
+def inicio_del_guion(tokens: list[str], oidas: list[dict]) -> float | None:
+    """Segundo en que empieza a oírse el guion (ignora lo que se haya dicho antes).
+
+    Busca la primera palabra del guion seguida, en orden, por las siguientes. Si Whisper no oyó
+    la primera palabra pero sí la segunda, empieza un poco antes de la segunda."""
+    primeras = [_normal(t) for t in tokens[:5] if _normal(t)]
+    oidas_n = [_normal(o["w"]) for o in oidas]
+    if len(primeras) < 2:
+        return oidas[0]["ini"] if oidas else None
+    candidatos = []
+    for i in range(min(len(oidas), 80)):
+        for desde, ajuste in ((0, 0.0), (1, -0.35)):
+            if oidas_n[i] != primeras[desde]:
+                continue
+            aciertos = 0
+            for k, w in enumerate(primeras[desde:]):
+                if w in oidas_n[i + k - 1 if k else i: i + k + 2]:
+                    aciertos += 1
+            if aciertos >= min(3, len(primeras) - desde):
+                candidatos.append((i, max(0.0, oidas[i]["ini"] + ajuste)))
+    return candidatos[0][1] if candidatos else None
+
+
+AIRE_INICIAL = 0.18  # silencio limpio antes de la primera palabra (que no se coma la primera sílaba)
+
+
 def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, nombre: str) -> dict:
     carpeta.mkdir(parents=True, exist_ok=True)
-    crudo = sintetizar(" ".join(textos), cfg, carpeta / f"gemini_{nombre}.wav")
     tokens, escena_de = [], []
     for i, t in enumerate(textos):
         for w in t.split():
             tokens.append(w)
             escena_de.append(i)
-    tiempos = alinear(tokens, escuchar_palabras(crudo, cfg, " ".join(textos)))
+    texto = " ".join(textos)
 
-    # Recorta el silencio inicial (y cualquier cosa dicha antes del guion) y el final
-    corte_ini = max(0.0, tiempos[0][0] - 0.05)
-    total = tiempos[-1][1] - corte_ini + 0.3
+    # Se intenta hasta 3 veces conseguir una narración que diga el guion completo desde el principio
+    mejor = None
+    for intento in range(3):
+        crudo = sintetizar(texto, cfg, carpeta / f"gemini_{nombre}_{intento}.wav")
+        oidas = escuchar_palabras(crudo, cfg, texto)
+        inicio = inicio_del_guion(tokens, oidas)
+        if inicio is None:
+            print("No se encontró el comienzo del guion en el audio; se repite la voz.")
+            continue
+        # Recorta lo que haya antes del guion (instrucciones leídas, silencio) con margen
+        limpio = carpeta / f"limpio_{nombre}_{intento}.wav"
+        corte = max(0.0, inicio - 0.12)
+        _ffmpeg("-i", str(crudo), "-ss", f"{corte:.3f}", "-af",
+                f"adelay={int(AIRE_INICIAL * 1000)}:all=1", "-ar", "24000", "-ac", "1", str(limpio))
+        oidas = escuchar_palabras(limpio, cfg, texto)  # se vuelve a escuchar el audio ya recortado
+        cob = cobertura(tokens, oidas)
+        print(f"Voz intento {intento + 1}: se oye el {round(cob * 100)} % del guion")
+        if mejor is None or cob > mejor[0]:
+            mejor = (cob, limpio, oidas)
+        if cob >= 0.8:
+            break
+    if mejor is None:
+        raise RuntimeError("La voz no dijo el guion en ninguno de los intentos")
+    cob_final, limpio, oidas = mejor
+    from .autocontrol import ESTADO_VIDEO
+    ESTADO_VIDEO["cobertura_voz"] = cob_final
+    tiempos = alinear(tokens, oidas)
+    # La primera palabra nunca empieza después de lo que de verdad se oyó
+    tiempos[0] = (min(tiempos[0][0], AIRE_INICIAL + 0.05), tiempos[0][1])
+
+    total = tiempos[-1][1] + 0.3
     factor = 1.0
     if total > 88:  # Facebook acepta hasta 90 s: se acelera un poco si hace falta
         factor = min(1.25, total / 86)
     archivo = f"voz_{nombre}.wav"
-    _ffmpeg("-i", str(crudo), "-ss", f"{corte_ini:.3f}", "-t", f"{total:.3f}",
+    _ffmpeg("-i", str(limpio), "-t", f"{total:.3f}",
             "-af", f"atempo={factor:.4f}" if factor != 1 else "anull",
             "-ar", "48000", "-ac", "2", "-c:a", "pcm_s16le", str(publico / archivo))
     total = duracion(publico / archivo)
     if total > 89.5:
         raise ValueError(f"La narración dura {total:.0f}s y Facebook acepta hasta 90s.")
-    t_abs = [((a - corte_ini) / factor, (b - corte_ini) / factor) for a, b in tiempos]
+    t_abs = [(a / factor, b / factor) for a, b in tiempos]
+    if t_abs[-1][1] > total - 0.05:  # por seguridad: ninguna palabra fuera del audio
+        k = (total - 0.1) / t_abs[-1][1]
+        t_abs = [(a * k, b * k) for a, b in t_abs]
 
     inicios = []
     for i in range(len(textos)):

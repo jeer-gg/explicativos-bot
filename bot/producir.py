@@ -10,7 +10,7 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 
 INICIO = time.monotonic()
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from . import estadisticas, estudio, render, revisor, sfx, telegram
 from .claude import Claude
@@ -190,7 +190,14 @@ def producir():
     trabajo = SALIDA / id_video
     trabajo.mkdir(parents=True, exist_ok=True)
     sfx.generar()
+    from .autocontrol import ESTADO_VIDEO
+    ESTADO_VIDEO.update(cobertura_voz=None, respaldos=[])
     preparar_motor(cfg, trabajo)
+    from . import reanudar
+    avance = reanudar.empezar()
+    if avance.get("reanudado"):
+        telegram.aviso_seguro("Se renovó el límite de Claude: sigo con el video que quedó a medias"
+                              + (f" («{avance['guion']['titulo']}»)." if avance.get("guion") else "."))
 
     try:
         estadisticas.actualizar()
@@ -207,39 +214,48 @@ def producir():
         print("Aviso: no se pudo revisar si algún video despegó:", e)
     from . import aprendizaje
     from .director import _hoy
-    aprendizaje.actualizar_lecciones(claude, cfg)
+    if not avance.get("reanudado"):
+        aprendizaje.actualizar_lecciones(claude, cfg)
     # Si este video reemplaza a uno cancelado: más exigente y con otro tema
-    reemplazo = estado().get("reemplazo")
+    reemplazo = None if avance.get("reanudado") else estado().get("reemplazo")
     if reemplazo:
         cfg["claude"]["rondas_revision"] = cfg["claude"]["rondas_revision"] + 1
         cfg["claude"]["nota_minima"] = cfg["claude"]["nota_minima"] + 0.5
-        cfg["claude"]["nota_para_publicar"] = cfg["claude"].get("nota_para_publicar", 6.5) + 0.5
+        if cfg["claude"].get("nota_para_publicar"):
+            cfg["claude"]["nota_para_publicar"] += 0.5
         cfg["canal"]["prohibidos"] = cfg["canal"]["prohibidos"] + [
             f"el tema del video que se canceló: «{reemplazo.get('titulo_cancelado', '')}» ({reemplazo.get('tema_cancelado', '')}) ni nada parecido"]
         e = estado()
         e.pop("reemplazo", None)
         guardar_estado(e)
-    estilo = sortear_estilo(cfg)
-    parte = None if reemplazo else series.siguiente(cfg)
+    estilo = avance.get("estilo") or sortear_estilo(cfg)
+    parte = None if (reemplazo or avance.get("tema")) else series.siguiente(cfg)
     if parte:
         parte["_hoy"] = _hoy(cfg)
     if parte:
         estilo["estructura"] = parte.get("estructura") or estilo["estructura"]
         tema = {"tema": parte["tema"], "angulo": parte.get("angulo", ""), "subtema": parte.get("subtema", ""),
                 "tendencia": parte.get("tendencia", ""), "serie": parte}
+    elif avance.get("tema"):
+        tema = avance["tema"]
     else:
         tema = elegir_tema(claude, cfg, estilo)
+    avance.update(tema=tema, estilo=estilo)
     print("Tema:", tema)
 
     # 2. Guion verificado
-    guion = verificar_guion(claude, pulir_gancho(claude, cfg, escribir_guion(claude, cfg, tema, estilo)))
-    guion["escenas"] = guion["escenas"][: cfg["produccion"]["escenas_max"]]
-    if tema.get("serie"):
-        n, total = tema["serie"]["parte"], tema["serie"]["total"]
-        if f"parte {n}" not in guion["titulo"].lower():
-            guion["titulo"] = f"{guion['titulo']} (Parte {n})"[:80]
-    series.registrar(guion, tema, estilo)
-    series.avanzar(guion, tema)
+    if avance.get("guion"):
+        guion = avance["guion"]
+    else:
+        guion = verificar_guion(claude, pulir_gancho(claude, cfg, escribir_guion(claude, cfg, tema, estilo)))
+        guion["escenas"] = guion["escenas"][: cfg["produccion"]["escenas_max"]]
+        if tema.get("serie"):
+            n, total = tema["serie"]["parte"], tema["serie"]["total"]
+            if f"parte {n}" not in guion["titulo"].lower():
+                guion["titulo"] = f"{guion['titulo']} (Parte {n})"[:80]
+        series.registrar(guion, tema, estilo)
+        series.avanzar(guion, tema)
+        avance["guion"] = guion
     (trabajo / "guion.json").write_text(json.dumps(guion, ensure_ascii=False, indent=1), encoding="utf-8")
 
     # 3. Voz (marca el tiempo de todo)
@@ -269,9 +285,15 @@ def producir():
 
     def dibujar_una(nombre, comentarios="", previo="", foto=None):
         esc, t, i = datos_escena(nombre)
+        guardado = avance["escenas"].get(nombre)
+        if guardado and not comentarios:  # ya se dibujó antes de que se acabara el límite
+            (estudio.ESCENAS / f"{nombre}.tsx").write_text(guardado, encoding="utf-8")
+            return nombre, guardado
         print("Dibujando", nombre)
-        return nombre, estudio.dibujar(claude, cfg, nombre, esc, t, guion, i, estilo,
-                                       comentarios=comentarios, codigo_previo=previo, foto=foto)
+        codigo = estudio.dibujar(claude, cfg, nombre, esc, t, guion, i, estilo,
+                                 comentarios=comentarios, codigo_previo=previo, foto=foto)
+        avance["escenas"][nombre] = codigo
+        return nombre, codigo
 
     # Se dibujan varias escenas a la vez para ahorrar tiempo.
     with ThreadPoolExecutor(max_workers=4) as hilos:
@@ -327,6 +349,17 @@ def producir():
         render.preparar_para_facebook(crudo, final, pista, cfg["produccion"].get("volumen_musica", 0.16))
         videos.append(final)
 
+    # 6b. Control de calidad del video terminado: errores -> reglas para los próximos
+    from . import autocontrol
+    control = autocontrol.revisar_video(claude, guion, videos[0], PUBLICO / tiempos["A"]["audio"],
+                                        tiempos["A"]["total"], trabajo)
+    if control["problemas"]:
+        lineas = [f"- {p['problema']}" for p in control["problemas"][:6]]
+        aviso = "Control de calidad de este video:\n" + "\n".join(lineas)
+        if control["nuevas"]:
+            aviso += f"\nAprendí {len(control['nuevas'])} regla(s) nueva(s) para no repetirlo."
+        telegram.aviso_seguro(aviso)
+
     # 7. Guardar como pendiente y pedir aprobación
     notas_num = [float(v.get("nota", 0)) for v in notas.values() if v.get("nota") is not None]
     nota_media = round(sum(notas_num) / len(notas_num), 1) if notas_num else None
@@ -354,18 +387,27 @@ def producir():
     guardar_estado(est)
 
     minima = cfg["claude"].get("nota_para_publicar", 0)
-    floja = isinstance(nota_media, (int, float)) and nota_media < minima
+    floja = (isinstance(nota_media, (int, float)) and nota_media < minima) or bool(control["graves"])
     if not cfg["aprobacion"]["activa"] and floja:
-        telegram.aviso_seguro(f"Este video sacó {nota_media} (mínimo {minima}), así que no lo publico solo. "
-                              "Míralo y decide.")
+        motivo = ("tiene un error grave: " + control["graves"][0]["problema"]) if control["graves"] \
+            else f"sacó {nota_media} (mínimo {minima})"
+        telegram.aviso_seguro(f"Este video {motivo}, así que no lo publico solo. Míralo y decide; "
+                              "el error ya quedó apuntado para no repetirlo.")
     if not cfg["aprobacion"]["activa"] and not floja:
         from . import horarios, meta
-        cuando = horarios.proximo(cfg)
+        # El horario que le tocaba a esta producción (según cuándo empezó). Si ya pasó (por ejemplo,
+        # porque se esperó a que se renovara el límite de Claude), se publica en el momento.
+        cuando = horarios.proximo(cfg, reanudar.inicio())
+        if cuando <= datetime.now(timezone.utc) + timedelta(minutes=12):
+            cuando = None
         video_fb = publicar(id_video, "A", videos[0], cuando)
+        reanudar.terminar()
         if meta.ULTIMA.get("programado"):
             aviso = f"Programado para {horarios.texto(cuando)}: «{guion['titulo']}»"
             if tema.get("tendencia"):
                 aviso += f"\nTendencia: {tema['tendencia']}"
+        elif cuando is None:
+            aviso = f"Publicado ya (su horario ya había pasado): «{guion['titulo']}»"
         else:
             aviso = f"Publicado ya (Facebook no aceptó programarlo): «{guion['titulo']}»"
         nota = f"\nNota del revisor: {nota_media}" + (f" · {revisor.ULTIMO_COMENTARIO}" if revisor.ULTIMO_COMENTARIO else "")
@@ -374,6 +416,7 @@ def producir():
                          [[{"text": "Cancelar publicación", "callback_data": f"borrar:{video_fb}"}]])
         return
 
+    reanudar.terminar()
     subir_pendiente(id_video, videos, guion["titulo"])
     cambios = guion.get("verificacion", {}).get("cambios", [])
     resumen = (f"Nuevo video: «{guion['titulo']}»\nTema: {tema['tema']}\n"
@@ -410,8 +453,13 @@ if __name__ == "__main__":
     try:
         producir()
     except LimiteDeSuscripcion as e:
-        telegram.aviso_seguro(f"No se hizo el video de hoy: {e}")
-        raise
+        from . import reanudar
+        cuando = reanudar.guardar_por_limite(str(e))
+        hora = cuando.astimezone(timezone(timedelta(hours=-4))).strftime("%I:%M %p").lstrip("0")
+        telegram.aviso_seguro("Se acabó el límite de uso de Claude a mitad del video. Guardé el avance y "
+                              f"sigo solo cuando se renueve (hacia las {hora}, hora de RD). Si su horario "
+                              "ya pasó para entonces, lo publico en cuanto esté listo.")
+        raise SystemExit(0)
     except Exception:
         error = traceback.format_exc()
         print(error)
