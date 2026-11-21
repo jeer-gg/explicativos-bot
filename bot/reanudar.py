@@ -2,8 +2,9 @@
 
 Mientras se produce, el bot va guardando el avance (tema, guion y cada escena ya dibujada).
 Si se acaba el límite, guarda ese avance en data/en_curso.json, calcula cuándo se renueva y
-apunta la hora. La revisión de cada 20 minutos lanza de nuevo la producción a esa hora, y el
-video sigue desde donde se quedó (no se repite lo ya hecho, así se gasta menos).
+apunta la hora. La misma tarea espera a que se renueve y sigue (si la espera no cabe en una tarea
+de GitHub, lanza otra que sigue esperando). El video sigue desde donde se quedó: no se repite lo ya
+hecho. La revisión de cada 20 minutos y las tareas programadas quedan de respaldo.
 """
 import json
 import re
@@ -27,7 +28,8 @@ def empezar() -> dict:
         AVANCE.update({"inicio": datetime.now(timezone.utc).isoformat(timespec="seconds"), "escenas": {}})
     AVANCE.setdefault("escenas", {})
     e = estado()
-    if e.pop("reintentar_desde", None):
+    if e.pop("reintentar_desde", None) or e.pop("esperando", None):
+        e.pop("esperando", None)
         guardar_estado(e)
     return AVANCE
 
@@ -74,6 +76,10 @@ def toca_reintentar() -> bool:
     e = estado()
     cuando = e.get("reintentar_desde")
     if not cuando or datetime.now(timezone.utc) < datetime.fromisoformat(cuando):
+        return False
+    # Si una tarea de producción ya está esperando la renovación, ella sigue sola
+    esperando = e.get("esperando")
+    if esperando and datetime.now(timezone.utc) - datetime.fromisoformat(esperando) < timedelta(hours=6):
         return False
     # Se aplaza por si el intento también falla (producir lo borra al empezar)
     e["reintentar_desde"] = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat(timespec="seconds")

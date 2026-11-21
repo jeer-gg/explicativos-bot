@@ -3,6 +3,7 @@
 Uso: python -m bot.producir
 """
 import json
+import os
 import shutil
 import subprocess
 import time
@@ -484,6 +485,20 @@ def producir():
     }
     guardar_estado(est)
 
+    # Un video roto (escenas vacías, nota muy baja) no se publica nunca: se descarta y se hace otro.
+    piso = cfg["claude"].get("nota_para_descartar", 4)
+    if not cfg["aprobacion"]["activa"] and isinstance(nota_media, (int, float)) and nota_media < piso:
+        e = estado()
+        e["pendientes"].pop(id_video, None)
+        guardar_estado(e)
+        reanudar.terminar()
+        telegram.aviso_seguro(
+            f"Descarté «{guion['titulo']}»: salió muy mal (nota {nota_media}"
+            + (f": {revisor.ULTIMO_COMENTARIO}" if revisor.ULTIMO_COMENTARIO else "")
+            + "). No lo publico; ya empecé otro video para ese horario.")
+        subprocess.run(["gh", "workflow", "run", "bot.yml", "-f", "tarea=producir"], check=False)
+        return
+
     minima = cfg["claude"].get("nota_para_publicar", 0)
     publicar_igual = cfg["claude"].get("publicar_si_no_se_arregla", True)
     floja = (isinstance(nota_media, (int, float)) and nota_media < minima) or \
@@ -548,18 +563,89 @@ def producir():
         escuchar(minutos)
 
 
-if __name__ == "__main__":
+def _guardar_avance_en_repo():
+    """Sube data/ al repo antes de esperar, por si GitHub corta la tarea durante la espera."""
+    for orden in (["git", "add", "data"],
+                  ["git", "-c", "user.name=bot-explicativos", "-c", "user.email=bot@users.noreply.github.com",
+                   "commit", "-q", "-m", "Memoria: avance guardado por límite de Claude"],
+                  ["git", "pull", "-q", "--rebase", "--autostash"], ["git", "push", "-q"]):
+        subprocess.run(orden, check=False, capture_output=True)
+
+
+def _relanzar_produccion():
+    subprocess.run(["gh", "workflow", "run", "bot.yml", "-f", "tarea=producir"], check=False)
+
+
+def _esperar_renovacion(esperar, arranque: float, tope: float, necesita: float) -> bool:
+    """Si hay un video a medias esperando a que se renueve el límite de Claude, espera aquí mismo.
+
+    True = ya es hora: seguir produciendo en esta tarea.
+    False = la espera no cabe en esta tarea: se esperó lo que se pudo y se lanzó otra tarea que
+    sigue esperando (un relevo en cadena que no depende de la revisión de cada 20 minutos)."""
+    from . import reanudar
+    e = estado()
+    cuando = e.get("reintentar_desde")
+    if not cuando or not reanudar.EN_CURSO.exists():
+        return True
+    falta = (datetime.fromisoformat(cuando) - datetime.now(timezone.utc)).total_seconds() / 60
+    if falta <= 0:
+        return True
+    # Marca que esta tarea está esperando, para que la revisión de cada 20 minutos no lance otra
+    e["esperando"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    guardar_estado(e)
+    _guardar_avance_en_repo()
+    usado = (time.monotonic() - arranque) / 60
+    if usado + falta + necesita <= tope:
+        print(f"Espero {falta:.0f} min a que se renueve el límite de Claude y sigo.")
+        esperar(falta * 60 + 60)
+        return True
+    # No cabe esperar y además producir: espera todo lo que permite esta tarea y pasa el relevo
+    margen = max(0.0, min(falta, tope - usado - 10))
+    print(f"Faltan {falta:.0f} min: espero {margen:.0f} y paso el relevo a otra tarea.")
+    if margen > 0:
+        esperar(margen * 60)
+    e = estado()
+    e.pop("esperando", None)
+    guardar_estado(e)
+    _guardar_avance_en_repo()
+    _relanzar_produccion()
+    return False
+
+
+def ejecutar(esperar=time.sleep):
+    """Produce el video. Si se acaba el límite de Claude, guarda el avance, espera aquí mismo a que
+    se renueve y sigue desde donde se quedó. Si la espera no cabe en esta tarea de GitHub, lanza
+    otra tarea que sigue esperando (relevo en cadena). Las tareas programadas y la revisión de cada
+    20 minutos quedan solo de respaldo."""
+    global INICIO
     from .claude import LimiteDeSuscripcion
+    from . import reanudar
+    arranque = time.monotonic()
+    # Lo que dura como máximo la tarea de GitHub (lo fija bot.yml; 175 si es el bot.yml viejo de 180 min)
+    tope = float(os.environ.get("MINUTOS_TAREA", "175"))
+    necesita = float(cargar_config()["produccion"].get("tiempo_maximo_min", 170))
+    # Una tarea programada o de relevo que llega mientras hay un video esperando, espera con él
+    if not _esperar_renovacion(esperar, arranque, tope, necesita):
+        return
+    for vuelta in range(4):
+        INICIO = time.monotonic()  # el tiempo para terminar el video cuenta desde ahora
+        try:
+            producir()
+            return
+        except LimiteDeSuscripcion as e:
+            cuando = reanudar.guardar_por_limite(str(e))
+            hora = cuando.astimezone(timezone(timedelta(hours=-4))).strftime("%I:%M %p").lstrip("0")
+            telegram.aviso_seguro(
+                "Se acabó el límite de uso de Claude a mitad del video. Guardé el avance y a las "
+                f"{hora} (hora de RD) sigo solo desde donde se quedó. Si su horario ya pasó para "
+                "entonces, lo publico en cuanto esté listo.")
+            if vuelta == 3 or not _esperar_renovacion(esperar, arranque, tope, necesita):
+                return
+
+
+if __name__ == "__main__":
     try:
-        producir()
-    except LimiteDeSuscripcion as e:
-        from . import reanudar
-        cuando = reanudar.guardar_por_limite(str(e))
-        hora = cuando.astimezone(timezone(timedelta(hours=-4))).strftime("%I:%M %p").lstrip("0")
-        telegram.aviso_seguro("Se acabó el límite de uso de Claude a mitad del video. Guardé el avance y "
-                              f"sigo solo cuando se renueve (hacia las {hora}, hora de RD). Si su horario "
-                              "ya pasó para entonces, lo publico en cuanto esté listo.")
-        raise SystemExit(0)
+        ejecutar()
     except Exception:
         error = traceback.format_exc()
         print(error)

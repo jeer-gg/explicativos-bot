@@ -176,6 +176,9 @@ claude:
   # En modo automático todos los videos se programan solos. Si pones un número (por ejemplo 6.5),
   # los que saquen menos te llegarán a Telegram para decidir en vez de publicarse solos.
   nota_para_publicar: 0
+  # Un video que sale roto (escenas vacías, nota del revisor por debajo de esto) no se publica:
+  # se descarta y se hace otro para ese horario.
+  nota_para_descartar: 4
   # Si el control final encuentra un error grave (voz que empieza tarde, dato falso, texto tapado),
   # el bot lo arregla solo: rehace la voz o las escenas afectadas, vuelve a revisar y publica.
   intentos_arreglo: 2

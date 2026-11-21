@@ -463,6 +463,79 @@ assert not reanudar.EN_CURSO.exists(), "al terminar se borra el avance"
 assert any("ya había pasado" in str(t) for t in REGISTRO["telegram"])
 est_mod.dibujar = _dibujar_real
 
+# ---------- 6b) Límite con espera en la misma tarea y relevo en cadena ----------
+print("== Límite: espera en la misma tarea y relevo ==")
+import os  # noqa: E402
+from datetime import datetime as _dt, timedelta as _td, timezone as _tz  # noqa: E402
+
+
+def aviso_limite(minutos):
+    hora = (_dt.now(_tz.utc) + _td(minutes=minutos)).strftime("%I:%M%p").lstrip("0").lower()
+    return f"Se agotó el límite. [You've hit your 5-hour limit · resets {hora} (UTC)]"
+
+
+ESPERAS, RELEVOS = [], []
+prod._guardar_avance_en_repo = lambda: None
+prod._relanzar_produccion = lambda: RELEVOS.append(1)
+
+
+def esperar_falso(segundos):
+    ESPERAS.append(segundos / 60)
+    assert estado().get("esperando"), "mientras espera debe marcarlo"
+    # la revisión de cada 20 minutos no debe lanzar otra producción mientras esta espera
+    e = estado(); hora = e["reintentar_desde"]; e["reintentar_desde"] = "2000-01-01T00:00:00+00:00"; _ge(e)  # noqa: E702
+    assert not reanudar.toca_reintentar(), "no debe relanzar si una tarea ya está esperando"
+    e = estado(); e["reintentar_desde"] = hora; _ge(e)  # noqa: E702
+
+
+# A) La espera cabe: espera en la misma tarea y termina el video
+FALLA["hecho"] = False
+MINUTOS = {"n": 30}
+
+
+def dibujar_con_limite_b(claude, cfg, nombre, *a, **k):
+    if nombre == "Escena3" and not FALLA["hecho"]:
+        FALLA["hecho"] = True
+        raise LimiteDeSuscripcion(aviso_limite(MINUTOS["n"]))
+    return _dibujar_real(claude, cfg, nombre, *a, **k)
+
+
+est_mod.dibujar = dibujar_con_limite_b
+os.environ["MINUTOS_TAREA"] = "340"
+antes = len(REGISTRO["meta"])
+guiones_antes = sum(1 for c in REGISTRO["claude"] if "guionista" in c)
+prod.ejecutar(esperar=esperar_falso)
+assert len(ESPERAS) == 1 and 30 <= ESPERAS[0] <= 37, ESPERAS
+assert not RELEVOS, "si cabe, no hace falta relevo"
+assert len(REGISTRO["meta"]) == antes + 1, "debe terminar y publicar el video"
+assert sum(1 for c in REGISTRO["claude"] if "guionista" in c) == guiones_antes + 1, "un solo guion: sigue el mismo video"
+assert not reanudar.EN_CURSO.exists() and not estado().get("reintentar_desde") and not estado().get("esperando")
+assert any("sigo solo desde donde se quedó" in str(t) for t in REGISTRO["telegram"][-8:])
+
+# B) La espera no cabe en la tarea: espera lo que puede y lanza otra tarea
+FALLA["hecho"] = False
+MINUTOS["n"] = 240
+ESPERAS.clear()
+os.environ["MINUTOS_TAREA"] = "200"
+antes = len(REGISTRO["meta"])
+prod.ejecutar(esperar=esperar_falso)
+assert RELEVOS == [1], "debe pasar el relevo a otra tarea"
+assert len(ESPERAS) == 1 and 185 <= ESPERAS[0] <= 191, ESPERAS  # espera todo lo que cabe (200 - 10)
+assert reanudar.EN_CURSO.exists() and len(REGISTRO["meta"]) == antes, "el video sigue a medias"
+assert not estado().get("esperando"), "al pasar el relevo deja de marcar que espera"
+
+# C) La tarea de relevo llega cuando ya falta poco: espera y termina el mismo video
+e = estado(); e["reintentar_desde"] = (_dt.now(_tz.utc) + _td(minutes=20)).isoformat(timespec="seconds"); _ge(e)  # noqa: E702
+ESPERAS.clear()
+os.environ["MINUTOS_TAREA"] = "340"
+guiones_antes = sum(1 for c in REGISTRO["claude"] if "guionista" in c)
+prod.ejecutar(esperar=esperar_falso)
+assert len(ESPERAS) == 1 and RELEVOS == [1]
+assert len(REGISTRO["meta"]) == antes + 1 and not reanudar.EN_CURSO.exists()
+assert sum(1 for c in REGISTRO["claude"] if "guionista" in c) == guiones_antes, "no debe reescribir el guion"
+est_mod.dibujar = _dibujar_real
+os.environ.pop("MINUTOS_TAREA")
+
 # ---------- 7) Error grave: el bot lo arregla solo y publica sin preguntar ----------
 print("== Error grave con arreglo automático ==")
 from bot import autocontrol as ac  # noqa: E402
