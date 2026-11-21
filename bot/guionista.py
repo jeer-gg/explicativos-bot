@@ -4,6 +4,35 @@ import json
 from .claude import Claude
 
 
+def _bloque_serie(tema: dict, estilo: dict) -> str:
+    """Instrucciones extra para historias en partes y continuaciones."""
+    parte = tema.get("serie")
+    if parte:
+        ultima = parte["parte"] >= parte["total"]
+        return f"""
+SERIE: este video es la PARTE {parte['parte']} de {parte['total']} de «{parte['serie']}».
+Lo que ya se contó antes: {parte.get('anterior', '')}
+- La primera frase engancha por sí sola a quien no vio lo anterior, y en una frase corta recuerda
+  lo esencial ("en la parte anterior viste que..."), sin repetir la explicación.
+- Este video responde por completo SU propia pregunta (nadie debe sentirse engañado).
+- {"Es la ÚLTIMA parte: cierra la historia con un remate satisfactorio." if ultima else
+   "NO es la última: la última frase deja una intriga concreta y verdadera sobre lo que viene en la parte " + str(parte['parte'] + 1) + " (por ejemplo «pero lo más raro pasó después... en la parte " + str(parte['parte'] + 1) + "»). En vez de final en bucle, final con intriga."}
+- "portada" empieza con "PARTE {parte['parte']}:".
+"""
+    if "HISTORIA EN PARTES" in estilo.get("estructura", ""):
+        return """
+SERIE NUEVA: este video es la PARTE 1 de una historia en 2 o 3 partes.
+- Responde por completo su propia pregunta (nadie debe sentirse engañado), pero la historia
+  continúa: la última frase deja una intriga concreta y verdadera sobre la parte 2 («y lo que
+  pasó después es aún más raro... en la parte 2»). En vez de final en bucle, final con intriga.
+- "portada" empieza con "PARTE 1:".
+- Añade al JSON el plan de las siguientes partes:
+  "serie": {"titulo": "nombre corto de la serie", "total": 2 o 3,
+            "siguientes": [{"parte": 2, "tema": "qué cuenta", "angulo": "lo sorprendente"}]}
+"""
+    return ""
+
+
 def escribir_guion(claude: Claude, cfg: dict, tema: dict, estilo: dict) -> dict:
     p = cfg["produccion"]
     canal = cfg["canal"]
@@ -15,10 +44,10 @@ def escribir_guion(claude: Claude, cfg: dict, tema: dict, estilo: dict) -> dict:
     palabras_max = int(p["duracion_max"] * 2.6)
     palabras_min = int(p["duracion_min"] * 2.4)
     usuario = f"""Tema: {tema['tema']}
-Ángulo: {tema['angulo']}
+Ángulo: {tema['angulo']}{(chr(10) + "Tendencia del momento que lo inspira: " + tema['tendencia'] + " (menciónala en la primera frase para enganchar, sin inventar detalles: verifica con la búsqueda web)") if tema.get('tendencia') else ""}
 Tipo de gancho: {estilo['tipo_gancho']}
 Formato ganador: {estilo['estructura']}
-
+{_bloque_serie(tema, estilo)}
 Reglas:
 - La voz arranca en el segundo 0: la primera frase ES el gancho, de 6 a 12 palabras.
 - Entre {palabras_min} y {palabras_max} palabras en total, en {p['escenas_min']} a {p['escenas_max']} escenas.
@@ -30,6 +59,18 @@ Reglas:
 - Retención: en los primeros 5 segundos promete algo concreto que se revela al final ("y lo
   más raro es lo que pasa al final"), mete una vuelta de tuerca o dato inesperado cada 2 o 3
   escenas, y termina con un remate que haga querer verlo otra vez o comentar.
+- Lo que más premia Facebook es que lo vean COMPLETO, lo vuelvan a ver y lo ENVÍEN a alguien:
+  · Una sola idea, bien contada. Nada de listas de cinco cosas.
+  · Dura lo que la explicación necesita: sin relleno ni frases de más para alargar, y sin
+    cortar información importante para acortar. El rango de palabras es orientativo.
+  · El gancho promete algo que solo se cobra viendo: nunca da la respuesta en la primera frase.
+  · Háblale al espectador de "tú" (lo que TÚ haces, lo que te pasa a TI), no "yo".
+  · La respuesta prometida SIEMPRE se entrega antes del final: un gancho que no cumple hace
+    que la gente oculte el video, y eso castiga a la página.
+  · Pon al menos un dato o consejo que den ganas de enviárselo a alguien ("tengo que
+    decirle esto a mi mamá").
+  · Final en bucle: la última frase se encadena con la primera, para que al repetirse el
+    video suene continuo y mucha gente lo vea dos veces.
 - Nada de "hola", "en este video" ni "suscríbete". Termina con un remate curioso o una
   pregunta que invite a comentar.
 - La descripción visual de cada escena debe ser concreta y dibujable: qué personajes u objetos
@@ -57,6 +98,8 @@ Devuelve JSON:
  "titulo": "título corto para Facebook (máx. 60 caracteres)",
  "descripcion": "descripción de 1 a 2 frases que invite a ver",
  "portada": "TÍTULO DE 3 A 6 PALABRAS",
+ "pregunta_comentarios": "pregunta corta para el texto de la publicación que invite a comentar (por ejemplo, ¿tú también lo hacías?)",
+ "hashtags": ["3 a 5 hashtags específicos del tema, en español, sin genéricos"],
  "escenas": [
    {{"voz": "texto narrado", "visual": "descripción detallada de la ilustración y su animación",
      "rotulo": "0 a 3 palabras o vacío", "palabra_clave": "palabra de la voz donde ocurre el momento visual principal",
@@ -93,12 +136,19 @@ Cada uno con: "voz" (primera frase, 6 a 12 palabras, que encaje con la escena 2 
 fotograma 0 y qué pasa en el primer segundo: algo grande, raro o a punto de romperse; nunca una
 pantalla tranquila), "palabra_clave" (palabra de la voz del golpe visual) y "rotulo".
 
+Reglas que separan un gancho que retiene de uno que se salta (datos de 2026):
+- No da la respuesta: promete algo que solo se cobra viendo hasta el final.
+- Habla de "tú", no de "yo". Empieza por la acción o el error, sin introducción.
+- La imagen arranca en plena acción, con lo que es parte de la historia (el objeto, o la persona
+  que vive la situación).
+
 Puntúa cada uno de 1 a 10 en: imagen que detiene el scroll en silencio, curiosidad que solo se
 cierra viendo hasta el final, claridad en menos de un segundo, emoción (sorpresa, miedo a
-equivocarse, risa). Elige el de mejor suma. Si el arranque actual es mejor, elígelo.
+equivocarse, risa) y ganas de enviárselo a alguien. Elige el de mejor suma. Si el arranque
+actual es mejor, elígelo.
 
 Devuelve JSON: {{"candidatos": [{{"voz": "...", "portada": "...", "visual": "...", "palabra_clave": "...",
-"rotulo": "...", "notas": {{"imagen": n, "curiosidad": n, "claridad": n, "emocion": n}}}}],
+"rotulo": "...", "notas": {{"imagen": n, "curiosidad": n, "claridad": n, "emocion": n, "compartir": n}}}}],
 "elegido": 0}}"""
     try:
         datos = claude.json(system, usuario, max_tokens=4000)
@@ -134,7 +184,7 @@ def verificar_guion(claude: Claude, guion: dict) -> dict:
     if not revisado.get("escenas") or len(revisado["escenas"]) != len(guion["escenas"]):
         return guion
     # Conserva lo que el verificador no debía tocar.
-    for clave in ("titulo", "descripcion", "portada", "gancho_b", "direccion_arte"):
+    for clave in ("titulo", "descripcion", "portada", "pregunta_comentarios", "hashtags", "serie", "gancho_b", "direccion_arte"):
         if not revisado.get(clave) and guion.get(clave):
             revisado[clave] = guion[clave]
     for nueva, vieja in zip(revisado["escenas"], guion["escenas"]):

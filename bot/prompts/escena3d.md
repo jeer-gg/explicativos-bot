@@ -45,10 +45,9 @@ cuando ayuda, la paleta sorteada y movimiento constante.
 - Texto solo con `Etiqueta`, `Medida` o `Cartel`: 1 a 3 palabras en minúsculas. Sin emojis.
   Los textos miran solos a la cámara: no les pongas `rotacion` (si no, se ven acostados).
 - Personajes (`Muneco`) solo si la idea los necesita; el protagonista suele ser el objeto.
-- Mascota del canal (`Mascota`, siempre igual: es la marca): OBLIGATORIA en la primera escena
-  (sorprendida o preocupada ante el gancho) y en la última (feliz o guiño, señalando el
-  resultado). En las demás, solo si ayuda a contar la idea (como mucho en la mitad). Va a un
-  lado del objeto principal, nunca lo tapa, y reacciona en sincronía con la voz.
+- Personajes: solo los que son parte de la historia que cuenta el video (quien usa el
+  objeto, quien comete el error, quien descubre la respuesta) o el propio objeto con
+  `Ojos` cuando ayuda. Nada de mascotas ni personajes decorativos que no tengan que ver.
 - Colores de marca: usa los de la paleta tal cual (naranja para lo principal, azul para lo que
   se resalta, amarillo para detalles, crema y grises para lo secundario). Nada de colores al azar.
 

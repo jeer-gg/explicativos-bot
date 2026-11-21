@@ -47,6 +47,8 @@ def publicar(id_video: str, variante: str, ruta: Path, cuando: datetime | None =
         "programado": bool(cuando),
         "titulo": info["titulo"],
         "tema": info["tema"],
+        "tendencia": info.get("tendencia", ""),
+        "serie": info.get("serie"),
         "subtema": info["subtema"],
         "estructura": info["estructura"],
         "paleta": info["paleta"],
@@ -54,6 +56,7 @@ def publicar(id_video: str, variante: str, ruta: Path, cuando: datetime | None =
         "tipo_gancho": info["tipo_gancho"] if variante == "A" else info.get("tipo_gancho_b", ""),
         "gancho": info["ganchos"].get(variante, ""),
         "nota_revisor": info.get("nota_media"),
+        "duracion": info.get("duracion"),
         "video_fb": video_fb,
         "metricas": {},
     })

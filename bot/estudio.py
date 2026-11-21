@@ -50,8 +50,8 @@ ocurre en el primer segundo y hay al menos 4 golpes visuales."""
 
 
 FINAL = """
-ESTA ES LA ÚLTIMA ESCENA (el remate): la Mascota del canal aparece feliz o guiñando, señalando
-el resultado, y la imagen final debe invitar a ver el video otra vez o comentar."""
+ESTA ES LA ÚLTIMA ESCENA (el remate): muestra el resultado o la respuesta de forma clara y
+satisfactoria, y que la imagen final conecte con la del inicio (el video se repite en bucle)."""
 
 
 def _pedido(escena: dict, tiempos: dict, guion: dict, indice: int, estilo: dict) -> str:

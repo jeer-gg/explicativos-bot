@@ -63,6 +63,12 @@ def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
     }
 
 
+def _hashtags(guion: dict, cfg: dict) -> list:
+    """3 a 5 hashtags específicos del tema (mejor que genéricos); si faltan, los del canal."""
+    propios = [("#" + str(h).lstrip("#").replace(" ", "")) for h in guion.get("hashtags", []) if str(h).strip()]
+    return (propios[:5] if len(propios) >= 3 else propios + cfg["publicacion"].get("hashtags", []))[:5]
+
+
 def grafico_valido(g):
     """Solo deja pasar gráficos con la forma que el video sabe dibujar."""
     if not isinstance(g, dict):
@@ -191,14 +197,33 @@ def producir():
     except Exception as e:  # noqa: BLE001
         print("Aviso: no se actualizaron métricas:", e)
 
-    # 1. Director
+    # 1. Director: primero, si hay una parte de serie pendiente o un video que despegó, va eso
+    from . import series
+    try:
+        exito = series.detectar_exitos(cfg)
+        if exito:
+            telegram.aviso_seguro(f"«{exito['serie']}» despegó: el próximo video será su parte 2.")
+    except Exception as e:  # noqa: BLE001
+        print("Aviso: no se pudo revisar si algún video despegó:", e)
     estilo = sortear_estilo(cfg)
-    tema = elegir_tema(claude, cfg, estilo)
+    parte = series.siguiente()
+    if parte:
+        estilo["estructura"] = parte.get("estructura") or estilo["estructura"]
+        tema = {"tema": parte["tema"], "angulo": parte.get("angulo", ""), "subtema": parte.get("subtema", ""),
+                "tendencia": parte.get("tendencia", ""), "serie": parte}
+    else:
+        tema = elegir_tema(claude, cfg, estilo)
     print("Tema:", tema)
 
     # 2. Guion verificado
     guion = verificar_guion(claude, pulir_gancho(claude, cfg, escribir_guion(claude, cfg, tema, estilo)))
     guion["escenas"] = guion["escenas"][: cfg["produccion"]["escenas_max"]]
+    if tema.get("serie"):
+        n, total = tema["serie"]["parte"], tema["serie"]["total"]
+        if f"parte {n}" not in guion["titulo"].lower():
+            guion["titulo"] = f"{guion['titulo']} (Parte {n})"[:80]
+    series.registrar(guion, tema, estilo)
+    series.avanzar(guion, tema)
     (trabajo / "guion.json").write_text(json.dumps(guion, ensure_ascii=False, indent=1), encoding="utf-8")
 
     # 3. Voz (marca el tiempo de todo)
@@ -292,9 +317,15 @@ def producir():
     est = estado()
     est["pendientes"][id_video] = {
         "titulo": guion["titulo"],
-        "descripcion": guion.get("descripcion", ""),
-        "hashtags": cfg["publicacion"].get("hashtags", []),
+        "descripcion": (guion.get("descripcion", "").strip()
+                        + (("\n\n" + guion["pregunta_comentarios"].strip()) if guion.get("pregunta_comentarios") else "")),
+        "hashtags": _hashtags(guion, cfg),
+        "duracion": tiempos["A"]["total"],
         "tema": tema["tema"],
+        "tendencia": tema.get("tendencia", ""),
+        "serie": ({"titulo": tema["serie"]["serie"], "parte": tema["serie"]["parte"], "total": tema["serie"]["total"]}
+                  if tema.get("serie") else ({"titulo": guion["serie"].get("titulo", ""), "parte": 1,
+                                              "total": guion["serie"].get("total", 2)} if guion.get("serie") else None)),
         "subtema": tema.get("subtema", ""),
         "estructura": estilo["estructura"],
         "paleta": estilo["paleta"],
@@ -306,12 +337,19 @@ def producir():
     }
     guardar_estado(est)
 
-    if not cfg["aprobacion"]["activa"]:
+    minima = cfg["claude"].get("nota_para_publicar", 0)
+    floja = isinstance(nota_media, (int, float)) and nota_media < minima
+    if not cfg["aprobacion"]["activa"] and floja:
+        telegram.aviso_seguro(f"Este video sacó {nota_media} (mínimo {minima}), así que no lo publico solo. "
+                              "Míralo y decide.")
+    if not cfg["aprobacion"]["activa"] and not floja:
         from . import horarios, meta
         cuando = horarios.proximo(cfg)
         video_fb = publicar(id_video, "A", videos[0], cuando)
         if meta.ULTIMA.get("programado"):
             aviso = f"Programado para {horarios.texto(cuando)}: «{guion['titulo']}»"
+            if tema.get("tendencia"):
+                aviso += f"\nTendencia: {tema['tendencia']}"
         else:
             aviso = f"Publicado ya (Facebook no aceptó programarlo): «{guion['titulo']}»"
         nota = f"\nNota del revisor: {nota_media}" + (f" · {revisor.ULTIMO_COMENTARIO}" if revisor.ULTIMO_COMENTARIO else "")
