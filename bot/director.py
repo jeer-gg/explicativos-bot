@@ -107,7 +107,11 @@ def recuento_del_dia(claude: Claude, cfg: dict) -> dict:
 los últimos 3 días en {", ".join(t.get("paises", []))}: tendencias de Google, noticias más
 leídas, lo viral en TikTok, Facebook e Instagram, deportes, lanzamientos, clima y fenómenos
 naturales, precios, fiestas y fechas de la temporada.
-2) Elige las 6 tendencias con más conversación que encajen con las reglas.
+2) Elige las 6 tendencias con más conversación que encajen con las reglas. Prefiere lo que
+interesa a todo el mundo o a toda Latinoamérica (ciencia, tecnología, clima, fenómenos
+naturales, lanzamientos, eventos mundiales, fechas y temporadas compartidas). Evita lo que
+solo importa en un país (trámites, instituciones, precios o noticias locales): un video tiene
+que poder interesarle igual a alguien de México, Argentina, República Dominicana o España.
 3) Para cada una, escribe 4 preguntas RELACIONADAS que la gente se hace o se haría al ver esa
 noticia, que no son la noticia en sí sino lo cotidiano que hay detrás. Ejemplo: tendencia «ola
 de calor en el Caribe» → «¿por qué el ventilador no enfría el aire?», «¿por qué el asfalto

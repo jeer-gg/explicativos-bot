@@ -18,10 +18,11 @@ export const estacion = (i: number): V3 => [i * SEPARACION, 0, i % 2 === 0 ? 0 :
 
 // Encuadres (desde dónde mira la cámara respecto al centro del escenario).
 const ENCUADRES: Record<string, {ojo: V3; mira: V3}> = {
-  picado: {ojo: [2.6, 3.4, 4.6], mira: [0, 0.7, 0]},
-  frente: {ojo: [0, 1.5, 5.6], mira: [0, 1.0, 0]},
-  picado_izq: {ojo: [-2.8, 3.2, 4.4], mira: [0, 0.7, 0]},
-  cerca: {ojo: [1.2, 2.0, 3.4], mira: [0, 0.8, 0]},
+  // Más cerca que antes: el objeto debe llenar la pantalla, sin mucho piso vacío alrededor.
+  picado: {ojo: [1.7, 2.3, 3.2], mira: [0, 0.6, 0]},
+  frente: {ojo: [0, 1.15, 4.0], mira: [0, 0.85, 0]},
+  picado_izq: {ojo: [-1.8, 2.2, 3.1], mira: [0, 0.6, 0]},
+  cerca: {ojo: [0.8, 1.4, 2.5], mira: [0, 0.7, 0]},
 };
 const encuadre = (nombre?: string) => ENCUADRES[nombre ?? 'picado'] ?? ENCUADRES.picado;
 

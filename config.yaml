@@ -18,7 +18,7 @@ canal:
   tendencias:
     activo: true
     por_cada_clasico: 2   # cada día: 2 de actualidad por cada clásico (con 3 al día: 2 + 1, cerca del 70/30)
-    paises: ["República Dominicana", "México", "Colombia", "Estados Unidos (hispanos)", "Latinoamérica en general"]
+    paises: ["el mundo entero", "toda Latinoamérica", "los hispanos de Estados Unidos y España"]
   # Temas prohibidos: el director nunca los elegirá.
   prohibidos:
     - "consejos médicos, dosis o tratamientos"

@@ -18,14 +18,18 @@ cuando ayuda, la paleta sorteada y movimiento constante.
   pared, mesas, encimeras o una base bajo el objeto si la escena lo pide (en tonos apagados).
 
 ## Cámara y encuadre (cercano)
-- Tu escenario está centrado en (0, 0, 0). La cámara lo mira desde unos 5 m y gira un poco.
+- Tu escenario está centrado en (0, 0, 0). La cámara lo mira desde unos 3 a 4 m (plano
+  cercano) y gira un poco.
   Encuadres (te digo cuál toca en el pedido):
   - picado: desde arriba a la derecha (como un plano en 3/4), mirando a (0, 0.7, 0).
   - picado_izq: igual, desde la izquierda.
   - frente: a la altura del objeto, de frente, mirando a (0, 1, 0).
   - cerca: muy cerca y algo alto, mirando a (0, 0.8, 0): lo principal debe ser grande.
-- El objeto principal mide entre 1 y 2 m de ancho y está en el centro: llena buena parte de la
-  pantalla. Todo lo importante dentro de un radio de 1,6 m del centro y por debajo de 2,4 m.
+- El objeto principal mide entre 1 y 1,6 m de ancho y está en el centro: llena la mayor parte
+  de la pantalla. Si el objeto real es pequeño (un celular, una llave), escálalo para que se
+  vea grande. Nada de mucho piso vacío alrededor.
+- Todo lo importante (incluidas etiquetas y medidas) dentro de un radio de 1,1 m del centro y
+  por debajo de 1,9 m de altura: lo que quede más lejos se corta en el borde de la pantalla.
 - Arriba de la pantalla van los subtítulos grandes y a veces una tarjeta de datos: el video los
   dibuja, no los repitas. Si la escena tiene rótulo, ponlo como `Etiqueta` señalando la parte.
 
@@ -40,9 +44,15 @@ cuando ayuda, la paleta sorteada y movimiento constante.
   - Por dentro: el objeto partido por la mitad (corte) y `Flecha` mostrando aire, agua o fuerzas.
   - Con números: `Medida` para tamaños; los números grandes van en la tarjeta de datos del video.
 - Fiel a la realidad: proporciones y funcionamiento correctos.
-- Desde el fotograma 0 la escena ya se ve completa (es la miniatura). Excepción: en "pieza por
+- Desde el fotograma 0 la escena ya se ve completa (es la miniatura): el objeto y el ambiente,
+  no los textos ni los datos, que esperan a su palabra. Excepción: en "pieza por
   pieza" ya hay una base o las primeras piezas visibles desde el inicio.
 - Texto solo con `Etiqueta`, `Medida` o `Cartel`: 1 a 3 palabras en minúsculas. Sin emojis.
+  · Nunca delante del objeto principal ni de un personaje: van a un lado, en zonas vacías,
+    con la línea apuntando a la parte. Como mucho 2 textos visibles a la vez.
+  · Los textos y números aparecen SOLO cuando la voz habla de eso (`aparecer` con `momento`),
+    con su valor correcto desde que aparecen: nada de etiquetas o cifras adelantadas o con
+    valores provisionales al inicio de la escena.
   Los textos miran solos a la cámara: no les pongas `rotacion` (si no, se ven acostados).
 - Personajes (`Muneco`) solo si la idea los necesita; el protagonista suele ser el objeto.
 - Personajes: solo los que son parte de la historia que cuenta el video (quien usa el
