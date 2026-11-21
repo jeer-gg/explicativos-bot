@@ -43,7 +43,14 @@ cuando ayuda, la paleta sorteada y movimiento constante.
 - Desde el fotograma 0 la escena ya se ve completa (es la miniatura). Excepción: en "pieza por
   pieza" ya hay una base o las primeras piezas visibles desde el inicio.
 - Texto solo con `Etiqueta`, `Medida` o `Cartel`: 1 a 3 palabras en minúsculas. Sin emojis.
+  Los textos miran solos a la cámara: no les pongas `rotacion` (si no, se ven acostados).
 - Personajes (`Muneco`) solo si la idea los necesita; el protagonista suele ser el objeto.
+- Mascota del canal (`Mascota`, siempre igual: es la marca): OBLIGATORIA en la primera escena
+  (sorprendida o preocupada ante el gancho) y en la última (feliz o guiño, señalando el
+  resultado). En las demás, solo si ayuda a contar la idea (como mucho en la mitad). Va a un
+  lado del objeto principal, nunca lo tapa, y reacciona en sincronía con la voz.
+- Colores de marca: usa los de la paleta tal cual (naranja para lo principal, azul para lo que
+  se resalta, amarillo para detalles, crema y grises para lo secundario). Nada de colores al azar.
 
 ## Ritmo (retención)
 - Al menos 3 "golpes" sincronizados con palabras de la voz usando `momento()` con 3 palabras

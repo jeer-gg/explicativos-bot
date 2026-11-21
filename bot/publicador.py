@@ -29,17 +29,22 @@ def borrar_pendiente(id_video: str):
     subprocess.run(["gh", "release", "delete", etiqueta(id_video), "--cleanup-tag", "-y"], check=False)
 
 
-def publicar(id_video: str, variante: str, ruta: Path) -> str:
+def publicar(id_video: str, variante: str, ruta: Path, cuando: datetime | None = None) -> str:
+    """Publica ya, o programa para `cuando` (datetime con zona horaria)."""
     est = estado()
     info = est["pendientes"][id_video]
     descripcion = info["descripcion"].strip() + "\n\n" + " ".join(info.get("hashtags", []))
-    video_fb = meta.publicar_reel(ruta, descripcion, titulo=info["titulo"])
+    video_fb = meta.publicar_reel(ruta, descripcion, titulo=info["titulo"],
+                                  programar=int(cuando.timestamp()) if cuando else None)
+    if not meta.ULTIMA.get("programado"):
+        cuando = None
 
     items = memoria()
     items.append({
         "id": id_video,
         "fecha": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-        "publicado_en": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "publicado_en": (cuando or datetime.now(timezone.utc)).astimezone(timezone.utc).isoformat(timespec="seconds"),
+        "programado": bool(cuando),
         "titulo": info["titulo"],
         "tema": info["tema"],
         "subtema": info["subtema"],

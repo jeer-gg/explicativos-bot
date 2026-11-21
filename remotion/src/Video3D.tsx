@@ -48,6 +48,8 @@ const calcularCamara = (frame: number, fps: number, plan: PlanVideo) => {
     const f = local - Math.round(clave * fps);
     if (f >= 0 && f <= 16) cerca -= Math.sin((f / 16) * Math.PI) * 0.1;
   }
+  // Arranque con golpe: el video empieza muy cerca y se abre de golpe en el primer medio segundo.
+  if (actual === 0) cerca *= interpolate(local, [0, 14], [0.62, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
   const giro = (avance - 0.5) * 0.3;
   const previo = encuadre(plan.escenas[Math.max(0, actual - 1)].camara);
   const este = encuadre(plan.escenas[actual].camara);
@@ -141,6 +143,39 @@ const Sol: React.FC<{donde: V3}> = ({donde}) => {
       />
     </>
   );
+};
+
+// ---------- Diseño de sonido: variado, corto y por debajo de la voz ----------
+const WHOOSH = ['whoosh1', 'whoosh3', 'whoosh2', 'whoosh4'];
+const GOLPES = ['pop1', 'toc1', 'pop3', 'clic', 'toc2', 'pop2'];
+
+const Efecto: React.FC<{nombre: string; en: number; vol: number; dur?: number}> = ({nombre, en, vol, dur = 1.4}) => {
+  const {fps} = useVideoConfig();
+  return (
+    <Sequence from={Math.max(0, Math.round(en * fps))} durationInFrames={Math.round(dur * fps)}>
+      <Audio src={staticFile(`sfx/${nombre}.mp3`)} volume={vol} />
+    </Sequence>
+  );
+};
+
+const Sonidos: React.FC<{plan: PlanVideo}> = ({plan}) => {
+  const n = plan.escenas.length;
+  const ultima = plan.escenas[n - 1];
+  const efectos: React.ReactNode[] = [];
+  efectos.push(<Efecto key="impacto" nombre="impacto" en={0} vol={0.42} />);
+  if (plan.portada) efectos.push(<Efecto key="swish" nombre="swish" en={DURACION_PORTADA - 0.2} vol={0.14} />);
+  plan.escenas.forEach((e, i) => {
+    // Transición: se alternan cuatro barridos distintos y uno de cada tres pasos va en silencio.
+    if (i > 0 && i % 3 !== 2) efectos.push(<Efecto key={`w${i}`} nombre={WHOOSH[i % WHOOSH.length]} en={e.inicio - 0.3} vol={0.16} />);
+    if (e.grafico) {
+      efectos.push(<Efecto key={`d${i}`} nombre={i % 2 ? 'ding2' : 'ding1'} en={e.inicio + 0.2} vol={0.2} />);
+    } else if (e.clave != null && i > 0) {
+      efectos.push(<Efecto key={`g${i}`} nombre={GOLPES[(i * 5) % GOLPES.length]} en={e.inicio + e.clave} vol={0.13} />);
+    }
+  });
+  // Subida de tensión justo antes de la revelación final
+  if (n > 3) efectos.push(<Efecto key="riser" nombre="riser" en={ultima.inicio - 1.25} vol={0.12} dur={1.4} />);
+  return <>{efectos}</>;
 };
 
 const Rotulo: React.FC<{plan: PlanVideo}> = ({plan}) => {
@@ -263,18 +298,7 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
 
       <Audio src={staticFile(plan.audio)} />
       {plan.musica ? <Audio src={staticFile(`musica/${plan.musica}`)} volume={0.07} loop /> : null}
-      {plan.escenas.map((e, i) =>
-        e.clave == null ? null : (
-          <Sequence key={`pop${i}`} from={Math.round((e.inicio + e.clave) * fps)} durationInFrames={Math.round(0.3 * fps)}>
-            <Audio src={staticFile('sfx/pop.mp3')} volume={0.2} />
-          </Sequence>
-        ),
-      )}
-      {plan.escenas.slice(1).map((e, i) => (
-        <Sequence key={i} from={Math.max(0, Math.round((e.inicio - 0.35) * fps))} durationInFrames={Math.round(0.7 * fps)}>
-          <Audio src={staticFile('sfx/whoosh.mp3')} volume={0.3} />
-        </Sequence>
-      ))}
+      <Sonidos plan={plan} />
     </AbsoluteFill>
   );
 };

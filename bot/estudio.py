@@ -41,6 +41,19 @@ def _system(cfg: dict, nombre: str) -> str:
             .replace("{nombre}", nombre))
 
 
+GANCHO = """
+ESTA ES LA ESCENA DEL GANCHO: decide si la gente deja de hacer scroll. Desde el fotograma 0
+(que es también la miniatura) debe verse algo llamativo, grande y en el centro, ya en plena
+acción o a punto de pasar (algo que cae, se rompe, se tacha, sale volando, o un objeto
+gigante con ojos sorprendidos). Nada de presentar el lugar con calma: el golpe principal
+ocurre en el primer segundo y hay al menos 4 golpes visuales."""
+
+
+FINAL = """
+ESTA ES LA ÚLTIMA ESCENA (el remate): la Mascota del canal aparece feliz o guiñando, señalando
+el resultado, y la imagen final debe invitar a ver el video otra vez o comentar."""
+
+
 def _pedido(escena: dict, tiempos: dict, guion: dict, indice: int, estilo: dict) -> str:
     palabras = " ".join(f"{p['w']}@{p['t']:.2f}s" for p in tiempos["palabras"])
     resumen = " / ".join(e["voz"] for e in guion["escenas"])
@@ -53,7 +66,7 @@ protagonista y el mundo se vean iguales en cada escena):
 
 Guion completo (para contexto): {resumen}
 
-Escena número {indice + 1}. Dura {tiempos['duracion']:.2f} segundos.
+Escena número {indice + 1} de {len(guion['escenas'])}. Dura {tiempos['duracion']:.2f} segundos.{GANCHO if indice == 0 else ''}{FINAL if indice == len(guion['escenas']) - 1 and MOTOR['actual'] == '3d' else ''}
 Voz de esta escena: «{escena['voz']}»
 Palabras con su tiempo dentro de la escena: {palabras}
 Palabra clave (momento visual principal): {escena.get('palabra_clave', '')}

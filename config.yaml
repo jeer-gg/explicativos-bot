@@ -34,19 +34,25 @@ produccion:
   voz_gemini: "Puck"              # otras: Charon, Fenrir, Orus, Kore, Aoede, Leda...
   modelos_voz_gemini: ["gemini-3.8-flash-tts", "gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts"]
   estilo_voz_gemini: >
-    Narra en español latinoamericano neutro como un narrador de videos explicativos virales:
-    voz cercana, enérgica y con curiosidad, ritmo rápido y continuo, sin pausas largas,
-    con énfasis natural en las palabras importantes. Lee exactamente este texto:
+    Eres el narrador de un canal de divulgación viral en español latinoamericano neutro.
+    Arranca la primera frase con mucha energía y sorpresa, como quien cuenta un secreto que
+    nadie sabe. Ritmo rápido y continuo, sin pausas largas, voz cercana y segura, con
+    sonrisa en la voz. Sube la intensidad en los datos sorprendentes, baja un poco el tono
+    y hazlo más íntimo justo antes de revelar la respuesta, y remata la última frase con
+    énfasis. Lee exactamente este texto, sin añadir ni quitar palabras:
   whisper_modelo: "base"          # para saber en qué momento se dice cada palabra
   # Animación: "3d" (escenas 3D con luces y sombras) o "2d" (ilustración plana)
   motor: "3d"
   concurrencia_3d: "50%"
   tiempo_maximo_min: 170          # debe ser menor que timeout-minutes del trabajo producir
   # Dos versiones del gancho (A y B) para que elijas la mejor.
-  ab_gancho: true
+  ab_gancho: false   # una sola versión, con todo el esfuerzo puesto en ella
   # Música de fondo: pon un .mp3 con licencia en remotion/public/musica/ y
   # escribe aquí su nombre (por ejemplo "fondo.mp3"). Vacío = sin música.
   musica: ""
+  # Música de fondo con "ducking" (baja sola cuando habla la voz): sube 2 o 3 pistas sin derechos
+  # (por ejemplo de la Biblioteca de audio de YouTube) a remotion/public/musica/ y se van rotando.
+  volumen_musica: 0.16
   # Subtítulos cortos (3 palabras) para quien ve sin sonido.
   subtitulos: true
 
@@ -58,19 +64,17 @@ estilo:
     sombras planas, todo en movimiento suave. Sin emojis. Sin párrafos de texto
     en pantalla. Gráfico, claro y fiel a la realidad.
   descripcion_3d: >
-    Animación 3D ilustrada, de día y luminosa, con contornos finos de dibujo y sombreado
-    suave tipo caricatura. El protagonista suele ser un OBJETO cotidiano grande y detallado
-    que llena la pantalla, que se arma pieza por pieza, se abre en corte o se compara con
-    números; a veces con ojos simpáticos. Etiquetas cortas que señalan partes, medidas,
-    flechas. Cámara cercana en picado que gira y se acerca. Sin emojis. Fiel a la realidad.
+    Estilo de marca fijo del canal: 3D ilustrado de día, luminoso, con contornos negros
+    finos de dibujo y sombreado de caricatura en 3 tonos. Naranja de marca para lo principal,
+    azul para lo que se resalta, amarillo para detalles. El protagonista es un OBJETO cotidiano
+    grande y detallado que llena la pantalla, que se arma pieza por pieza, se abre en corte o
+    se compara con números. La mascota del canal (Tuerquita: bolita naranja con casco amarillo
+    y ojos grandes) aparece en el gancho y en el final reaccionando. Etiquetas cortas, medidas,
+    flechas. Cámara cercana que gira y se acerca. Sin emojis. Fiel a la realidad.
   # Paletas para 3D (fondo oscuro, texto claro; acentos: protagonista, gente, luz, extra).
+  # Estilo de marca ÚNICO para todos los videos (no se sortea): así la gente reconoce el canal.
   paletas_3d:  # cielo, texto, [objeto principal, secundario, resalte, extra, suelo]
-    pasto:    ["#8EC9F0", "#1B1B1F", "#E8642C", "#F2EDE4", "#2F7DE1", "#E8C547", "#7DBE4B"]
-    madera:   ["#BFD9EA", "#1B1B1F", "#3E8E7E", "#F4EFE6", "#2F7DE1", "#E85D4A", "#D9B48A"]
-    concreto: ["#A9D4F5", "#1B1B1F", "#F2A33A", "#ECE7DF", "#E5484D", "#3BA6A0", "#C9C3BA"]
-    arena:    ["#9FD0EE", "#1B1B1F", "#5B6CF0", "#F5F0E8", "#F28C28", "#2BB673", "#E3CFA3"]
-    cocina:   ["#CFE6F2", "#1B1B1F", "#D94A3D", "#F7F3EC", "#1E88E5", "#F6B93B", "#BFD3DE"]
-    noche:    ["#121417", "#F2EEE6", "#1FB5A5", "#A9ADB3", "#FFC27A", "#F25C3B", "#2A2E35"]
+    marca: ["#8EC9F0", "#1B1B1F", "#F26B21", "#F4EFE6", "#2F7DE1", "#FFC93C", "#7DBE4B"]
   # Paletas para 2D (fondo, tinta, 4 colores de acento).
   paletas:
     calida:   ["#FFF4E0", "#1E1B2E", "#FF6B35", "#F7B32B", "#2EC4B6", "#E71D36"]
@@ -101,10 +105,14 @@ ganchos:
 
 aprobacion:
   # true = te llega a Telegram y tú decides. false = publica solo (versión A).
-  activa: true
+  activa: false   # false = el bot publica solo en los horarios de abajo
   escuchar_minutos: 30  # minutos que el bot espera tu botón para publicar al instante
 
 publicacion:
+  # Horas a las que se publica (hora de República Dominicana). Basado en estudios de 2026:
+  # mañana temprano, mediodía y noche son los picos de actividad en Facebook.
+  horarios: ["09:00", "13:00", "20:00"]
+  zona_horaria: "America/Santo_Domingo"
   hashtags: ["#ciencia", "#curiosidades", "#aprende", "#explicacion"]
 
 claude:
@@ -117,5 +125,5 @@ claude:
   # Tope de llamadas a la API por video, para controlar el gasto.
   max_llamadas: 75
   # Rondas máximas en que el revisor puede pedir rehacer escenas.
-  rondas_revision: 2
+  rondas_revision: 3
   nota_minima: 7

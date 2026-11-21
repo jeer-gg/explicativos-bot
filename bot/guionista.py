@@ -48,7 +48,7 @@ Reglas:
   pantalla. Tipos: {{"tipo": "barras", "items": [{{"etiqueta": "un panel", "valor": 450, "unidad": "W"}}, ...]}}
   (2 a 4 barras), {{"tipo": "mitos", "items": ["hielo", "pasta", "mantequilla"]}} (se tachan con
   una X roja), {{"tipo": "contador", "valor": 1839, "etiqueta": "año"}}. Usa solo datos verificados.
-- Incluye la versión B del gancho: otra primera escena con un tipo de gancho distinto.
+{"- Incluye la versión B del gancho: otra primera escena con un tipo de gancho distinto." if p.get("ab_gancho") else ""}
 - Define una dirección de arte común: el mismo protagonista y el mismo mundo visual en todas
   las escenas, para que el video se sienta como un solo plano continuo.
 
@@ -63,7 +63,7 @@ Devuelve JSON:
      "grafico": null,
      "datos": [{{"afirmacion": "...", "fuente": "url o referencia"}}]}}
  ],
- "gancho_b": {{"voz": "...", "visual": "...", "rotulo": "...", "palabra_clave": "...", "tipo": "..."}},
+{' "gancho_b": {"voz": "...", "visual": "...", "rotulo": "...", "palabra_clave": "...", "tipo": "..."},' if p.get("ab_gancho") else ""}
  "direccion_arte": {{
    "protagonista": "aspecto exacto del personaje o objeto que guía el video (forma, colores, ropa, rasgos) para dibujarlo igual en todas las escenas",
    "secundarios": "otros personajes u objetos que se repiten, con su aspecto",
@@ -72,6 +72,48 @@ Devuelve JSON:
  }}
 }}"""
     return claude.json(system, usuario, max_tokens=6000, web=True)
+
+
+def pulir_gancho(claude: Claude, cfg: dict, guion: dict) -> dict:
+    """Escribe varios arranques posibles, los puntúa y se queda con el más fuerte.
+
+    El primer segundo decide si la gente se detiene: se juzga la imagen inicial (que también
+    es la miniatura), el título de portada y la primera frase que se oye.
+    """
+    system = ("Eres editor de Reels virales en español. Sabes que el 70 % de la gente decide en el "
+              "primer segundo si se queda. Juzgas ganchos con frialdad, por lo que hace detenerse "
+              "a alguien que está haciendo scroll con el sonido apagado o encendido.")
+    usuario = f"""Guion actual (JSON):
+{json.dumps(guion, ensure_ascii=False)}
+
+Escribe 6 arranques alternativos para la PRIMERA escena (distintos entre sí: negación de lo
+obvio, advertencia directa, número imposible, pregunta que duele, imagen absurda, error común).
+Cada uno con: "voz" (primera frase, 6 a 12 palabras, que encaje con la escena 2 del guion),
+"portada" (3 a 6 palabras en mayúsculas, dice lo mismo que la voz), "visual" (qué se VE en el
+fotograma 0 y qué pasa en el primer segundo: algo grande, raro o a punto de romperse; nunca una
+pantalla tranquila), "palabra_clave" (palabra de la voz del golpe visual) y "rotulo".
+
+Puntúa cada uno de 1 a 10 en: imagen que detiene el scroll en silencio, curiosidad que solo se
+cierra viendo hasta el final, claridad en menos de un segundo, emoción (sorpresa, miedo a
+equivocarse, risa). Elige el de mejor suma. Si el arranque actual es mejor, elígelo.
+
+Devuelve JSON: {{"candidatos": [{{"voz": "...", "portada": "...", "visual": "...", "palabra_clave": "...",
+"rotulo": "...", "notas": {{"imagen": n, "curiosidad": n, "claridad": n, "emocion": n}}}}],
+"elegido": 0}}"""
+    try:
+        datos = claude.json(system, usuario, max_tokens=4000)
+        mejor = datos["candidatos"][int(datos.get("elegido", 0))]
+    except Exception as e:  # noqa: BLE001  (si falla, se queda el gancho original)
+        print("No se pudo pulir el gancho:", e)
+        return guion
+    primera = guion["escenas"][0]
+    for clave in ("voz", "visual", "palabra_clave", "rotulo"):
+        if mejor.get(clave):
+            primera[clave] = mejor[clave]
+    if mejor.get("portada"):
+        guion["portada"] = mejor["portada"]
+    print("Gancho elegido:", primera["voz"])
+    return guion
 
 
 def verificar_guion(claude: Claude, guion: dict) -> dict:

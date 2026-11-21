@@ -16,8 +16,8 @@ from . import estadisticas, estudio, render, revisor, sfx, telegram
 from .claude import Claude
 from .config import PUBLICO, SALIDA, cargar_config
 from .director import elegir_tema, sortear_estilo
-from .guionista import escribir_guion, verificar_guion
-from .memoria import estado, guardar_estado
+from .guionista import escribir_guion, pulir_gancho, verificar_guion
+from .memoria import estado, guardar_estado, memoria
 from .publicador import publicar, subir_pendiente
 from .voz import narrar_guion
 
@@ -197,7 +197,7 @@ def producir():
     print("Tema:", tema)
 
     # 2. Guion verificado
-    guion = verificar_guion(claude, escribir_guion(claude, cfg, tema, estilo))
+    guion = verificar_guion(claude, pulir_gancho(claude, cfg, escribir_guion(claude, cfg, tema, estilo)))
     guion["escenas"] = guion["escenas"][: cfg["produccion"]["escenas_max"]]
     (trabajo / "guion.json").write_text(json.dumps(guion, ensure_ascii=False, indent=1), encoding="utf-8")
 
@@ -282,7 +282,8 @@ def producir():
             if not ok:
                 raise RuntimeError("Falló el render:\n" + salida[-2000:])
         final = trabajo / f"{variante}.mp4"
-        render.preparar_para_facebook(crudo, final)
+        pista = render.elegir_musica(PUBLICO / "musica", len(memoria()))
+        render.preparar_para_facebook(crudo, final, pista, cfg["produccion"].get("volumen_musica", 0.16))
         videos.append(final)
 
     # 7. Guardar como pendiente y pedir aprobación
@@ -306,20 +307,33 @@ def producir():
     guardar_estado(est)
 
     if not cfg["aprobacion"]["activa"]:
-        publicar(id_video, "A", videos[0])
-        telegram.aviso_seguro(f"Publicado solo: «{guion['titulo']}»")
+        from . import horarios, meta
+        cuando = horarios.proximo(cfg)
+        video_fb = publicar(id_video, "A", videos[0], cuando)
+        if meta.ULTIMA.get("programado"):
+            aviso = f"Programado para {horarios.texto(cuando)}: «{guion['titulo']}»"
+        else:
+            aviso = f"Publicado ya (Facebook no aceptó programarlo): «{guion['titulo']}»"
+        nota = f"\nNota del revisor: {nota_media}" + (f" · {revisor.ULTIMO_COMENTARIO}" if revisor.ULTIMO_COMENTARIO else "")
+        telegram.video(videos[0], aviso)
+        telegram.mensaje(aviso + nota + "\nSi no te gusta, puedes cancelarlo:",
+                         [[{"text": "Cancelar publicación", "callback_data": f"borrar:{video_fb}"}]])
         return
 
     subir_pendiente(id_video, videos, guion["titulo"])
     cambios = guion.get("verificacion", {}).get("cambios", [])
     resumen = (f"Nuevo video: «{guion['titulo']}»\nTema: {tema['tema']}\n"
                f"Nota del revisor: {nota_media}\n"
+               + (f"Opinión del revisor: {revisor.ULTIMO_COMENTARIO}\n" if revisor.ULTIMO_COMENTARIO else "")
+               + 
                f"Verificación de datos: {guion.get('verificacion', {}).get('confianza', 'sin dato')}"
                + (f" ({len(cambios)} correcciones)" if cambios else ""))
     for video_ruta in videos:
         v = video_ruta.stem
-        telegram.video(video_ruta, f"Versión {v}. Gancho: «{est['pendientes'][id_video]['ganchos'][v]}»")
-    botones = [[{"text": f"Publicar {v.stem}", "callback_data": f"pub:{id_video}:{v.stem}"} for v in videos],
+        nombre_version = f"Versión {v}. " if len(videos) > 1 else ""
+        telegram.video(video_ruta, f"{nombre_version}Gancho: «{est['pendientes'][id_video]['ganchos'][v]}»")
+    botones = [[{"text": f"Publicar {v.stem}" if len(videos) > 1 else "Publicar",
+                 "callback_data": f"pub:{id_video}:{v.stem}"} for v in videos],
                [{"text": "Rehacer otro", "callback_data": f"rehacer:{id_video}"},
                 {"text": "Descartar", "callback_data": f"descartar:{id_video}"}]]
     telegram.mensaje(resumen, botones)

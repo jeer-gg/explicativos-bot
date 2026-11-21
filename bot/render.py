@@ -44,16 +44,38 @@ def renderizar(plan_ruta: Path, destino: Path) -> tuple[bool, str]:
                 f"--concurrency={OPCIONES['concurrencia']}", *_gl(), timeout=5400)
 
 
-def preparar_para_facebook(origen: Path, destino: Path):
+def preparar_para_facebook(origen: Path, destino: Path, musica: Path | None = None, volumen_musica: float = 0.16):
     """Codificación final según las especificaciones de Reels de Meta:
-    H.264, 30 fps fijos, GOP cerrado de 2 s, yuv420p, AAC estéreo 48 kHz."""
+    H.264, 30 fps fijos, GOP cerrado de 2 s, yuv420p, AAC estéreo 48 kHz.
+
+    Audio: si hay música, va de fondo y baja sola cuando habla la voz (ducking). Al final se
+    iguala el volumen a -14 LUFS, el nivel habitual de las redes, para que suene como los videos
+    profesionales: ni bajito ni saturado.
+    """
+    iguala = "loudnorm=I=-14:TP=-1.5:LRA=9"
+    if musica and musica.exists():
+        entradas = ["-i", str(origen), "-stream_loop", "-1", "-i", str(musica)]
+        filtro = ("[0:a]asplit=2[voz][llave];"
+                  f"[1:a]volume={volumen_musica},afade=t=in:d=0.8[mus];"
+                  "[mus][llave]sidechaincompress=threshold=0.02:ratio=10:attack=15:release=350[fondo];"
+                  f"[voz][fondo]amix=inputs=2:duration=first:normalize=0,{iguala}[a]")
+        mapa = ["-filter_complex", filtro, "-map", "0:v", "-map", "[a]", "-shortest"]
+    else:
+        entradas = ["-i", str(origen)]
+        mapa = ["-af", iguala]
     subprocess.run([
-        "ffmpeg", "-y", "-loglevel", "error", "-i", str(origen),
+        "ffmpeg", "-y", "-loglevel", "error", *entradas, *mapa,
         "-c:v", "libx264", "-preset", "veryfast", "-crf", "21", "-pix_fmt", "yuv420p",
         "-r", "30", "-g", "60", "-keyint_min", "60", "-sc_threshold", "0", "-flags", "+cgop",
         "-c:a", "aac", "-b:a", "160k", "-ar", "48000", "-ac", "2",
         "-movflags", "+faststart", str(destino),
     ], check=True)
+
+
+def elegir_musica(carpeta: Path, turno: int) -> Path | None:
+    """Rota entre las pistas que haya en la carpeta de música (mp3, m4a o wav)."""
+    pistas = sorted(p for p in carpeta.glob("*") if p.suffix.lower() in (".mp3", ".m4a", ".wav"))
+    return pistas[turno % len(pistas)] if pistas else None
 
 
 def escena_con_error(salida: str, nombres: list[str]) -> str | None:

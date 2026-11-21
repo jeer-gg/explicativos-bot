@@ -2,7 +2,7 @@
 // "un banco de tres patas nunca cojea, porque tres puntos siempre caben en un mismo plano".
 // Las escenas 3D que genera Claude siguen esta misma forma.
 import React from 'react';
-import {EscenaProps, Pieza, Etiqueta, Medida, Flecha, Ojos, Aro, caer, aparecer, rebote, flotar, mover, momento} from '../lib3d';
+import {EscenaProps, Mascota, Pieza, Etiqueta, Medida, Flecha, Ojos, Aro, caer, aparecer, rebote, flotar, mover, momento} from '../lib3d';
 
 export const Ejemplo3D: React.FC<EscenaProps> = ({frame, fps, duracion, palabras, paleta}) => {
   const [principal, secundario, resalte, extra] = paleta.acentos;
@@ -69,6 +69,10 @@ export const Ejemplo3D: React.FC<EscenaProps> = ({frame, fps, duracion, palabras
       <Etiqueta texto="3 patas" punto={[patas[0].x, 0.3, patas[0].z]} desplazamiento={[0.55, 0.35, 0.2]} escala={aparecer(frame, tPatas + 12, 8)} />
       <Etiqueta texto="asiento" punto={[0.3, 0.8, 0.3]} desplazamiento={[0.5, 0.5, 0]} escala={aparecer(frame, tAsiento + 6, 8)} />
       <Medida desde={[-0.75, 0, 0.6]} hasta={[-0.75, 0.79, 0.6]} texto="45 cm" progreso={aparecer(frame, tAsiento + 10, 12)} />
+
+      {/* La mascota del canal reacciona al lado (nunca tapa el objeto) */}
+      <Mascota posicion={[1.15, 0, 0.5]} rotacion={-0.5} gesto={frame >= tPlano ? 'feliz' : 'pensando'}
+        mirar={[-0.8, -0.2]} saltar={rebote(frame, fps, tCojea) * 0.6} senalar={aparecer(frame, tPlano, 8)} frame={frame} />
 
       {/* Capa delantera: objeto cercano que da profundidad */}
       <Pieza forma="cilindro" medidas={[0.12, 0.1, 0.22]} color={principal} posicion={[0.95, 0.11, 1.2]} />

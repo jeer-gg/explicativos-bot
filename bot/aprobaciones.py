@@ -54,7 +54,7 @@ def procesar(espera: int = 0, caducar: bool = True):
             continue
         partes = cb.get("data", "").split(":")
         accion, id_video = partes[0], partes[1] if len(partes) > 1 else ""
-        if id_video not in estado()["pendientes"]:
+        if accion != "borrar" and id_video not in estado()["pendientes"]:
             telegram.responder_boton(cb["id"], "Ese video ya no está pendiente")
             continue
 
@@ -68,6 +68,21 @@ def procesar(espera: int = 0, caducar: bool = True):
             except Exception as e:  # noqa: BLE001
                 telegram.aviso_seguro(f"No pude publicar: {str(e)[-1200:]}\nEl video sigue pendiente; toca el botón otra vez para reintentar.")
                 print(traceback.format_exc())
+        elif accion == "borrar":
+            from . import meta
+            from .memoria import guardar_memoria, memoria
+            try:
+                meta.borrar(id_video)
+                items = memoria()
+                for m in items:
+                    if m.get("video_fb") == id_video:
+                        m["cancelado"] = True
+                guardar_memoria(items)
+                telegram.responder_boton(cb["id"], "Cancelado")
+                telegram.aviso_seguro("Listo: ese video se borró de Facebook.")
+            except Exception as e:  # noqa: BLE001
+                telegram.responder_boton(cb["id"], "No se pudo")
+                telegram.aviso_seguro(f"No pude borrar el video: {str(e)[-500:]}")
         elif accion in ("rehacer", "descartar"):
             e = estado()
             e["pendientes"].pop(id_video, None)

@@ -2,6 +2,7 @@
 // Unidades en metros: el suelo está en y = 0 y una persona mide unos 1,6.
 import React from 'react';
 import * as THREE from 'three';
+import {useThree} from '@react-three/fiber';
 import {aparecer, desaparecer, rebote, flotar, mover, momento} from './lib';
 import type {EscenaProps, Palabra, Paleta} from './lib';
 
@@ -386,11 +387,23 @@ export const Cartel: React.FC<{
 }> = ({texto, posicion, alto = 0.32, fondo = '#F7F4EE', colorTexto = '#16161A', cola = false, escala = 1, rotacion = [0, 0, 0], opacidad = 1, borde = ''}) => {
   const tex = texturaDeTexto(texto, fondo, colorTexto, cola, FUENTE.familia, borde);
   const img = tex.image as HTMLCanvasElement;
+  // Siempre de frente a la cámara (salvo que se pida una rotación fija), para que se lea bien.
+  const camara = useThree((st) => st.camera);
+  const ref = React.useRef<THREE.Mesh>(null);
+  const fijo = rotacion.some((r) => r !== 0);
+  React.useLayoutEffect(() => {
+    const m = ref.current;
+    if (!m || fijo || !m.parent) return;
+    m.parent.updateWorldMatrix(true, false);
+    const padre = new THREE.Quaternion();
+    m.parent.getWorldQuaternion(padre);
+    m.quaternion.copy(padre.invert().multiply(camara.quaternion));
+  });
   const h = alto * (img.height / (img.height - (cola ? 70 : 0)));
   const w = h * (img.width / img.height);
   if (escala <= 0.001) return null;
   return (
-    <mesh position={posicion} rotation={rotacion} scale={escala}>
+    <mesh ref={ref} position={posicion} rotation={fijo ? rotacion : undefined} scale={escala}>
       <planeGeometry args={[w, h]} />
       <meshBasicMaterial map={tex} transparent opacity={opacidad} toneMapped={false} depthWrite={false} />
     </mesh>
@@ -568,6 +581,70 @@ export const Ojos: React.FC<{posicion: V3; tam?: number; separacion?: number; mi
           </mesh>
         </group>
       ))}
+    </group>
+  );
+};
+
+// ---------- Mascota del canal (igual en todos los videos: es parte de la marca) ----------
+
+export type GestoMascota = 'feliz' | 'sorprendida' | 'pensando' | 'preocupada' | 'guino';
+
+/**
+ * Tuerquita, la mascota del canal: bolita naranja con casco amarillo de obra, ojos grandes y
+ * bracitos. Mide unos 0,8 m. Úsala en el gancho y en el final, a un lado del objeto principal.
+ * - saltar: 0..1 (altura del brinco) · senalar: 0..1 levanta el brazo derecho para señalar
+ */
+export const Mascota: React.FC<{
+  posicion?: V3;
+  rotacion?: number;
+  escala?: number;
+  gesto?: GestoMascota;
+  mirar?: [number, number];
+  saltar?: number;
+  senalar?: number;
+  frame?: number;
+}> = ({posicion = [0, 0, 0], rotacion = 0, escala = 1, gesto = 'feliz', mirar = [0, 0], saltar = 0, senalar = 0, frame}) => {
+  if (escala <= 0.001) return null;
+  const naranja = '#F26B21';
+  const crema = '#FFE3C9';
+  const amarillo = '#FFC93C';
+  const respiro = frame !== undefined ? Math.sin(frame / 9) * 0.015 : 0;
+  const boca =
+    gesto === 'sorprendida' ? (
+      <Pieza forma="esfera" medidas={[0.055]} color="#3A1A12" escala={[1, 1.25, 0.5]} posicion={[0, -0.1, 0.3]} />
+    ) : gesto === 'preocupada' ? (
+      <Pieza forma="toro" medidas={[0.06, 0.014, Math.PI]} color="#3A1A12" posicion={[0, -0.14, 0.3]} contorno={false} />
+    ) : gesto === 'pensando' ? (
+      <Pieza forma="caja" medidas={[0.08, 0.018, 0.02]} color="#3A1A12" posicion={[0.03, -0.11, 0.31]} rotacion={[0, 0, 0.25]} contorno={false} />
+    ) : (
+      <Pieza forma="toro" medidas={[0.075, 0.016, Math.PI]} color="#3A1A12" posicion={[0, -0.08, 0.3]} rotacion={[0, 0, Math.PI]} contorno={false} />
+    );
+  return (
+    <group position={[posicion[0], posicion[1] + saltar * 0.35, posicion[2]]} rotation={[0, rotacion, 0]} scale={escala}>
+      {/* piernas */}
+      {[-1, 1].map((l) => (
+        <Pieza key={`p${l}`} forma="capsula" medidas={[0.06, 0.12]} color={naranja} posicion={[0.11 * l, 0.1, 0]} />
+      ))}
+      {/* cuerpo */}
+      <group position={[0, 0.45, 0]} scale={[1, 1 + respiro, 1]}>
+        <Pieza forma="esfera" medidas={[0.34]} color={naranja} escala={[1, 1.06, 0.95]} />
+        <Pieza forma="esfera" medidas={[0.2]} color={crema} posicion={[0, -0.1, 0.2]} escala={[1, 0.9, 0.5]} contorno={false} />
+        <Ojos posicion={[0, 0.05, 0.3]} tam={0.085} separacion={0.2} mirar={mirar} frame={gesto === 'guino' ? 99 : frame} />
+        {boca}
+        {/* brazos */}
+        <group position={[-0.33, -0.02, 0]} rotation={[0, 0, -0.5 - (gesto === 'sorprendida' ? 1.6 : 0)]}>
+          <Pieza forma="capsula" medidas={[0.055, 0.18]} color={naranja} posicion={[0, -0.12, 0]} />
+        </group>
+        <group position={[0.33, -0.02, 0]} rotation={[0, 0, 0.5 + 2.1 * senalar + (gesto === 'sorprendida' ? 1.6 : 0)]}>
+          <Pieza forma="capsula" medidas={[0.055, 0.18]} color={naranja} posicion={[0, -0.12, 0]} />
+        </group>
+        {/* casco de obra */}
+        <group position={[0, 0.27, 0]} rotation={[gesto === 'pensando' ? -0.15 : -0.08, 0, gesto === 'preocupada' ? 0.12 : 0]}>
+          <Pieza forma="media_esfera" medidas={[0.24]} color={amarillo} />
+          <Pieza forma="cilindro" medidas={[0.3, 0.3, 0.03]} color={amarillo} posicion={[0, 0.0, 0.04]} />
+          <Pieza forma="caja" medidas={[0.05, 0.05, 0.42]} color="#F2B51E" posicion={[0, 0.2, 0]} contorno={false} />
+        </group>
+      </group>
     </group>
   );
 };

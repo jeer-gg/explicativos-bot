@@ -14,11 +14,22 @@ VERSION = "v25.0"
 GRAPH = f"https://graph.facebook.com/{VERSION}"
 
 
+ULTIMA = {"programado": False}  # si la última subida quedó programada
+
+
+def borrar(video_id: str) -> None:
+    """Borra un Reel (por ejemplo, uno programado que quieres cancelar)."""
+    _, token = _credenciales()
+    r = requests.delete(f"{GRAPH}/{video_id}", params={"access_token": token}, timeout=60)
+    r.raise_for_status()
+
+
 def _credenciales():
     return secreto("META_PAGE_ID"), secreto("META_PAGE_TOKEN")
 
 
-def publicar_reel(ruta: Path, descripcion: str, titulo: str = "") -> str:
+def publicar_reel(ruta: Path, descripcion: str, titulo: str = "", programar: int | None = None) -> str:
+    """Sube el Reel. Con `programar` (hora UNIX) queda programado y Facebook lo publica a esa hora."""
     pagina, token = _credenciales()
 
     # 1) Iniciar la sesión de subida
@@ -37,13 +48,21 @@ def publicar_reel(ruta: Path, descripcion: str, titulo: str = "") -> str:
                       data=datos, timeout=900)
     r.raise_for_status()
 
-    # 3) Publicar
+    # 3) Publicar o programar
     params = {"access_token": token, "video_id": video_id, "upload_phase": "finish",
               "video_state": "PUBLISHED", "description": descripcion}
     if titulo:
         params["title"] = titulo
-    r = requests.post(f"{GRAPH}/{pagina}/video_reels", params=params, timeout=120)
+    if programar:
+        r = requests.post(f"{GRAPH}/{pagina}/video_reels", timeout=120,
+                          params={**params, "video_state": "SCHEDULED", "scheduled_publish_time": int(programar)})
+        if not r.ok:  # si Facebook no acepta la programación, se publica ya
+            print("No se pudo programar, publico ahora:", r.text[:300])
+            programar = None
+    if not programar:
+        r = requests.post(f"{GRAPH}/{pagina}/video_reels", params=params, timeout=120)
     r.raise_for_status()
+    ULTIMA["programado"] = bool(programar)
 
     # Esperar a que Meta termine de procesar (informativo)
     for _ in range(20):
@@ -52,7 +71,7 @@ def publicar_reel(ruta: Path, descripcion: str, titulo: str = "") -> str:
                               timeout=60)
         if estado.ok:
             s = estado.json().get("status", {})
-            if s.get("video_status") in ("ready", "published") or \
+            if s.get("video_status") in ("ready", "published", "scheduled") or \
                     s.get("publishing_phase", {}).get("status") == "complete":
                 break
             if s.get("video_status") == "error":
