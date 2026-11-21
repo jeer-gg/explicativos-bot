@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "id": "20261121-1524",
+    "fecha": "2026-11-21",
+    "publicado_en": "2026-11-21T16:19:08+00:00",
+    "programado": false,
+    "titulo": "Las 108 puntadas de la pelota de béisbol no son adorno",
+    "tema": "Las 108 puntadas rojas de una pelota de béisbol: parecen decoración, pero ¿qué pasaría si la pelota fuera lisa?",
+    "tendencia": "La final de la Serie Mundial 2026 de béisbol y el Balón de Oro 2026 están entre lo más buscado en Google Trends",
+    "serie": null,
+    "subtema": "por qué las cosas son como son (diseños, costumbres, objetos)",
+    "estructura": "NO ESTÁ DE ADORNO: un detalle de un objeto cotidiano que parece decoración pero cumple una función clave; se muestra el objeto, se quita el detalle, se ve qué pasaría sin él y se explica por qué está ahí",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "dato sorprendente con número",
+    "gancho": "¿Crees que podrías lanzar una pelota sin costuras?",
+    "nota_revisor": 2.9,
+    "duracion": 45.67,
+    "video_fb": "1709000854111396",
+    "metricas": {}
+  }
+]

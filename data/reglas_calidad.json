@@ -1,6 +1,70 @@
 {
   "reglas": [
     {
+      "regla": "Frases cortas y fáciles de pronunciar; números escritos como se dicen.",
+      "area": "voz",
+      "veces": 1,
+      "ultima": "2026-11-21T15:49:23+00:00",
+      "clave": "cortas dicen escritos frases fáciles números pronunciar",
+      "ejemplo": "solo se entiende el 50 % del guion en el audio"
+    },
+    {
+      "regla": "El primer fotograma debe mostrar el objeto principal del tema, bien visible y centrado. No se deja un fondo vacío con solo texto.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T15:49:23+00:00",
+      "clave": "centrado fondo fotograma mostrar objeto primer principal texto vacío visible",
+      "ejemplo": "El fotograma del gancho es un fondo beige casi vacío. Solo se ve el título, sin ninguna pelota ni objeto que explique el tema en los primeros segundos."
+    },
+    {
+      "regla": "Los subtítulos ocupan una franja fija, y ningún elemento de la escena ni ninguna etiqueta se coloca en esa franja. Las etiquetas deben quedar dentro del margen seguro, lejos de los bordes.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-21T15:49:23+00:00",
+      "clave": "bordes coloca deben dentro elemento escena etiqueta etiquetas franja lejos margen ninguna ningún ocupan quedar seguro subtítulos",
+      "ejemplo": "Los subtítulos y los textos de la escena se pisan. En el fotograma 2 la palabra «costuras» queda pegada al borde superior y cerca del subtítulo. En el fotograma 3 el subtítulo «IMPORTA» tapa la parte alta de la escena con las flechas de aire."
+    },
+    {
+      "regla": "Cada escena debe ilustrar de forma literal y reconocible la frase que se narra, con objetos del tema. No se usan metáforas abstractas ni muebles de relleno que confundan.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T15:49:23+00:00",
+      "clave": "abstractas confundan escena forma frase ilustrar literal metáforas muebles narra objetos reconocible relleno",
+      "ejemplo": "Las escenas 2 y 3 no se entienden. En la 2 hay pelotas con ojos junto a una reja y una caja, y no se ve a un lanzador perdiendo agarre. En la 3 hay una pila de arcos rojos sobre un colchón o cajón y flechas azules, con un contexto de muebles sin relación con el béisbol."
+    },
+    {
+      "regla": "Los objetos reales que se explican deben dibujarse fieles a la realidad, sin ojos ni rasgos de personaje, salvo que el guion lo pida.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T15:49:23+00:00",
+      "clave": "deben dibujarse explican fieles guion objetos personaje rasgos reales realidad salvo",
+      "ejemplo": "Las pelotas tienen ojos de personaje. Eso les quita fidelidad y distrae en un video que explica un objeto real."
+    },
+    {
+      "regla": "Los subtítulos deben tener alto contraste y contorno en cualquier fondo. Las palabras resaltadas no pueden quedar casi invisibles, y las frases no deben aparecer cortadas.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-21T15:49:23+00:00",
+      "clave": "aparecer contorno contraste cortadas cualquier deben fondo frases invisibles palabras pueden quedar resaltadas subtítulos tener",
+      "ejemplo": "El texto del subtítulo no coincide con lo que se ve ni con la narración. «LA PELOTA SE» aparece cortado y con la palabra «SE» casi invisible. «AIRE» y «CIENTO OCHO» van en azul sobre un fondo claro con poco contraste."
+    },
+    {
+      "regla": "No se repite el mismo decorado en escenas seguidas. El objeto principal no debe tapar el fondo ni chocar con los subtítulos, y debe dejar espacio libre en la franja del texto.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T15:49:23+00:00",
+      "clave": "chocar decorado dejar escenas espacio fondo franja libre mismo objeto principal repite seguidas subtítulos tapar texto",
+      "ejemplo": "En el fotograma 8 la pelota enorme tapa la televisión y los subtítulos «CIENTO OCHO PUNTADAS» se pegan a su borde. La escena repite el mismo decorado (mueble y televisor) del fotograma 7 sin aportar nada nuevo. La pelota tampoco muestra 108 puntadas claras."
+    },
+    {
+      "regla": "Los planos de cierre deben ser cercanos y mostrar el objeto o tema clave, sin elementos diminutos o decorativos que no se puedan leer.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T15:49:23+00:00",
+      "clave": "cercanos cierre clave deben decorativos diminutos elementos mostrar objeto planos puedan",
+      "ejemplo": "El plano del fotograma 7 es lejano y vacío. El televisor muestra a un muñeco diminuto que no se relaciona con «la Serie Mundial», y la escena no dice nada del cierre."
+    },
+    {
       "regla": "Mantener todo texto, tarjetas y preguntas dentro del área segura del encuadre (márgenes mínimos a cada lado). Comprobar que ninguna frase queda cortada ni en pantalla ni en la narración, y que el guion termina con una frase completa.",
       "area": "edicion",
       "veces": 1,
