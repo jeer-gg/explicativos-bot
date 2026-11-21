@@ -27,15 +27,66 @@ def _normal(s: str) -> str:
     return "".join(c for c in s if c.isalnum() and unicodedata.category(c) != "Mn")
 
 
+VOZ = Path(__file__).resolve().parent.parent / "data" / "voz.json"
+URL_VOCES = "https://generativelanguage.googleapis.com/v1beta/voices"
+
+
+def _clave() -> str:
+    return os.environ["GEMINI_API_KEY"].strip()
+
+
+def voz_de_marca(cfg: dict) -> str | None:
+    """La voz única del canal, diseñada una sola vez con Voice Design de Gemini y reutilizada en
+    TODOS los videos (se guarda su id en data/voz.json). Si cambias la descripción en
+    config.yaml, se diseña una nueva. Devuelve el id o None si no se pudo."""
+    d = cfg["produccion"].get("voz_marca", {})
+    if not d.get("activa"):
+        return None
+    descripcion = d.get("descripcion", "").strip()
+    guardada = json.loads(VOZ.read_text(encoding="utf-8")) if VOZ.exists() else {}
+    if guardada.get("id") and guardada.get("descripcion") == descripcion:
+        return guardada["id"]
+    cuerpo = {"voice": {"type": "prompted", "display_name": d.get("nombre", "Voz del canal"),
+                        "prompted": {"input": descripcion, "language_code": d.get("idioma", "es-419"),
+                                     "gender": d.get("genero", "female"), "pitch": d.get("tono", "medium"),
+                                     "accent": d.get("acento", "Latin American neutral Spanish"),
+                                     "persona": d.get("persona", ""), "context": d.get("contexto", "")}},
+              "store": True}
+    try:
+        r = requests.post(URL_VOCES, json=cuerpo, headers={"x-goog-api-key": _clave()}, timeout=180)
+        r.raise_for_status()
+        voz = r.json()
+        voz_id = voz["id"]
+    except Exception as e:  # noqa: BLE001
+        print("No se pudo diseñar la voz de marca:", e, getattr(locals().get("r"), "text", "")[:300])
+        return None
+    VOZ.parent.mkdir(parents=True, exist_ok=True)
+    VOZ.write_text(json.dumps({"id": voz_id, "descripcion": descripcion}, ensure_ascii=False, indent=1),
+                   encoding="utf-8")
+    try:  # que el dueño la escuche
+        muestra = (voz.get("sample_audio") or voz.get("sampleAudio") or {}).get("data")
+        if muestra:
+            ruta = VOZ.parent / "voz_muestra.wav"
+            ruta.write_bytes(base64.b64decode(muestra))
+            from . import telegram
+            telegram.audio(ruta, "Esta es la voz que usarán todos los videos a partir de ahora.")
+    except Exception as e:  # noqa: BLE001
+        print("No se pudo enviar la muestra de voz:", e)
+    return voz_id
+
+
 def sintetizar(texto: str, cfg: dict, destino: Path) -> Path:
-    """Devuelve un WAV con la narración. Prueba varios modelos por si uno no está disponible."""
+    """Devuelve un WAV con la narración, siempre con la misma voz y el mismo modelo."""
     p = cfg["produccion"]
     indicacion = p.get("estilo_voz_gemini", "").strip()
+    voz_id = voz_de_marca(cfg)
+    voz = ({"voice": voz_id} if voz_id
+           else {"prebuiltVoiceConfig": {"voiceName": p.get("voz_gemini", "Laomedeia")}})
     cuerpo = {
         "contents": [{"parts": [{"text": f"{indicacion}\n\n{texto}" if indicacion else texto}]}],
         "generationConfig": {
             "responseModalities": ["AUDIO"],
-            "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": p.get("voz_gemini", "Puck")}}},
+            "speechConfig": {"voiceConfig": voz},
         },
     }
     errores = []
@@ -43,7 +94,7 @@ def sintetizar(texto: str, cfg: dict, destino: Path) -> Path:
         for intento in range(3):
             try:
                 r = requests.post(URL.format(modelo=modelo), json=cuerpo, timeout=300,
-                                  headers={"x-goog-api-key": os.environ["GEMINI_API_KEY"].strip()})
+                                  headers={"x-goog-api-key": _clave()})
             except requests.RequestException as e:
                 errores.append(f"{modelo}: {e}")
                 time.sleep(5)
@@ -56,6 +107,12 @@ def sintetizar(texto: str, cfg: dict, destino: Path) -> Path:
                     raise RuntimeError("Google rechazó la clave GEMINI_API_KEY (no es válida). "
                                        "Créala de nuevo en aistudio.google.com/apikey y vuelve a guardarla en GitHub.")
                 errores.append(f"{modelo}: {r.status_code} {r.text[:200]}")
+                if voz_id:
+                    # este modelo no acepta la voz diseñada: se prueba con la voz fija de reserva
+                    cuerpo["generationConfig"]["speechConfig"]["voiceConfig"] = {
+                        "prebuiltVoiceConfig": {"voiceName": p.get("voz_gemini", "Laomedeia")}}
+                    voz_id = None
+                    continue
                 break
             partes = r.json()["candidates"][0]["content"]["parts"]
             dato = next(x["inlineData"] for x in partes if "inlineData" in x)

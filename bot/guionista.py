@@ -1,6 +1,7 @@
 """Guion con investigación y verificación de datos."""
 import json
 
+from . import aprendizaje
 from .claude import Claude
 
 
@@ -47,7 +48,7 @@ def escribir_guion(claude: Claude, cfg: dict, tema: dict, estilo: dict) -> dict:
 Ángulo: {tema['angulo']}{(chr(10) + "Tendencia del momento que lo inspira: " + tema['tendencia'] + " (menciónala en la primera frase para enganchar, sin inventar detalles: verifica con la búsqueda web)") if tema.get('tendencia') else ""}
 Tipo de gancho: {estilo['tipo_gancho']}
 Formato ganador: {estilo['estructura']}
-{_bloque_serie(tema, estilo)}
+{_bloque_serie(tema, estilo)}{aprendizaje.texto_lecciones()}
 Reglas:
 - La voz arranca en el segundo 0: la primera frase ES el gancho, de 6 a 12 palabras.
 - Entre {palabras_min} y {palabras_max} palabras en total, en {p['escenas_min']} a {p['escenas_max']} escenas.
@@ -129,6 +130,7 @@ def pulir_gancho(claude: Claude, cfg: dict, guion: dict) -> dict:
     usuario = f"""Guion actual (JSON):
 {json.dumps(guion, ensure_ascii=False)}
 
+{aprendizaje.texto_lecciones()}
 Escribe 6 arranques alternativos para la PRIMERA escena (distintos entre sí: negación de lo
 obvio, advertencia directa, número imposible, pregunta que duele, imagen absurda, error común).
 Cada uno con: "voz" (primera frase, 6 a 12 palabras, que encaje con la escena 2 del guion),

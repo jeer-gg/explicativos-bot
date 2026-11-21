@@ -108,7 +108,7 @@ const texturaSuelo = (color: string) => {
   let semilla = 7;
   const azar = () => ((semilla = (semilla * 16807) % 2147483647) / 2147483647);
   for (let i = 0; i < 1400; i++) {
-    const k = (azar() - 0.5) * 0.22;
+    const k = (azar() - 0.5) * 0.08;
     ctx.fillStyle = base.clone().offsetHSL(0, 0, k).getStyle();
     ctx.fillRect(azar() * 256, azar() * 256, 1 + azar() * 3, 2 + azar() * 7);
   }
@@ -128,8 +128,8 @@ const Sol: React.FC<{donde: V3}> = ({donde}) => {
       <directionalLight
         position={[donde[0] + 4, 9, donde[2] + 5]}
         target={objetivo}
-        intensity={2.3}
-        color="#FFF6E5"
+        intensity={1.55}
+        color="#FFF3E2"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -227,12 +227,13 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
   ASPECTO.dibujo = dia;
   const [, , luz] = plan.paleta.acentos;
   const colorSuelo = plan.paleta.acentos[4] ?? cielo.clone().lerp(new THREE.Color('#ffffff'), 0.07).getStyle();
-  const horizonte = cielo.clone().lerp(new THREE.Color('#ffffff'), 0.55).getStyle();
+  const horizonte = cielo.clone().lerp(new THREE.Color('#ffffff'), 0.3).getStyle();
+  const oscuro = cielo.clone().multiplyScalar(0.78).getStyle();
 
   return (
     <AbsoluteFill
       style={{
-        background: dia ? `linear-gradient(180deg, ${plan.paleta.fondo} 0%, ${horizonte} 70%)` : plan.paleta.fondo,
+        background: dia ? `radial-gradient(ellipse 90% 70% at 50% 40%, ${horizonte} 0%, ${plan.paleta.fondo} 55%, ${oscuro} 100%)` : plan.paleta.fondo,
         fontFamily: fuente.fontFamily,
       }}
     >
@@ -240,11 +241,11 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
         <ThreeCanvas width={ANCHO} height={ALTO} shadows gl={{alpha: true, antialias: true}} camera={{fov: 40, near: 0.1, far: 140, position: cam.ojo}}>
           <Camara ojo={cam.ojo} mira={cam.mira} />
           {dia ? null : <color attach="background" args={[plan.paleta.fondo]} />}
-          <fog attach="fog" args={dia ? [horizonte, 16, 46] : [plan.paleta.fondo, 10, 28]} />
+          <fog attach="fog" args={dia ? [plan.paleta.fondo, 12, 34] : [plan.paleta.fondo, 10, 28]} />
           {dia ? (
             <>
-              <ambientLight intensity={0.35} />
-              <hemisphereLight args={['#FFFFFF', colorSuelo, 1.1]} />
+              <ambientLight intensity={0.5} />
+              <hemisphereLight args={['#F6F1EA', colorSuelo, 0.85]} />
               <Sol donde={estacion(cam.actual)} />
             </>
           ) : (
@@ -282,6 +283,7 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
 
       {dia ? (
         <>
+          <AbsoluteFill style={{background: 'radial-gradient(ellipse 85% 70% at 50% 45%, rgba(0,0,0,0) 60%, rgba(30,24,18,0.22) 100%)'}} />
           <TarjetaDatos plan={plan} />
           <Portada plan={plan} />
           {plan.subtitulos ? <Subtitulos plan={plan} titular desde={plan.portada ? DURACION_PORTADA : 0} /> : null}

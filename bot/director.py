@@ -1,7 +1,9 @@
 """El director: sortea el estilo y elige un tema nuevo con ayuda de los datos."""
 import random
+from datetime import datetime, timedelta, timezone
 
 from .claude import Claude
+from . import aprendizaje
 from .memoria import guardar_recuento, memoria, recuento, resumen_para_director
 
 
@@ -12,11 +14,16 @@ def sortear_estilo(cfg: dict) -> dict:
     }
     grupo = "paletas_3d" if cfg["produccion"].get("motor") == "3d" else "paletas"
     paletas = list(cfg["estilo"][grupo].keys())
+    tipos = cfg["ganchos"]["tipos"]
+    estructuras = [e for e in cfg["ganchos"]["estructuras"] if permitir_estructura(cfg, e)]
+    # Lo que mejor ha funcionado en esta página sale más seguido (sin dejar de probar lo demás).
+    peso_tipos = aprendizaje.pesos(tipos, "tipo_gancho")
+    peso_estr = aprendizaje.pesos(estructuras, "estructura")
     for _ in range(50):
         combo = (
             random.choice(paletas),
-            random.choice(cfg["ganchos"]["tipos"]),
-            random.choice(cfg["ganchos"]["estructuras"]),
+            random.choices(tipos, weights=peso_tipos)[0],
+            random.choices(estructuras, weights=peso_estr)[0],
         )
         if combo not in recientes:
             break
@@ -39,6 +46,23 @@ def _hoy(cfg: dict) -> str:
     from .horarios import _zona
     from datetime import datetime
     return datetime.now(_zona(cfg)).strftime("%Y-%m-%d")
+
+
+def permitir_estructura(cfg: dict, estructura: str) -> bool:
+    """Las historias en partes no deben dominar: como mucho una serie nueva cada pocos días y
+    nunca mientras haya otra a medias."""
+    if "HISTORIA EN PARTES" not in estructura:
+        return True
+    from . import series
+    if series.datos()["pendientes"]:
+        return False
+    dias = cfg.get("series", {}).get("dias_entre_series", 4)
+    limite = datetime.now(timezone.utc) - timedelta(days=dias)
+    for m in memoria():
+        if (m.get("serie") or {}).get("parte") == 1 and m.get("publicado_en") and \
+                datetime.fromisoformat(m["publicado_en"]) > limite:
+            return False
+    return True
 
 
 def toca_tendencia(cfg: dict) -> bool:
@@ -149,6 +173,7 @@ Temas prohibidos: {", ".join(canal['prohibidos'])}
 
 Videos publicados y su rendimiento (usa esto para aprender qué funciona):
 {resumen_para_director()}
+{aprendizaje.texto_lecciones()}
 
 Temas ya usados (no los repitas ni hagas variantes cercanas):
 {"; ".join(usados[-150:]) or "ninguno"}

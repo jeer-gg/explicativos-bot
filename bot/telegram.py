@@ -34,6 +34,14 @@ def video(ruta, texto: str, botones: list | None = None):
         mensaje(f"No pude enviar el video por Telegram ({r.status_code}). {texto}", botones)
 
 
+def audio(ruta, texto: str):
+    with open(ruta, "rb") as f:
+        r = requests.post(_url("sendAudio"), data={"chat_id": _chat(), "caption": texto[:1000]},
+                          files={"audio": f}, timeout=300)
+    if not r.ok:
+        mensaje(f"No pude enviar el audio ({r.status_code}). {texto}")
+
+
 def actualizaciones(offset: int, espera: int = 0) -> list:
     """espera > 0: Telegram mantiene la conexión abierta hasta que toques un botón (máx. espera s)."""
     r = requests.get(_url("getUpdates"), params={"offset": offset, "timeout": espera,

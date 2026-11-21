@@ -138,6 +138,13 @@ GEMINI = {"textos": []}
 
 def gemini_post(url, json=None, timeout=None, headers=None):  # noqa: A002
     import base64 as b64
+    if url.endswith("/voices"):
+        GEMINI["voz_creada"] = json
+        muestra = b64.b64encode(b"RIFF....WAVEfmt ").decode()
+        datos = {"id": "voice_prueba123", "sample_audio": {"mime_type": "audio/wav", "data": muestra}}
+        return types.SimpleNamespace(status_code=200, json=lambda: datos, text="", ok=True,
+                                     raise_for_status=lambda: None)
+    GEMINI.setdefault("voces_usadas", []).append(json["generationConfig"]["speechConfig"]["voiceConfig"])
     texto = json["contents"][0]["parts"][0]["text"].split("\n\n", 1)[-1]
     GEMINI["textos"].append(texto)
     dur = 0.3 * (len(texto.split()) + 2)
@@ -214,6 +221,7 @@ render.empaquetar, render.foto, render.renderizar = empaquetar, foto, renderizar
 
 telegram.mensaje = lambda texto, botones=None: REGISTRO["telegram"].append(("mensaje", texto, botones))
 telegram.video = lambda ruta, texto, botones=None: REGISTRO["telegram"].append(("video", Path(ruta).name, texto))
+telegram.audio = lambda ruta, texto: REGISTRO["telegram"].append(("audio", Path(ruta).name, texto))
 telegram.aviso_seguro = lambda texto: REGISTRO["telegram"].append(("aviso", texto))
 telegram.responder_boton = lambda i, t: REGISTRO["telegram"].append(("boton", t))
 
@@ -268,6 +276,9 @@ aprobaciones.escuchar = _escuchar_real
 assert ESCUCHA and ESCUCHA[0] > 2, "al terminar debe quedarse escuchando los botones"
 assert len(GEMINI["textos"]) == 1, "una sola versión, con voz de Gemini"
 assert REGISTRO.get("pulir"), "debe pulir el gancho"
+assert GEMINI["voz_creada"]["voice"]["type"] == "prompted" and GEMINI["voz_creada"]["store"] is True
+assert all(v == {"voice": "voice_prueba123"} for v in GEMINI["voces_usadas"]), "siempre la voz de marca"
+assert any(t[0] == "audio" for t in REGISTRO["telegram"]), "debe enviar la muestra de la voz"
 assert not any("respaldo" in str(t) or "3D no funcion" in str(t) for t in REGISTRO["telegram"]), REGISTRO["telegram"]
 est = estado()
 assert len(est["pendientes"]) == 1, "debe quedar un video pendiente"
@@ -369,5 +380,7 @@ telegram.actualizaciones = lambda offset, espera=0: [
     {"update_id": 50, "callback_query": {"id": "z", "from": {"id": 123}, "data": "borrar:fb_prog"}}] if offset <= 50 else []
 aprobaciones.procesar()
 assert BORRADOS == ["fb_prog"] and memoria()[-1].get("cancelado")
+assert estado().get("reemplazo", {}).get("titulo_cancelado"), "debe pedir un video de reemplazo"
+assert any("otro" in str(t) and "horario" in str(t) for t in REGISTRO["telegram"])
 
 print("\nSIMULACIÓN CORRECTA. Archivos en", TMP)

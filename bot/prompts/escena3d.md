@@ -13,9 +13,9 @@ partes, cotas de medida, flechas). El toque propio de este canal: objetos con oj
 cuando ayuda, la paleta sorteada y movimiento constante.
 
 ## El mundo (ya lo pone el video, no lo repitas)
-- Cielo, suelo con textura en y = 0 (pasto, madera o cemento según la paleta), sol con sombras.
-- NO añadas cielo, suelo general ni el sol. Sí puedes poner tapetes, pisos de un cuarto,
-  paredes, mesas o una base bajo el objeto si la escena lo pide.
+- Un estudio neutro de fondo gris cálido, suelo greige en y = 0, luz suave y sombras suaves.
+- NO añadas fondo, suelo general ni luces principales. Sí puedes poner tapetes, un trozo de
+  pared, mesas, encimeras o una base bajo el objeto si la escena lo pide (en tonos apagados).
 
 ## Cámara y encuadre (cercano)
 - Tu escenario está centrado en (0, 0, 0). La cámara lo mira desde unos 5 m y gira un poco.
@@ -48,8 +48,14 @@ cuando ayuda, la paleta sorteada y movimiento constante.
 - Personajes: solo los que son parte de la historia que cuenta el video (quien usa el
   objeto, quien comete el error, quien descubre la respuesta) o el propio objeto con
   `Ojos` cuando ayuda. Nada de mascotas ni personajes decorativos que no tengan que ver.
-- Colores de marca: usa los de la paleta tal cual (naranja para lo principal, azul para lo que
-  se resalta, amarillo para detalles, crema y grises para lo secundario). Nada de colores al azar.
+- Color (medido en los videos virales de referencia: fondos neutros, poca saturación, solo
+  un 3 % de la imagen con colores fuertes):
+  · Los objetos con sus colores REALES pero apagados: madera, metal gris, plástico blanco o
+    negro, tela, cerámica, comida con su color natural sin exagerar. Nada fosforito ni chillón.
+  · El color fuerte se reserva para guiar la mirada: `acentos[2]` (azul) para lo que se
+    resalta o señala, `acentos[0]` (rojo terracota) para tachar, advertir o el error,
+    `acentos[3]` (mostaza) para un detalle. Como mucho uno o dos elementos fuertes a la vez.
+  · Usa `acentos[1]` (crema) y grises cálidos para lo secundario.
 
 ## Ritmo (retención)
 - Al menos 3 "golpes" sincronizados con palabras de la voz usando `momento()` con 3 palabras

@@ -17,7 +17,7 @@ export const ASPECTO = {dibujo: true};
 let degradado: THREE.DataTexture | null = null;
 const tonos = () => {
   if (!degradado) {
-    degradado = new THREE.DataTexture(new Uint8Array([120, 120, 120, 255, 200, 200, 200, 255, 255, 255, 255, 255]), 3, 1, THREE.RGBAFormat);
+    degradado = new THREE.DataTexture(new Uint8Array([150, 150, 150, 255, 212, 212, 212, 255, 255, 255, 255, 255]), 3, 1, THREE.RGBAFormat);
     degradado.minFilter = THREE.NearestFilter;
     degradado.magFilter = THREE.NearestFilter;
     degradado.needsUpdate = true;

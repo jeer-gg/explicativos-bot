@@ -53,16 +53,19 @@ def preparar_para_facebook(origen: Path, destino: Path, musica: Path | None = No
     profesionales: ni bajito ni saturado.
     """
     iguala = "loudnorm=I=-14:TP=-1.5:LRA=9"
+    # Etalonaje de marca: un poco menos de saturación y un grano muy fino (textura de cine).
+    imagen = ["-vf", "eq=saturation=0.92:contrast=0.98,noise=alls=3:allf=t"]
     if musica and musica.exists():
         entradas = ["-i", str(origen), "-stream_loop", "-1", "-i", str(musica)]
         filtro = ("[0:a]asplit=2[voz][llave];"
                   f"[1:a]volume={volumen_musica},afade=t=in:d=0.8[mus];"
                   "[mus][llave]sidechaincompress=threshold=0.02:ratio=10:attack=15:release=350[fondo];"
                   f"[voz][fondo]amix=inputs=2:duration=first:normalize=0,{iguala}[a]")
-        mapa = ["-filter_complex", filtro, "-map", "0:v", "-map", "[a]", "-shortest"]
+        filtro = "[0:v]eq=saturation=0.92:contrast=0.98,noise=alls=3:allf=t[v];" + filtro
+        mapa = ["-filter_complex", filtro, "-map", "[v]", "-map", "[a]", "-shortest"]
     else:
         entradas = ["-i", str(origen)]
-        mapa = ["-af", iguala]
+        mapa = [*imagen, "-af", iguala]
     subprocess.run([
         "ffmpeg", "-y", "-loglevel", "error", *entradas, *mapa,
         "-c:v", "libx264", "-preset", "veryfast", "-crf", "21", "-pix_fmt", "yuv420p",

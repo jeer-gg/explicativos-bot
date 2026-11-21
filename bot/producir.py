@@ -205,8 +205,24 @@ def producir():
             telegram.aviso_seguro(f"«{exito['serie']}» despegó: el próximo video será su parte 2.")
     except Exception as e:  # noqa: BLE001
         print("Aviso: no se pudo revisar si algún video despegó:", e)
+    from . import aprendizaje
+    from .director import _hoy
+    aprendizaje.actualizar_lecciones(claude, cfg)
+    # Si este video reemplaza a uno cancelado: más exigente y con otro tema
+    reemplazo = estado().get("reemplazo")
+    if reemplazo:
+        cfg["claude"]["rondas_revision"] = cfg["claude"]["rondas_revision"] + 1
+        cfg["claude"]["nota_minima"] = cfg["claude"]["nota_minima"] + 0.5
+        cfg["claude"]["nota_para_publicar"] = cfg["claude"].get("nota_para_publicar", 6.5) + 0.5
+        cfg["canal"]["prohibidos"] = cfg["canal"]["prohibidos"] + [
+            f"el tema del video que se canceló: «{reemplazo.get('titulo_cancelado', '')}» ({reemplazo.get('tema_cancelado', '')}) ni nada parecido"]
+        e = estado()
+        e.pop("reemplazo", None)
+        guardar_estado(e)
     estilo = sortear_estilo(cfg)
-    parte = series.siguiente()
+    parte = None if reemplazo else series.siguiente(cfg)
+    if parte:
+        parte["_hoy"] = _hoy(cfg)
     if parte:
         estilo["estructura"] = parte.get("estructura") or estilo["estructura"]
         tema = {"tema": parte["tema"], "angulo": parte.get("angulo", ""), "subtema": parte.get("subtema", ""),

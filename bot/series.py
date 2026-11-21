@@ -24,10 +24,18 @@ def guardar(d: dict):
     _guardar(SERIES, d)
 
 
-def siguiente() -> dict | None:
-    """La próxima parte que toca hacer (tiene prioridad sobre un tema nuevo)."""
+def siguiente(cfg: dict | None = None) -> dict | None:
+    """La próxima parte que toca hacer. Sale una parte por día (así la gente vuelve al día
+    siguiente y no todos los videos del día son de la misma historia)."""
     pend = datos()["pendientes"]
-    return min(pend, key=lambda p: p["parte"]) if pend else None
+    if not pend:
+        return None
+    if cfg is not None:
+        from .director import _hoy
+        hoy = _hoy(cfg)
+        if datos().get("ultima_parte_fecha") == hoy:
+            return None
+    return min(pend, key=lambda p: p["parte"])
 
 
 def quitar(parte: dict):
@@ -61,6 +69,8 @@ def avanzar(guion: dict, tema: dict):
         return
     quitar(parte)
     d = datos()
+    if cfg_hoy := parte.get("_hoy"):
+        d["ultima_parte_fecha"] = cfg_hoy
     resumen = (parte.get("anterior", "") + " | Parte " + str(parte["parte"]) + ": "
                + " ".join(e["voz"] for e in guion["escenas"]))[-1500:]
     for p in d["pendientes"]:

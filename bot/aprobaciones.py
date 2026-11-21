@@ -74,12 +74,21 @@ def procesar(espera: int = 0, caducar: bool = True):
             try:
                 meta.borrar(id_video)
                 items = memoria()
+                cancelado = {}
                 for m in items:
                     if m.get("video_fb") == id_video:
                         m["cancelado"] = True
+                        cancelado = m
                 guardar_memoria(items)
+                # Se hace otro video, más exigente y de otro tema, para ocupar ese horario
+                e = estado()
+                e["reemplazo"] = {"tema_cancelado": cancelado.get("tema", ""),
+                                  "titulo_cancelado": cancelado.get("titulo", "")}
+                guardar_estado(e)
+                subprocess.run(["gh", "workflow", "run", "bot.yml", "-f", "tarea=producir"], check=False)
                 telegram.responder_boton(cb["id"], "Cancelado")
-                telegram.aviso_seguro("Listo: ese video se borró de Facebook.")
+                telegram.aviso_seguro("Listo: ese video se borró de Facebook. Ya estoy haciendo otro, de otro "
+                                      "tema y con revisión más exigente, para ese mismo horario.")
             except Exception as e:  # noqa: BLE001
                 telegram.responder_boton(cb["id"], "No se pudo")
                 telegram.aviso_seguro(f"No pude borrar el video: {str(e)[-500:]}")

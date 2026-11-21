@@ -35,19 +35,35 @@ produccion:
   escenas_max: 11
   # Voces gratis de Edge TTS. Ejemplos: es-MX-JorgeNeural, es-MX-DaliaNeural,
   # es-DO-EmilioNeural, es-DO-RamonaNeural, es-US-AlonsoNeural
-  voz: "es-MX-JorgeNeural"
+  voz: "es-MX-DaliaNeural"        # voz de respaldo (Edge), femenina como la principal
   velocidad_voz: "+15%"          # solo para la voz de respaldo (Edge)
   # Voz principal: Google Gemini (gratis con la clave GEMINI_API_KEY de Google AI Studio)
   voz_motor: "gemini"             # "gemini" o "edge"
-  voz_gemini: "Puck"              # otras: Charon, Fenrir, Orus, Kore, Aoede, Leda...
+  # Voz de marca: se diseña UNA vez con Gemini (Voice Design) y es la misma en todos los videos.
+  # Si cambias la descripción, el bot diseña una nueva y te manda la muestra por Telegram.
+  voz_marca:
+    activa: true
+    nombre: "Narradora del canal"
+    genero: "female"
+    tono: "medium"
+    idioma: "es-419"
+    acento: "Latin American neutral Spanish, Caribbean warmth, no strong regional accent"
+    persona: "Popular science explainer and storyteller in her early thirties"
+    contexto: "Narration for short viral explainer videos about everyday science"
+    descripcion: >
+      A warm, bright and confident female narrator in her early thirties speaking neutral
+      Latin American Spanish. Friendly and close, like a smart friend telling you a secret
+      you will love. Clear diction, medium pitch, natural smile in the voice, energetic but
+      never shouting, fast and fluid pace with expressive intonation and real curiosity.
+  voz_gemini: "Laomedeia"         # voz fija de reserva si la voz de marca no estuviera disponible
+  # Siempre el mismo modelo para que la voz suene igual; los otros solo si el primero falla.
   modelos_voz_gemini: ["gemini-3.8-flash-tts", "gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts"]
   estilo_voz_gemini: >
-    Eres el narrador de un canal de divulgación viral en español latinoamericano neutro.
-    Arranca la primera frase con mucha energía y sorpresa, como quien cuenta un secreto que
-    nadie sabe. Ritmo rápido y continuo, sin pausas largas, voz cercana y segura, con
-    sonrisa en la voz. Sube la intensidad en los datos sorprendentes, baja un poco el tono
-    y hazlo más íntimo justo antes de revelar la respuesta, y remata la última frase con
-    énfasis. Lee exactamente este texto, sin añadir ni quitar palabras:
+    Narra como una divulgadora de videos virales en español latinoamericano neutro: cercana,
+    cálida y con sonrisa en la voz, como quien le cuenta a un amigo algo fascinante. Arranca
+    la primera frase con energía y sorpresa. Ritmo rápido y continuo, sin pausas largas.
+    Sube la intensidad en los datos sorprendentes, baja un poco y hazlo íntimo antes de la
+    respuesta, y remata con énfasis. Lee exactamente este texto, sin añadir ni quitar palabras:
   whisper_modelo: "base"          # para saber en qué momento se dice cada palabra
   # Animación: "3d" (escenas 3D con luces y sombras) o "2d" (ilustración plana)
   motor: "3d"
@@ -72,16 +88,20 @@ estilo:
     sombras planas, todo en movimiento suave. Sin emojis. Sin párrafos de texto
     en pantalla. Gráfico, claro y fiel a la realidad.
   descripcion_3d: >
-    Estilo de marca fijo del canal: 3D ilustrado de día, luminoso, con contornos negros
-    finos de dibujo y sombreado de caricatura en 3 tonos. Naranja de marca para lo principal,
-    azul para lo que se resalta, amarillo para detalles. El protagonista es un OBJETO cotidiano
-    grande y detallado que llena la pantalla, que se arma pieza por pieza, se abre en corte o
-    se compara con números. Los personajes son solo los de la historia que se cuenta. Etiquetas cortas, medidas,
-    flechas. Cámara cercana que gira y se acerca. Sin emojis. Fiel a la realidad.
+    Estilo de marca fijo del canal: 3D ilustrado con contornos negros finos de dibujo y
+    sombreado suave de caricatura, en un estudio de fondo neutro gris cálido, luz suave
+    y difusa y sombras suaves. Colores naturales y apagados (madera, metal, plástico, tela
+    reales, poco saturados); el color fuerte se reserva para lo que se resalta (azul de marca,
+    rojo para tachar o advertir). Nada chillón ni muy brillante. El protagonista es un OBJETO
+    cotidiano grande y detallado que llena la pantalla, que se arma, se abre en corte o se
+    compara con números. Los personajes son solo los de la historia que se cuenta. Etiquetas
+    cortas, medidas, flechas. Cámara cercana que gira y se acerca. Sin emojis. Fiel a la realidad.
   # Paletas para 3D (fondo oscuro, texto claro; acentos: protagonista, gente, luz, extra).
   # Estilo de marca ÚNICO para todos los videos (no se sortea): así la gente reconoce el canal.
   paletas_3d:  # cielo, texto, [objeto principal, secundario, resalte, extra, suelo]
-    marca: ["#8EC9F0", "#1B1B1F", "#F26B21", "#F4EFE6", "#2F7DE1", "#FFC93C", "#7DBE4B"]
+    # Estudio neutro (fondo gris cálido, suelo greige) y colores apagados; un solo resalte fuerte.
+    # Medido en los videos de ejemplo: brillo medio ~0,58, saturación ~0,3, solo ~3 % de píxeles muy saturados.
+    marca: ["#D3CEC6", "#1B1B1F", "#B9573F", "#E9E4DB", "#2F6FB5", "#D4A03C", "#C2BBAF"]
   # Paletas para 2D (fondo, tinta, 4 colores de acento).
   paletas:
     calida:   ["#FFF4E0", "#1E1B2E", "#FF6B35", "#F7B32B", "#2EC4B6", "#E71D36"]
@@ -115,6 +135,8 @@ series:
   # Continuación automática: si un video saca este múltiplo de las vistas normales, se hace su parte 2.
   multiplo_exito: 2.5
   minimo_videos_para_comparar: 6
+  # Historias en partes: como mucho una serie nueva cada estos días, y una parte por día.
+  dias_entre_series: 4
 
 aprobacion:
   # true = te llega a Telegram y tú decides. false = publica solo (versión A).
