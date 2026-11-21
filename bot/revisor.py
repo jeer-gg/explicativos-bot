@@ -23,7 +23,9 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
         "entender aunque se recorte arriba y abajo al formato 4:5 del feed), que el plano sea cercano "
         "(el protagonista grande, no un cuarto vacío visto de lejos), que desde el inicio de la "
         "escena ya se vea una ilustración completa y rica, y que entre los dos fotogramas haya "
-        "un cambio visible (movimiento, acción). En la PRIMERA escena exige además un gancho visual "
+        "un cambio visible (movimiento, acción), que el protagonista y el lugar sean los MISMOS que "
+        "en las demás escenas (mismo objeto, colores y sitio: el video debe parecer un solo mundo "
+        "que cambia) y que la parte de la que habla la voz se vea resaltada o señalada. En la PRIMERA escena exige además un gancho visual "
         "que detenga el scroll desde el fotograma 0 (es la miniatura)."
     )}]
     from .autocontrol import texto_reglas

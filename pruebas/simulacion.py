@@ -36,6 +36,7 @@ REGISTRO = {"claude": [], "telegram": [], "gh": [], "meta": []}
 def guion_falso():
     escenas = [{"voz": f"Frase número {i} sobre por qué el pan se pone duro.", "visual": f"visual {i}",
                 "rotulo": "Pan" if i == 0 else "", "palabra_clave": "pan",
+                "concepto": "por qué el pan" if i else "", "mundo": f"el pan con {i + 1} capas",
                 "datos": [{"afirmacion": "el pan pierde agua", "fuente": "https://ejemplo.org"}]}
                for i in range(6)]
     escenas[1]["grafico"] = {"tipo": "barras", "items": [{"etiqueta": "pan", "valor": 35, "unidad": "%"},
@@ -54,6 +55,13 @@ import {EscenaProps, ANCHO, ALTO} from '../lib';
 export const NOMBRE: React.FC<EscenaProps> = ({paleta}) => (
   <svg width={ANCHO} height={ALTO} viewBox={`0 0 ${ANCHO} ${ALTO}`}><rect width={ANCHO} height={ALTO} fill={paleta.fondo} /></svg>
 );
+"""
+
+MUNDO_OK = """import React from 'react';
+import type {Paleta} from '../lib3d';
+export type MundoProps = {paso: number; frame: number; fps: number; paleta: Paleta; ocultar?: string[]; resaltar?: string[]};
+export const PARTES = ['miga'] as const;
+export const Mundo: React.FC<MundoProps> = () => <group />;
 """
 
 RONDA_REVISOR = {"n": 0}
@@ -94,6 +102,10 @@ def responder(system: str, contenido) -> str:
         g["verificacion"] = {"cambios": ["matiz en escena 2"], "confianza": "alta"}
         g.pop("direccion_arte", None)  # el verificador "olvida" un campo: debe recuperarse
         return json.dumps(g, ensure_ascii=False)
+    if "MUNDO COMPARTIDO" in system:
+        REGISTRO["mundo"] = REGISTRO.get("mundo", 0) + 1
+        REGISTRO["pedido_mundo"] = texto
+        return "```tsx\n" + MUNDO_OK + "```"
     if "Contrato técnico" in system:
         REGISTRO["ultimo_escena"] = system
         nombre = system.split("export const ")[1].split(":")[0]
@@ -318,6 +330,13 @@ assert plan_a["escenas"][1]["grafico"]["tipo"] == "barras" and plan_a["escenas"]
 assert [e["camara"] for e in plan_a["escenas"][:2]] == ["picado", "frente"]
 assert "Encuadre de cámara" in str(REGISTRO.get("ultimo_pedido", "Encuadre de cámara"))
 assert "React Three Fiber" in REGISTRO["ultimo_escena"], "en 3D se debe usar la guía de escenas 3D"
+# Mundo compartido: se dibuja una vez, las escenas lo reciben y el plan va en modo continuo
+assert REGISTRO.get("mundo") == 1, "el mundo compartido se dibuja una sola vez por video"
+assert "el pan con 3 capas" in REGISTRO["pedido_mundo"], "el mundo debe conocer cómo queda cada escena"
+assert "Mundo compartido (OBLIGATORIO" in REGISTRO["ultimo_escena"] and "export const Mundo" in REGISTRO["ultimo_escena"]
+assert plan_a["continuo"] is True and plan_a["estilo_subtitulos"] == "concepto"
+assert plan_a["escenas"][1]["concepto"] == "por qué el pan"
+assert (REPO / "remotion" / "src" / "escenas" / "Mundo.tsx").exists()
 assert not (REPO / "remotion" / "plan_B.json").exists() or True
 for plan in (plan_a,):
     for a, b in zip(plan["escenas"], plan["escenas"][1:]):

@@ -51,7 +51,8 @@ def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
                         "clave": momento_clave(t["palabras"], fuente.get("palabra_clave", "")),
                         "clave_palabra": fuente.get("palabra_clave", "") or "",
                         "camara": estudio.encuadre(len(escenas)),
-                        "grafico": grafico_valido(fuente.get("grafico"))})
+                        "grafico": grafico_valido(fuente.get("grafico")),
+                        "concepto": (fuente.get("concepto") or "").strip()[:40]})
     return {
         "motor": cfg["produccion"].get("motor", "2d"),
         "audio": tiempos_variante["audio"],
@@ -60,6 +61,9 @@ def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
         "paleta": estilo["colores"],
         "portada": (guion.get("portada") or "").upper()[:60],
         "escenas": escenas,
+        # Un solo mundo que evoluciona (si se pudo dibujar el mundo compartido)
+        "continuo": bool(estudio.MUNDO["activo"]) and cfg["produccion"].get("motor") == "3d",
+        "estilo_subtitulos": cfg["produccion"].get("subtitulos_estilo", "concepto"),
     }
 
 
@@ -283,6 +287,21 @@ def producir():
 
     estudio.limpiar_escenas_viejas()
 
+    # 4a. Mundo compartido: el lugar y el protagonista que evolucionan en todas las escenas
+    if cfg["produccion"].get("motor") == "3d" and cfg["produccion"].get("mundo_continuo", True):
+        from .claude import LimiteDeSuscripcion as _Limite
+        if avance["escenas"].get("Mundo"):
+            estudio.guardar_mundo(avance["escenas"]["Mundo"])
+        else:
+            try:
+                print("Dibujando el mundo compartido")
+                avance["escenas"]["Mundo"] = estudio.dibujar_mundo(claude, cfg, guion, estilo)
+            except _Limite:
+                raise
+            except Exception as e:  # noqa: BLE001  (sin mundo, cada escena se dibuja por su cuenta)
+                print("No se pudo dibujar el mundo compartido:", e)
+                estudio.MUNDO.update(activo=False, codigo="")
+
     def dibujar_una(nombre, comentarios="", previo="", foto=None):
         esc, t, i = datos_escena(nombre)
         guardado = avance["escenas"].get(nombre)
@@ -318,7 +337,7 @@ def producir():
         except LimiteDeSuscripcion:
             for _ in range(len(todos)):
                 ok, salida = render.empaquetar()
-                culpable = None if ok else render.escena_con_error(salida, todos)
+                culpable = None if ok else render.escena_con_error(salida, estudio.con_mundo(todos))
                 if ok or not culpable:
                     return
                 estudio.usar_respaldo(culpable)
@@ -340,7 +359,7 @@ def producir():
           crudo = trabajo / f"{variante}_crudo.mp4"
           ok, salida = render.renderizar(ruta_plan, crudo)
           if not ok:
-              culpable = render.escena_con_error(salida, todos)
+              culpable = render.escena_con_error(salida, estudio.con_mundo(todos))
               if not culpable:
                   raise RuntimeError("Falló el render:\n" + salida[-2000:])
               estudio.usar_respaldo(culpable)

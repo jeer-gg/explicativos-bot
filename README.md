@@ -11,8 +11,10 @@ página de Facebook. Se publica solo; por Telegram te avisa y puedes cancelar.
    llamada verifica cada dato.
 3. **Voz:** Edge TTS narra cada escena. Su duración y el momento de cada palabra marcan el ritmo
    de toda la animación.
-4. **Estudio:** Claude dibuja cada escena como código de Remotion (ilustración animada desde
-   cero, sin clips de stock). La cámara recorre las escenas en un solo plano continuo.
+4. **Estudio:** Claude dibuja primero el **mundo compartido** (el lugar y el objeto protagonista)
+   y luego cada escena encima de él: el objeto se arma pieza por pieza, se llena, falla y se
+   arregla en un solo mundo, como los Reels 3D con millones de vistas. Arriba aparece en grande
+   el concepto que dice la voz («EL FLOTADOR», «NO SUBE SOLA»).
 5. **Revisor:** Claude mira un fotograma real de cada escena, la puntúa y manda a rehacer las
    flojas.
 6. **Render:** Remotion y ffmpeg generan el MP4 vertical con las especificaciones de Reels.

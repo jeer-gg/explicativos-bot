@@ -21,6 +21,40 @@ def encuadre(indice: int) -> str:
 
 
 MOTOR = {"actual": "2d"}  # lo fija producir al empezar ("3d" o "2d")
+# Mundo compartido (3D): un solo lugar y un solo protagonista que evoluciona en todas las escenas.
+MUNDO = {"activo": False, "codigo": ""}
+
+
+def con_mundo(nombres: list[str]) -> list[str]:
+    """Archivos que se compilan: las escenas y, si está activo, el mundo compartido."""
+    return nombres + (["Mundo"] if MUNDO["activo"] and "Mundo" not in nombres else [])
+
+
+BLOQUE_MUNDO = """
+## Mundo compartido (OBLIGATORIO en este video)
+Todas las escenas pasan en el MISMO lugar y con el MISMO protagonista, que va cambiando escena a
+escena (como los Reels 3D más virales). Ese mundo ya está hecho en el archivo `./Mundo`:
+```tsx
+{codigo}
+```
+- Además de los imports permitidos, importa lo que necesites de `./Mundo`
+  (`import {Mundo, Ala} from './Mundo';`).
+- Tu escena dibuja la base con `<Mundo paso={PASO} frame={frame} fps={fps} paleta={paleta} />`
+  (PASO es el número de tu escena, te lo doy en el pedido). NO vuelvas a construir el
+  protagonista ni el lugar: ya los dibuja Mundo. No lo muevas ni lo cambies de escala.
+- Lo NUEVO de tu escena (la pieza que se agrega, lo que se llena, lo que se abre) lo animas tú:
+  quítalo de Mundo con `ocultar={['nombre']}` y dibuja la parte exportada (`<Ala paleta={paleta} />`)
+  dentro de un `<group>` animado (caer, aparecer, mover) hasta quedar en su sitio.
+- Al TERMINAR tu escena el mundo debe verse EXACTAMENTE como `<Mundo paso={PASO + 1} />`: así el
+  paso a la escena siguiente es invisible y parece un solo plano.
+- Cuando la voz nombra una parte, resáltala justo en ese momento: añádela a `resaltar` (o pasa
+  `resaltado` a su componente) durante 1 a 1,5 segundos y vuelve a su color.
+- Si la escena muestra qué pasa SIN una pieza o cuando algo falla, exagéralo con física de
+  dibujo animado (se ladea y se cae, se desborda, se rompe, sale volando) y, si la siguiente
+  escena lo necesita, termina con el mundo de nuevo en su estado correcto.
+- Lo tuyo encima del mundo: flechas de fuerza o de flujo, líneas punteadas de trayectoria,
+  etiquetas cortas, medidas, partículas (agua, aire, chispas, tornillos que llueven).
+"""
 
 RESPALDO = """import React from 'react';
 import {EscenaProps, EscenaRespaldo} from '../lib';
@@ -35,7 +69,10 @@ def _system(cfg: dict, nombre: str) -> str:
     ejemplo = (ESCENAS / ("Ejemplo3D.tsx" if tres else "Ejemplo.tsx")).read_text(encoding="utf-8")
     estilo = cfg["estilo"]["descripcion_3d" if tres else "descripcion"].strip()
     from .autocontrol import texto_reglas
-    return (prompt("escena3d.md" if tres else "escena.md").replace("Responde SOLO con", texto_reglas("escenas") + "\nResponde SOLO con")
+    extra = texto_reglas("escenas")
+    if tres and MUNDO["activo"] and MUNDO["codigo"] and nombre != "Mundo":
+        extra = BLOQUE_MUNDO.replace("{codigo}", MUNDO["codigo"]) + extra
+    return (prompt("escena3d.md" if tres else "escena.md").replace("Responde SOLO con", extra + "\nResponde SOLO con")
             .replace("{estilo}", estilo)
             .replace("{lib}", lib)
             .replace("{ejemplo}", ejemplo)
@@ -67,7 +104,7 @@ protagonista y el mundo se vean iguales en cada escena):
 
 Guion completo (para contexto): {resumen}
 
-Escena número {indice + 1} de {len(guion['escenas'])}. Dura {tiempos['duracion']:.2f} segundos.{GANCHO if indice == 0 else ''}{FINAL if indice == len(guion['escenas']) - 1 and MOTOR['actual'] == '3d' else ''}
+Escena número {indice + 1} de {len(guion['escenas'])}. Dura {tiempos['duracion']:.2f} segundos.{_paso_mundo(guion, indice)}{GANCHO if indice == 0 else ''}{FINAL if indice == len(guion['escenas']) - 1 and MOTOR['actual'] == '3d' else ''}
 Voz de esta escena: «{escena['voz']}»
 Palabras con su tiempo dentro de la escena: {palabras}
 Palabra clave (momento visual principal): {escena.get('palabra_clave', '')}
@@ -76,6 +113,53 @@ Lo que debe mostrar: {escena['visual']}
 Paleta sorteada: fondo {estilo['colores']['fondo']}, tinta {estilo['colores']['tinta']}, acentos {', '.join(estilo['colores']['acentos'])}{' (acentos: objeto principal, secundario, resalte, extra, suelo)' if MOTOR['actual'] == '3d' else ''}
 
 {"Todas las escenas están en el mismo mundo: el cielo, el suelo, el sol y las sombras ya los pone el video. Tú construyes solo lo de tu escenario." if MOTOR["actual"] == "3d" else "Las escenas vecinas comparten el mismo tablero y la cámara viaja entre ellas: mantén un fondo coherente con la paleta para que el paso sea fluido."}"""
+
+
+def _paso_mundo(guion: dict, indice: int) -> str:
+    if not (MUNDO["activo"] and MUNDO["codigo"] and MOTOR["actual"] == "3d"):
+        return ""
+    escenas = guion["escenas"]
+    antes = escenas[indice - 1].get("mundo", "") if indice > 0 else "el estado inicial del mundo"
+    despues = escenas[indice].get("mundo", "")
+    return (f"\nPASO = {indice} (usa <Mundo paso={{{indice}}} ... />)."
+            f"\nAl empezar, el mundo está así: {antes}"
+            f"\nAl terminar tu escena debe quedar así (igual que <Mundo paso={{{indice + 1}}} />): {despues}")
+
+
+def _pedido_mundo(guion: dict, estilo: dict) -> str:
+    arte = guion.get("direccion_arte") or {}
+    direccion = "\n".join(f"- {k}: {v}" for k, v in arte.items()) or "- libre, coherente con el guion"
+    pasos = "\n".join(
+        f"- Escena {i} (paso {i}). Voz: «{e['voz']}». Se ve: {e.get('visual', '')}. "
+        f"Al terminar, el mundo queda así: {e.get('mundo', '(igual que antes)')}"
+        for i, e in enumerate(guion["escenas"]))
+    c = estilo["colores"]
+    return f"""Video: «{guion['titulo']}»
+Dirección de arte:
+{direccion}
+
+Escenas (cada una cambia algo del mismo mundo):
+{pasos}
+
+Paleta: fondo {c['fondo']}, tinta {c['tinta']}, acentos {', '.join(c['acentos'])} (objeto principal, secundario, resalte, extra, suelo).
+Construye el archivo Mundo.tsx con PARTES, un componente por parte, y Mundo."""
+
+
+def dibujar_mundo(claude: Claude, cfg: dict, guion: dict, estilo: dict) -> str:
+    """Dibuja el mundo compartido (Mundo.tsx) una sola vez por video."""
+    lib = (REMOTION / "src" / "lib3d.tsx").read_text(encoding="utf-8")
+    ejemplo = (ESCENAS / "Ejemplo3D.tsx").read_text(encoding="utf-8")
+    system = (prompt("mundo3d.md").replace("{estilo}", cfg["estilo"]["descripcion_3d"].strip())
+              .replace("{lib}", lib).replace("{ejemplo}", ejemplo))
+    texto = claude.texto(system, _pedido_mundo(guion, estilo), modelo=claude.modelo_escenas, max_tokens=14000)
+    codigo = extraer_codigo(texto)
+    guardar_mundo(codigo)
+    return codigo
+
+
+def guardar_mundo(codigo: str) -> None:
+    (ESCENAS / "Mundo.tsx").write_text(codigo, encoding="utf-8")
+    MUNDO.update(activo=True, codigo=codigo)
 
 
 def dibujar(claude: Claude, cfg: dict, nombre: str, escena: dict, tiempos: dict, guion: dict,
@@ -98,17 +182,42 @@ def dibujar(claude: Claude, cfg: dict, nombre: str, escena: dict, tiempos: dict,
 def reparar(claude: Claude, cfg: dict, nombre: str, error: str) -> None:
     ruta = ESCENAS / f"{nombre}.tsx"
     codigo = ruta.read_text(encoding="utf-8")
+    if nombre == "Mundo":
+        lib = (REMOTION / "src" / "lib3d.tsx").read_text(encoding="utf-8")
+        sistema = (prompt("mundo3d.md").replace("{estilo}", cfg["estilo"]["descripcion_3d"].strip())
+                   .replace("{lib}", lib).replace("{ejemplo}", "(no hace falta)"))
+    else:
+        sistema = _system(cfg, nombre)
     texto = claude.texto(
-        _system(cfg, nombre),
+        sistema,
         f"Este archivo falla al compilar o renderizar.\n```tsx\n{codigo}\n```\nError:\n{error[-3000:]}\n"
         "Corrige el error sin bajar la calidad de la ilustración. Devuelve el archivo completo.",
-        modelo=claude.modelo_escenas, max_tokens=12000)
-    ruta.write_text(extraer_codigo(texto), encoding="utf-8")
+        modelo=claude.modelo_escenas, max_tokens=14000)
+    nuevo = extraer_codigo(texto)
+    ruta.write_text(nuevo, encoding="utf-8")
+    if nombre == "Mundo":
+        MUNDO["codigo"] = nuevo
+
+
+RESPALDO_MUNDO = """import React from 'react';
+import type {Paleta} from '../lib3d';
+
+export type ParteProps = {paleta: Paleta; resaltado?: boolean; frame?: number};
+export type MundoProps = {paso: number; frame: number; fps: number; paleta: Paleta; ocultar?: string[]; resaltar?: string[]};
+export const PARTES = [] as const;
+export const Mundo: React.FC<MundoProps> = () => <group />;
+"""
 
 
 def usar_respaldo(nombre: str):
     from .autocontrol import ESTADO_VIDEO
     ESTADO_VIDEO["respaldos"].append(nombre)
+    if nombre == "Mundo":
+        # Las escenas importan partes de Mundo: con el mundo vacío, las que fallen se repararán
+        # (o pasarán a respaldo) en la compilación.
+        (ESCENAS / "Mundo.tsx").write_text(RESPALDO_MUNDO, encoding="utf-8")
+        MUNDO["codigo"] = RESPALDO_MUNDO
+        return
     plantilla = RESPALDO_3D if MOTOR["actual"] == "3d" else RESPALDO
     (ESCENAS / f"{nombre}.tsx").write_text(plantilla.replace("{nombre}", nombre), encoding="utf-8")
 
@@ -134,6 +243,7 @@ _REPAROS: dict = {}
 
 def limpiar_escenas_viejas():
     _REPAROS.clear()
+    MUNDO.update(activo=False, codigo="")
     for f in ESCENAS.glob("*.tsx"):
         if f.name not in ("Ejemplo.tsx", "Ejemplo3D.tsx"):
             f.unlink()
@@ -141,6 +251,7 @@ def limpiar_escenas_viejas():
 
 def compilar(claude: Claude, cfg: dict, nombres: list[str], intentos: int = 3) -> None:
     """Empaqueta el proyecto; si una escena rompe la compilación, la repara o la reemplaza."""
+    nombres = con_mundo(nombres)
     for _ in range(intentos * len(nombres) + 1):
         ok, salida = render.empaquetar()
         if ok:

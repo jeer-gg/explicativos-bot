@@ -101,7 +101,7 @@ export const TarjetaDatos: React.FC<{plan: PlanVideo}> = ({plan}) => {
   const g = e.grafico;
   const tarjeta = g.tipo !== 'mitos';
   return (
-    <div style={{position: 'absolute', left: 0, right: 0, top: 470, display: 'flex', justifyContent: 'center'}}>
+    <div style={{position: 'absolute', left: 0, right: 0, top: plan.estilo_subtitulos === 'concepto' ? 590 : 470, display: 'flex', justifyContent: 'center'}}>
       <div
         style={{
           transform: `scale(${0.6 + 0.4 * pop})`,

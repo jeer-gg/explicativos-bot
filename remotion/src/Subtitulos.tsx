@@ -1,7 +1,7 @@
 // Subtítulos cortos (máximo 3 palabras) con la palabra actual resaltada.
 import React from 'react';
 import {spring, useCurrentFrame, useVideoConfig} from 'remotion';
-import type {PlanVideo} from './Video';
+import type {EscenaPlan, PlanVideo} from './Video';
 
 type Trozo = {inicio: number; fin: number; palabras: {w: string; t: number}[]};
 
@@ -129,6 +129,113 @@ export const Subtitulos: React.FC<{plan: PlanVideo; cine?: boolean; titular?: bo
             }}
           >
             {p.w.replace(/[.,;:]$/, '')}
+          </span>
+        );
+      })}
+    </div>
+  );
+};
+
+// ---------- Estilo "concepto" (como los Reels 3D más virales) ----------
+// En vez de subtitular cada palabra, arriba aparece solo el CONCEPTO de cada momento
+// («EL FLOTADOR», «LA BOLA SUBE», «NO SUBE SOLA»), palabra por palabra justo cuando la voz lo
+// dice, y se queda hasta el siguiente. Lo negativo va en rojo y la palabra clave en el color de resalte.
+
+type Concepto = {inicio: number; fin: number; palabras: {w: string; t: number}[]; clave: string};
+
+const NEGACION = /^(no|sin|nunca|ni|jamas|tampoco|nadie|nada)$/;
+
+const parecida = (a: string, b: string) =>
+  a.length > 0 && b.length > 0 && (a === b || (a.length > 3 && b.length > 3 && (a.startsWith(b) || b.startsWith(a))));
+
+const momentosConcepto = (e: EscenaPlan): Concepto | null => {
+  const texto = (e.concepto || e.rotulo || '').trim();
+  if (!texto) return null;
+  const palabras = texto.split(/\s+/).filter(Boolean).slice(0, 5);
+  const objetivo = palabras.map(normal);
+  const dichas = e.palabras.map((p) => normal(p.w));
+  // Busca la frase en la voz: el primer sitio donde coinciden en orden la mayoría de sus palabras.
+  let tiempos: number[] | null = null;
+  for (let j = 0; j < dichas.length && !tiempos; j++) {
+    if (!parecida(dichas[j], objetivo[0]) && !(objetivo.length > 1 && parecida(dichas[j], objetivo[1]))) continue;
+    const desfase = parecida(dichas[j], objetivo[0]) ? 0 : 1;
+    const ts: number[] = [];
+    let k = j;
+    let aciertos = 0;
+    objetivo.forEach((w, i) => {
+      if (i < desfase) {
+        ts.push(Math.max(0, e.palabras[j].t - 0.12));
+        return;
+      }
+      const hasta = Math.min(dichas.length, k + 3);
+      let hallado = -1;
+      for (let m = k; m < hasta; m++) if (parecida(dichas[m], w)) { hallado = m; break; }
+      if (hallado >= 0) {
+        ts.push(e.palabras[hallado].t);
+        k = hallado + 1;
+        aciertos++;
+      } else {
+        ts.push((ts[ts.length - 1] ?? e.palabras[j].t) + 0.14);
+      }
+    });
+    if (aciertos >= Math.ceil((objetivo.length - desfase) / 2)) tiempos = ts;
+  }
+  if (!tiempos) {
+    // No se dice tal cual: aparece en la palabra clave (o al empezar la escena), una tras otra.
+    const base = e.clave != null ? e.clave : 0.15;
+    tiempos = objetivo.map((_, i) => base + i * 0.14);
+  }
+  const absolutos = tiempos.map((x) => e.inicio + Math.max(0, x));
+  return {
+    inicio: absolutos[0] - 0.04,
+    fin: e.inicio + e.duracion,
+    palabras: palabras.map((w, i) => ({w, t: absolutos[i]})),
+    clave: normal(e.clave_palabra ?? ''),
+  };
+};
+
+export const Conceptos: React.FC<{plan: PlanVideo; oscuro?: boolean; desde?: number}> = ({plan, oscuro = false, desde = 0}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const t = frame / fps;
+  const conceptos = React.useMemo(() => plan.escenas.map(momentosConcepto).filter((c): c is Concepto => c !== null), [plan]);
+  if (t < desde) return null;
+  const c = conceptos.find((x) => t >= x.inicio && t < x.fin);
+  if (!c) return null;
+  const largo = c.palabras.reduce((n, p) => n + p.w.length + 1, 0);
+  const tam = largo <= 12 ? 120 : largo <= 20 ? 100 : largo <= 28 ? 84 : 72;
+  const tinta = oscuro ? '#FFFFFF' : '#1B1B1F';
+  const borde = oscuro ? '#0E0E12' : '#FFFFFF';
+  const resalte = plan.paleta.acentos[2] ?? '#2F6FB5';
+  let negado = false;
+  return (
+    <div style={{position: 'absolute', left: 36, right: 36, top: 292, textAlign: 'center', lineHeight: 1.02}}>
+      {c.palabras.map((p, i) => {
+        const n = normal(p.w);
+        if (NEGACION.test(n)) negado = true;
+        const f = frame - Math.round(p.t * fps);
+        if (f < 0) return null;
+        const sube = spring({frame: f, fps, config: {damping: 15, stiffness: 260}});
+        const esClave = !negado && c.clave.length > 2 && parecida(n, c.clave);
+        const color = negado ? '#E5484D' : esClave ? resalte : tinta;
+        return (
+          <span
+            key={i}
+            style={{
+              display: 'inline-block',
+              margin: `0 ${Math.round(tam * 0.11)}px`,
+              fontSize: tam,
+              fontWeight: 900,
+              letterSpacing: -1,
+              textTransform: 'uppercase',
+              color,
+              opacity: Math.min(1, sube * 1.6),
+              transform: `translateY(${(1 - sube) * 46}px) scale(${0.86 + 0.14 * sube})`,
+              WebkitTextStroke: `${oscuro ? 10 : 8}px ${borde}`,
+              paintOrder: 'stroke fill',
+            }}
+          >
+            {p.w.replace(/[.,;:!?¡¿«»"]/g, '')}
           </span>
         );
       })}

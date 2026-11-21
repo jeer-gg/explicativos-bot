@@ -31,8 +31,8 @@ produccion:
   # Duración objetivo del Reel en segundos (Facebook acepta de 3 a 90).
   duracion_min: 40   # orientativo: el guion dura lo que la explicación necesita, sin relleno
   duracion_max: 70
-  escenas_min: 8
-  escenas_max: 11
+  escenas_min: 10   # en los videos ganadores cambia algo cada 3 a 4 segundos
+  escenas_max: 14
   # Voces gratis de Edge TTS. Ejemplos: es-MX-JorgeNeural, es-MX-DaliaNeural,
   # es-DO-EmilioNeural, es-DO-RamonaNeural, es-US-AlonsoNeural
   voz: "es-MX-DaliaNeural"        # voz de respaldo (Edge), femenina como la principal
@@ -67,6 +67,9 @@ produccion:
   whisper_modelo: "base"          # para saber en qué momento se dice cada palabra
   # Animación: "3d" (escenas 3D con luces y sombras) o "2d" (ilustración plana)
   motor: "3d"
+  # true = todo el video pasa en UN mundo que evoluciona (el objeto se arma, se llena, falla,
+  # se arregla), como los Reels 3D con millones de vistas. false = un escenario por escena.
+  mundo_continuo: true
   concurrencia_3d: "50%"
   tiempo_maximo_min: 170          # debe ser menor que timeout-minutes del trabajo producir
   # Dos versiones del gancho (A y B) para que elijas la mejor.
@@ -77,8 +80,12 @@ produccion:
   # Música de fondo con "ducking" (baja sola cuando habla la voz): sube 2 o 3 pistas sin derechos
   # (por ejemplo de la Biblioteca de audio de YouTube) a remotion/public/musica/ y se van rotando.
   volumen_musica: 0.16
-  # Subtítulos cortos (3 palabras) para quien ve sin sonido.
+  # Texto en pantalla para quien ve sin sonido.
   subtitulos: true
+  # "concepto" = solo el concepto de cada momento en grande arriba («EL FLOTADOR», «NO SUBE
+  # SOLA»), palabra por palabra cuando la voz lo dice (estilo de los videos ganadores).
+  # "completo" = subtítulos de toda la narración, de 3 en 3 palabras.
+  subtitulos_estilo: "concepto"
 
 estilo:
   descripcion: >
@@ -121,6 +128,8 @@ ganchos:
     - "título que niega lo obvio («esto NO está de adorno»)"
     - "advertencia directa («si te pasa X, NO hagas Y»)"
     - "comparación imposible con número («va más lento que un tren»)"
+    - "te mintieron («Te mintieron: casi nadie se fija en ti»)"
+    - "ya lo tienes, pero falta algo («Ya tienes un avión… pero así no vuela»)"
   # Formatos ganadores (sacados de Reels con cientos de miles de vistas). Se sortea uno por video.
   estructuras:
     - "NO ESTÁ DE ADORNO: un detalle de un objeto cotidiano que parece decoración pero cumple una función clave; se muestra el objeto, se quita el detalle, se ve qué pasaría sin él y se explica por qué está ahí"
@@ -130,6 +139,8 @@ ganchos:
     - "POR DENTRO: vista en corte de algo cotidiano para ver lo que pasa adentro (aire, agua, fuerzas, calor) con flechas que lo muestran"
     - "HISTORIA EN PARTES: una historia real e intrigante detrás de algo cotidiano (un invento por accidente, un error que cambió todo, un misterio con explicación científica) contada en 2 o 3 partes; cada parte responde su propia pregunta y termina con una intriga que lleva a la siguiente"
     - "LA MISMA IDEA: cómo un objeto evolucionó desde su versión más antigua hasta la que usas hoy, mostrando que el principio es el mismo"
+    - "DE LO MÍNIMO A LO REAL: arranca con la versión más simple posible del objeto («ya tienes un avión: una tabla con un palo»); cada frase muestra un problema, el fallo exagerado, y la pieza real que lo resuelve se agrega con su nombre; al final, el objeto completo funcionando"
+    - "SIGUE EL CAMINO: se recorre un sistema cotidiano de principio a fin en un solo mundo en corte (el agua desde la calle hasta tu llave, la luz desde el poste hasta el foco); cada tramo agrega una pieza con su nombre y lo que pasaría sin ella"
 
 series:
   # Continuación automática: si un video saca este múltiplo de las vistas normales, se hace su parte 2.

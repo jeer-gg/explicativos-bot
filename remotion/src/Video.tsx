@@ -19,6 +19,7 @@ export type EscenaPlan = {
   clave_palabra?: string;
   camara?: string;
   grafico?: Grafico | null;
+  concepto?: string; // frase de 1 a 4 palabras que se dice en la voz y aparece grande arriba
 };
 
 export type PlanVideo = {
@@ -29,6 +30,8 @@ export type PlanVideo = {
   paleta: Paleta;
   portada?: string;
   escenas: EscenaPlan[];
+  continuo?: boolean; // 3D: todas las escenas en el mismo lugar (un solo mundo que evoluciona)
+  estilo_subtitulos?: 'concepto' | 'completo';
 };
 
 export type Grafico =

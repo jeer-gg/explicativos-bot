@@ -43,6 +43,16 @@ cuando ayuda, la paleta sorteada y movimiento constante.
   - No está de adorno: se señala el detalle, desaparece (escala a 0), se ve el problema, vuelve.
   - Por dentro: el objeto partido por la mitad (corte) y `Flecha` mostrando aire, agua o fuerzas.
   - Con números: `Medida` para tamaños; los números grandes van en la tarjeta de datos del video.
+- Lo que más retiene en los Reels 3D con millones de vistas (aplícalo siempre que encaje):
+  · Resaltar la parte que se nombra: en el momento exacto en que la voz dice su nombre, esa
+    parte se pinta del color de resalte (`acentos[2]`) o brilla 1 a 1,5 segundos y vuelve.
+  · El fallo exagerado: qué pasa SIN la pieza o cuando se hace mal, con física de dibujo
+    animado (se ladea y cae de golpe, se desborda, se desarma, le llueven tornillos, sale
+    volando) y después la versión correcta que sí aguanta.
+  · Fuerzas y caminos visibles: `Flecha` para fuerzas (sustentación arriba, peso abajo, empuje),
+    `Linea` discontinua para trayectorias y flujos (por dónde va el agua, el aire, la corriente),
+    partículas pequeñas que corren por tuberías o cables.
+  · Vista en corte para lo que pasa adentro (cisternas, motores, paredes, cables).
 - Fiel a la realidad: proporciones y funcionamiento correctos.
 - PROHIBIDO inventar datos: en carteles, etiquetas, medidas, calendarios o pantallas solo van
   números, años, porcentajes o medidas que aparecen en la voz de ESTA escena. Si la voz no da
@@ -74,6 +84,8 @@ cuando ayuda, la paleta sorteada y movimiento constante.
 - Al menos 3 "golpes" sincronizados con palabras de la voz usando `momento()` con 3 palabras
   distintas: una pieza cae, algo se abre, una flecha corre, una etiqueta aparece, unos ojos miran.
 - El primer golpe en los primeros 0,3 segundos. Nunca más de 1,5 segundos sin un cambio visible.
+- Arriba de la pantalla el video escribe en grande el concepto que dice la voz («EL FLOTADOR»):
+  no lo repitas como texto 3D; señala la parte con el resalte o una flecha.
 
 ## Contrato técnico (obligatorio)
 - Archivo TSX que exporta exactamente: `export const {nombre}: React.FC<EscenaProps> = (...) => ...`

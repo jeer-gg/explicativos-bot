@@ -1,5 +1,8 @@
-// Video 3D: un solo mundo con un "escenario" por escena, iluminado por su reflector.
-// La cámara viaja de un escenario al siguiente sin cortes (un plano continuo), siempre cerca.
+// Video 3D. Dos modos:
+// - continuo (por defecto): UN solo mundo en el mismo lugar que evoluciona escena a escena (como
+//   los Reels 3D más virales: el objeto se arma pieza por pieza, se llena, falla, se arregla) y la
+//   cámara se mueve dentro de él.
+// - escenarios: un "escenario" por escena y la cámara viaja de uno al siguiente.
 import React from 'react';
 import {AbsoluteFill, Audio, Easing, Sequence, continueRender, delayRender, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {ThreeCanvas} from '@remotion/three';
@@ -9,12 +12,14 @@ import {ANCHO, ALTO} from './lib';
 import {ASPECTO, EscenaRespaldo3D, FUENTE, V3} from './lib3d';
 import {DURACION_PORTADA, Portada, TarjetaDatos} from './Tarjetas';
 import {ESCENAS} from './escenas';
-import {Subtitulos} from './Subtitulos';
+import {Conceptos, Subtitulos} from './Subtitulos';
 import {fuente} from './fuente';
 import type {PlanVideo} from './Video';
 
 const SEPARACION = 11; // metros entre escenarios
 export const estacion = (i: number): V3 => [i * SEPARACION, 0, i % 2 === 0 ? 0 : -1.5];
+const ORIGEN: V3 = [0, 0, 0];
+const lugar = (plan: PlanVideo, i: number): V3 => (plan.continuo ? ORIGEN : estacion(i));
 
 // Encuadres (desde dónde mira la cámara respecto al centro del escenario).
 const ENCUADRES: Record<string, {ojo: V3; mira: V3}> = {
@@ -54,10 +59,11 @@ const calcularCamara = (frame: number, fps: number, plan: PlanVideo) => {
   const giro = (avance - 0.5) * 0.3;
   const previo = encuadre(plan.escenas[Math.max(0, actual - 1)].camara);
   const este = encuadre(plan.escenas[actual].camara);
-  const desde = estacion(Math.max(0, actual - 1));
-  const hasta = estacion(actual);
+  const desde = lugar(plan, Math.max(0, actual - 1));
+  const hasta = lugar(plan, actual);
   const base = mezclar(desde, hasta, p);
-  const viaje = Math.sin(Math.PI * p) * (actual === 0 ? 0 : 1);
+  // En el mundo continuo no hay viaje entre escenarios: solo cambia el encuadre, suave.
+  const viaje = Math.sin(Math.PI * p) * (actual === 0 || plan.continuo ? 0 : 1);
   const offOjo = mezclar(previo.ojo, escalar(girarY(este.ojo, giro), cerca), p);
   const offMira = mezclar(previo.mira, este.mira, p);
   const ojo = sumar(base, sumar(offOjo, [0, viaje * 0.8, viaje * 1.2]));
@@ -222,7 +228,11 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
   }, [espera]);
 
   const cam = calcularCamara(frame, fps, plan);
-  const visibles = [cam.actual - 1, cam.actual, cam.actual + 1].filter((i) => i >= 0 && i < plan.escenas.length);
+  // En el mundo continuo todas las escenas están en el mismo sitio: se ve solo la actual.
+  const visibles = plan.continuo
+    ? [cam.actual]
+    : [cam.actual - 1, cam.actual, cam.actual + 1].filter((i) => i >= 0 && i < plan.escenas.length);
+  const conceptos = plan.estilo_subtitulos === 'concepto';
   const cielo = new THREE.Color(plan.paleta.fondo);
   const dia = cielo.getHSL({h: 0, s: 0, l: 0}).l > 0.45;
   ASPECTO.dibujo = dia;
@@ -247,7 +257,7 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
             <>
               <ambientLight intensity={0.5} />
               <hemisphereLight args={['#F6F1EA', colorSuelo, 0.85]} />
-              <Sol donde={estacion(cam.actual)} />
+              <Sol donde={lugar(plan, cam.actual)} />
             </>
           ) : (
             <>
@@ -255,7 +265,7 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
               <hemisphereLight args={['#ffffff', plan.paleta.fondo, 0.35]} />
               <directionalLight position={[cam.mira[0] - 4, 5, cam.mira[2] - 6]} intensity={0.6} color="#cfd8ff" />
               {visibles.map((i) => (
-                <Reflector key={`r${i}`} donde={estacion(i)} color={luz} sombras={i === cam.actual} />
+                <Reflector key={`r${i}`} donde={lugar(plan, i)} color={luz} sombras={i === cam.actual} />
               ))}
             </>
           )}
@@ -267,7 +277,7 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
             const e = plan.escenas[i];
             const Escena = ESCENAS[e.componente] ?? EscenaRespaldo3D;
             return (
-              <group key={i} position={estacion(i)}>
+              <group key={i} position={lugar(plan, i)}>
                 <Escena
                   frame={Math.max(0, frame - cam.inicios[i])}
                   fps={fps}
@@ -287,15 +297,17 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
           <AbsoluteFill style={{background: 'radial-gradient(ellipse 85% 70% at 50% 45%, rgba(0,0,0,0) 60%, rgba(30,24,18,0.22) 100%)'}} />
           <TarjetaDatos plan={plan} />
           <Portada plan={plan} />
-          {plan.subtitulos ? <Subtitulos plan={plan} titular desde={plan.portada ? DURACION_PORTADA : 0} /> : null}
+          {plan.subtitulos && conceptos ? <Conceptos plan={plan} desde={plan.portada ? DURACION_PORTADA : 0} /> : null}
+          {plan.subtitulos && !conceptos ? <Subtitulos plan={plan} titular desde={plan.portada ? DURACION_PORTADA : 0} /> : null}
         </>
       ) : (
         <>
           <AbsoluteFill style={{background: 'radial-gradient(ellipse 75% 62% at 50% 46%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%)'}} />
-          <Rotulo plan={plan} />
+          {conceptos ? null : <Rotulo plan={plan} />}
           <TarjetaDatos plan={plan} />
           <Portada plan={plan} />
-          {plan.subtitulos ? <Subtitulos plan={plan} cine desde={plan.portada ? DURACION_PORTADA : 0} /> : null}
+          {plan.subtitulos && conceptos ? <Conceptos plan={plan} oscuro desde={plan.portada ? DURACION_PORTADA : 0} /> : null}
+          {plan.subtitulos && !conceptos ? <Subtitulos plan={plan} cine desde={plan.portada ? DURACION_PORTADA : 0} /> : null}
         </>
       )}
 

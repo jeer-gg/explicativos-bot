@@ -57,7 +57,8 @@ Formato ganador: {estilo['estructura']}
 Reglas:
 - La voz arranca en el segundo 0: la primera frase ES el gancho, de 6 a 12 palabras.
 - Entre {palabras_min} y {palabras_max} palabras en total, en {p['escenas_min']} a {p['escenas_max']} escenas.
-- Cada escena dura entre 3 y 7 segundos de voz y muestra UNA idea visual clara. Muchas escenas
+- Cada escena dura entre 3 y 5 segundos de voz y muestra UNA idea visual clara (en los videos
+  ganadores cambia algo cada 3 a 4 segundos). Muchas escenas
   cortas mantienen la atención mejor que pocas largas.
 - Habla corrida, como un narrador entusiasta que no se detiene: frases que se encadenan con
   "y", "pero", "porque", "así que". Evita puntos y comas innecesarios, porque cada signo crea
@@ -82,6 +83,19 @@ Reglas:
 - La descripción visual de cada escena debe ser concreta y dibujable: qué personajes u objetos
   hay, qué hacen, qué se mueve, qué metáfora visual explica la idea. Sin texto largo en pantalla
   (máximo 3 palabras de rótulo por escena).
+- UN SOLO MUNDO QUE EVOLUCIONA (así son los Reels 3D con millones de vistas): todo el video pasa
+  en el mismo lugar con el mismo protagonista (un objeto, una máquina, un sistema), y cada
+  escena le cambia UNA cosa: se agrega una pieza, se llena, se abre, falla, se arregla. Nada de
+  saltar a otro lugar u otro objeto. En cada escena escribe en "mundo" cómo queda al terminarla.
+  · Empieza muchas veces por la versión más simple o rota del objeto («ya tienes un avión: una
+    tabla y un palo») y cada frase le agrega la pieza que resuelve el siguiente problema.
+  · Muestra qué pasa SIN la pieza (se cae, se desborda, no sube, se rompe) justo antes de
+    ponerla: el fallo exagerado es lo que más retiene.
+  · Nombra cada parte con su nombre real («el flotador», «el estabilizador horizontal»): la
+    gente se queda para aprender cómo se llama.
+- "concepto" en cada escena: de 1 a 4 palabras que se DICEN TAL CUAL en la voz de esa escena y
+  resumen el momento («LA BOLA SUBE», «EL FLOTADOR», «NO SUBE SOLA», «POCA FUERZA»). Es el texto
+  grande que aparece arriba de la pantalla; si hay negación, que empiece por ella.
 - Escribe números como se pronuncian si pueden leerse mal ("dos mil" en vez de "2.000").
 - Formato: sigue al pie de la letra la estructura sorteada; es un formato probado con cientos
   de miles de vistas.
@@ -109,6 +123,7 @@ Devuelve JSON:
  "escenas": [
    {{"voz": "texto narrado", "visual": "descripción detallada de la ilustración y su animación",
      "rotulo": "0 a 3 palabras o vacío", "palabra_clave": "palabra de la voz donde ocurre el momento visual principal",
+     "concepto": "1 a 4 palabras dichas tal cual en la voz", "mundo": "cómo queda el mundo al terminar esta escena (qué piezas hay, en qué estado)",
      "grafico": null,
      "datos": [{{"afirmacion": "...", "fuente": "url o referencia"}}]}}
  ],
@@ -116,7 +131,8 @@ Devuelve JSON:
  "direccion_arte": {{
    "protagonista": "aspecto exacto del personaje o objeto que guía el video (forma, colores, ropa, rasgos) para dibujarlo igual en todas las escenas",
    "secundarios": "otros personajes u objetos que se repiten, con su aspecto",
-   "ambiente": "lugar o mundo visual común del video",
+   "ambiente": "el único lugar donde pasa todo el video (si es grande, como maqueta en corte)",
+   "partes": "las piezas del protagonista que se agregan, cambian o se señalan, con su aspecto",
    "metafora": "la metáfora visual central que explica el tema"
  }}
 }}"""
@@ -141,7 +157,8 @@ obvio, advertencia directa, número imposible, pregunta que duele, imagen absurd
 Cada uno con: "voz" (primera frase, 6 a 12 palabras, que encaje con la escena 2 del guion),
 "portada" (3 a 6 palabras en mayúsculas, dice lo mismo que la voz), "visual" (qué se VE en el
 fotograma 0 y qué pasa en el primer segundo: algo grande, raro o a punto de romperse; nunca una
-pantalla tranquila), "palabra_clave" (palabra de la voz del golpe visual) y "rotulo".
+pantalla tranquila, y en el mismo mundo del resto del guion), "palabra_clave" (palabra de la voz
+del golpe visual), "rotulo" y "concepto" (1 a 4 palabras dichas tal cual en la voz).
 
 Reglas que separan un gancho que retiene de uno que se salta (datos de 2026):
 - No da la respuesta: promete algo que solo se cobra viendo hasta el final.
@@ -155,7 +172,7 @@ equivocarse, risa) y ganas de enviárselo a alguien. Elige el de mejor suma. Si 
 actual es mejor, elígelo.
 
 Devuelve JSON: {{"candidatos": [{{"voz": "...", "portada": "...", "visual": "...", "palabra_clave": "...",
-"rotulo": "...", "notas": {{"imagen": n, "curiosidad": n, "claridad": n, "emocion": n, "compartir": n}}}}],
+"rotulo": "...", "concepto": "...", "notas": {{"imagen": n, "curiosidad": n, "claridad": n, "emocion": n, "compartir": n}}}}],
 "elegido": 0}}"""
     try:
         datos = claude.json(system, usuario, max_tokens=4000)
@@ -164,7 +181,7 @@ Devuelve JSON: {{"candidatos": [{{"voz": "...", "portada": "...", "visual": "...
         print("No se pudo pulir el gancho:", e)
         return guion
     primera = guion["escenas"][0]
-    for clave in ("voz", "visual", "palabra_clave", "rotulo"):
+    for clave in ("voz", "visual", "palabra_clave", "rotulo", "concepto"):
         if mejor.get(clave):
             primera[clave] = mejor[clave]
     if mejor.get("portada"):
@@ -195,6 +212,7 @@ def verificar_guion(claude: Claude, guion: dict) -> dict:
         if not revisado.get(clave) and guion.get(clave):
             revisado[clave] = guion[clave]
     for nueva, vieja in zip(revisado["escenas"], guion["escenas"]):
-        if vieja.get("grafico") and not nueva.get("grafico"):
-            nueva["grafico"] = vieja["grafico"]
+        for clave in ("grafico", "concepto", "mundo"):
+            if vieja.get(clave) and not nueva.get(clave):
+                nueva[clave] = vieja[clave]
     return revisado
