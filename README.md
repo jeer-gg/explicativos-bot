@@ -1,7 +1,7 @@
 # Bot de videos explicativos
 
 Produce cada día un Reel animado de "explicativos de la vida cotidiana" y lo publica en tu
-página de Facebook. Tú solo tocas un botón en Telegram.
+página de Facebook. Se publica solo; por Telegram te avisa y puedes cancelar.
 
 ## Cómo funciona
 
@@ -16,8 +16,8 @@ página de Facebook. Tú solo tocas un botón en Telegram.
 5. **Revisor:** Claude mira un fotograma real de cada escena, la puntúa y manda a rehacer las
    flojas.
 6. **Render:** Remotion y ffmpeg generan el MP4 vertical con las especificaciones de Reels.
-7. **Aprobación:** te llegan las versiones A y B a Telegram con los botones *Publicar A*,
-   *Publicar B*, *Rehacer otro* y *Descartar*.
+7. **Control y arreglo:** se revisa el video terminado. Si tiene un error grave, el bot lo
+   arregla solo (rehace la voz o las escenas afectadas) y lo vuelve a revisar.
 8. **Publicación y aprendizaje:** se sube el Reel a tu página y, al día siguiente, el bot lee
    sus métricas para elegir mejor el próximo tema.
 

@@ -59,6 +59,9 @@ export const NOMBRE: React.FC<EscenaProps> = ({paleta}) => (
 RONDA_REVISOR = {"n": 0}
 
 
+GRAVE = {"n": 0}
+
+
 def responder(system: str, contenido) -> str:
     texto = " ".join(c.get("text", "") for c in contenido if c.get("type") == "text")
     REGISTRO["claude"].append(system[:40])
@@ -70,6 +73,11 @@ def responder(system: str, contenido) -> str:
         return "Aquí va:\n```json\n" + json.dumps(guion_falso(), ensure_ascii=False) + "\n```"
     if "control de calidad" in system:
         REGISTRO["control"] = REGISTRO.get("control", 0) + 1
+        if GRAVE["n"] > 0:
+            GRAVE["n"] -= 1
+            return json.dumps({"problemas": [{"problema": "dato falso visible en una etiqueta",
+                                              "regla": "Cada número en pantalla debe coincidir con la narración.",
+                                              "area": "escenas", "grave": True, "fotograma": 8}], "nota_final": 4})
         return json.dumps({"problemas": [{"problema": "etiqueta cortada en el borde",
                                           "regla": "Las etiquetas deben quedar completas dentro del cuadro, lejos de los bordes.",
                                           "area": "escenas", "grave": False}], "nota_final": 7})
@@ -435,5 +443,43 @@ assert REGISTRO["meta"][antes][3] is None, "su horario ya pasó: se publica en e
 assert not reanudar.EN_CURSO.exists(), "al terminar se borra el avance"
 assert any("ya había pasado" in str(t) for t in REGISTRO["telegram"])
 est_mod.dibujar = _dibujar_real
+
+# ---------- 7) Error grave: el bot lo arregla solo y publica sin preguntar ----------
+print("== Error grave con arreglo automático ==")
+from bot import autocontrol as ac  # noqa: E402
+_tecnicos = ac.chequeos_tecnicos
+VOZ_MAL = {"n": 1}
+
+
+def tecnicos_con_error(voz, duracion):
+    problemas = _tecnicos(voz, duracion)
+    if VOZ_MAL["n"] > 0:
+        VOZ_MAL["n"] -= 1
+        problemas.append({"grave": True, "area": "voz", "problema": "la voz empieza tarde (1.2 s)",
+                          "regla": "La primera palabra del gancho debe oírse en los primeros 0,3 segundos."})
+    return problemas
+
+
+ac.chequeos_tecnicos = tecnicos_con_error
+GRAVE["n"] = 1
+controles = REGISTRO.get("control", 0)
+pend_antes = len(estado()["pendientes"])
+antes = len(REGISTRO["meta"])
+prod.producir()
+ac.chequeos_tecnicos = _tecnicos
+assert REGISTRO["control"] - controles == 2, "debe revisar, arreglar y volver a revisar"
+assert len(REGISTRO["meta"]) == antes + 1, "debe publicarse solo, sin botones"
+assert len(estado()["pendientes"]) == pend_antes, "no debe quedar esperando decisión"
+avisos = [str(t) for t in REGISTRO["telegram"]]
+assert any("Arreglé solo" in t and "rehice la voz" in t and "la escena 5" in t and "Ya no quedan" in t for t in avisos), avisos[-4:]
+assert not any("no lo publico solo" in t for t in avisos[-6:])
+
+# Si el error no se puede arreglar, igual se publica
+GRAVE["n"] = 5
+antes = len(REGISTRO["meta"])
+prod.producir()
+GRAVE["n"] = 0
+assert len(REGISTRO["meta"]) == antes + 1, "aunque quede un error, se publica"
+assert any("lo publico igual" in str(t) for t in REGISTRO["telegram"][-6:])
 
 print("\nSIMULACIÓN CORRECTA. Archivos en", TMP)

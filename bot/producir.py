@@ -301,10 +301,13 @@ def producir():
     estudio.escribir_indice(todos)
     estudio.compilar(claude, cfg, todos)
 
-    planes = {"A": armar_plan(cfg, tiempos["A"], nombres_a, guion, estilo, "A")}
-    if hay_b:
-        planes["B"] = armar_plan(cfg, tiempos["B"], nombres_b, guion, estilo, "B")
-    rutas_plan = {v: render.guardar_plan(p, v) for v, p in planes.items()}
+    def armar_planes():
+        pl = {"A": armar_plan(cfg, tiempos["A"], nombres_a, guion, estilo, "A")}
+        if hay_b and "B" in tiempos:
+            pl["B"] = armar_plan(cfg, tiempos["B"], nombres_b, guion, estilo, "B")
+        return pl, {v: render.guardar_plan(p, v) for v, p in pl.items()}
+
+    planes, rutas_plan = armar_planes()
 
     from .claude import LimiteDeSuscripcion
 
@@ -331,33 +334,109 @@ def producir():
         compilar_seguro()
 
     # 6. Render final
-    videos = []
-    for variante, ruta_plan in rutas_plan.items():
-        crudo = trabajo / f"{variante}_crudo.mp4"
-        ok, salida = render.renderizar(ruta_plan, crudo)
-        if not ok:
-            culpable = render.escena_con_error(salida, todos)
-            if not culpable:
-                raise RuntimeError("Falló el render:\n" + salida[-2000:])
-            estudio.usar_respaldo(culpable)
-            estudio.compilar(claude, cfg, todos)
-            ok, salida = render.renderizar(ruta_plan, crudo)
-            if not ok:
-                raise RuntimeError("Falló el render:\n" + salida[-2000:])
-        final = trabajo / f"{variante}.mp4"
-        pista = render.elegir_musica(PUBLICO / "musica", len(memoria()))
-        render.preparar_para_facebook(crudo, final, pista, cfg["produccion"].get("volumen_musica", 0.16))
-        videos.append(final)
+    def renderizar_todo():
+      videos = []
+      for variante, ruta_plan in rutas_plan.items():
+          crudo = trabajo / f"{variante}_crudo.mp4"
+          ok, salida = render.renderizar(ruta_plan, crudo)
+          if not ok:
+              culpable = render.escena_con_error(salida, todos)
+              if not culpable:
+                  raise RuntimeError("Falló el render:\n" + salida[-2000:])
+              estudio.usar_respaldo(culpable)
+              estudio.compilar(claude, cfg, todos)
+              ok, salida = render.renderizar(ruta_plan, crudo)
+              if not ok:
+                  raise RuntimeError("Falló el render:\n" + salida[-2000:])
+          final = trabajo / f"{variante}.mp4"
+          pista = render.elegir_musica(PUBLICO / "musica", len(memoria()))
+          render.preparar_para_facebook(crudo, final, pista, cfg["produccion"].get("volumen_musica", 0.16))
+          videos.append(final)
+      return videos
+
+    videos = renderizar_todo()
 
     # 6b. Control de calidad del video terminado: errores -> reglas para los próximos
     from . import autocontrol
     control = autocontrol.revisar_video(claude, guion, videos[0], PUBLICO / tiempos["A"]["audio"],
                                         tiempos["A"]["total"], trabajo)
-    if control["problemas"]:
+    aprendidas = len(control["nuevas"])
+
+    # 6c. Arreglo automático: si hay errores graves, se corrige solo, se vuelve a revisar y sigue
+    arreglos = []
+    for intento in range(int(cfg["claude"].get("intentos_arreglo", 2))):
+        if not control["graves"]:
+            break
+        quedan = cfg["produccion"].get("tiempo_maximo_min", 170) - (time.monotonic() - INICIO) / 60
+        if quedan < 35:
+            print(f"Quedan {quedan:.0f} min: no da tiempo a otro arreglo.")
+            break
+        graves = control["graves"]
+        print(f"Arreglo {intento + 1}: errores graves", [g["problema"] for g in graves])
+        hecho = []
+        try:
+            # Voz: se narra de nuevo (en el segundo intento, con la voz de respaldo)
+            if any(g.get("area") == "voz" for g in graves):
+                if intento >= 1:
+                    cfg["produccion"]["voz_motor"] = "edge"
+                ESTADO_VIDEO["cobertura_voz"] = None
+                try:
+                    tiempos = narrar_guion(guion, cfg, trabajo / "voz", PUBLICO)
+                except ValueError:
+                    cfg["produccion"]["velocidad_voz"] = "+18%"
+                    tiempos = narrar_guion(guion, cfg, trabajo / "voz", PUBLICO)
+                planes, rutas_plan = armar_planes()
+                hecho.append("rehice la voz")
+            # Imagen: se rehacen las escenas donde se vio el error
+            visuales = [g for g in graves if g.get("area") != "voz"]
+            if visuales:
+                por_escena = {}
+                escenas_a = planes["A"]["escenas"]
+                for g in visuales:
+                    nombre = None
+                    seg = g.get("segundo")
+                    if isinstance(seg, (int, float)):
+                        for e in escenas_a:
+                            if e["inicio"] - 0.3 <= seg < e["inicio"] + e["duracion"]:
+                                nombre = e["componente"]
+                    if not nombre:  # sin momento: la escena peor puntuada
+                        peores = sorted(notas.items(), key=lambda kv: float(kv[1].get("nota", 10)))
+                        nombre = peores[0][0] if peores else escenas_a[0]["componente"]
+                    texto = f"ERROR GRAVE en el video terminado: {g['problema']}. Regla: {g.get('regla', '')}."
+                    if g.get("area") == "edicion":
+                        texto += (" Los subtítulos van en la franja inferior y el título arriba: deja esas "
+                                  "zonas libres de cosas importantes y de etiquetas, y nada pegado a los bordes.")
+                    por_escena.setdefault(nombre, []).append(texto)
+                por_escena = dict(list(por_escena.items())[:4])
+                with ThreadPoolExecutor(max_workers=4) as hilos:
+                    def rehacer(kv):
+                        foto = trabajo / "fotos" / f"{kv[0]}.png"
+                        return dibujar_una(kv[0], " ".join(kv[1]), codigos.get(kv[0], ""),
+                                           foto if foto.exists() else None)
+                    codigos.update(dict(hilos.map(rehacer, por_escena.items())))
+                compilar_seguro()
+                hecho.append("rehice " + ", ".join(n.replace("Escena", "la escena ") for n in por_escena))
+            videos = renderizar_todo()
+            control = autocontrol.revisar_video(claude, guion, videos[0], PUBLICO / tiempos["A"]["audio"],
+                                                tiempos["A"]["total"], trabajo, aprender=False)
+        except LimiteDeSuscripcion:
+            print("Se acabó el límite de Claude durante el arreglo.")
+            break
+        except Exception as e:  # noqa: BLE001
+            print("El arreglo falló:", e)
+            telegram.aviso_seguro(f"No pude terminar un arreglo ({str(e)[:300]}); sigo con la mejor versión.")
+            break
+        arreglos.append(" y ".join(hecho))
+
+    if control["problemas"] or arreglos:
         lineas = [f"- {p['problema']}" for p in control["problemas"][:6]]
-        aviso = "Control de calidad de este video:\n" + "\n".join(lineas)
-        if control["nuevas"]:
-            aviso += f"\nAprendí {len(control['nuevas'])} regla(s) nueva(s) para no repetirlo."
+        aviso = ("Control de calidad de este video:\n" + "\n".join(lineas)) if lineas else "Control de calidad:"
+        if arreglos:
+            aviso += "\nArreglé solo: " + "; ".join(arreglos) + "."
+            aviso += (" Ya no quedan errores graves." if not control["graves"]
+                      else " Aún queda algún error grave, pero lo publico igual.")
+        if aprendidas:
+            aviso += f"\nAprendí {aprendidas} regla(s) nueva(s) para no repetirlo."
         telegram.aviso_seguro(aviso)
 
     # 7. Guardar como pendiente y pedir aprobación
@@ -387,7 +466,9 @@ def producir():
     guardar_estado(est)
 
     minima = cfg["claude"].get("nota_para_publicar", 0)
-    floja = (isinstance(nota_media, (int, float)) and nota_media < minima) or bool(control["graves"])
+    publicar_igual = cfg["claude"].get("publicar_si_no_se_arregla", True)
+    floja = (isinstance(nota_media, (int, float)) and nota_media < minima) or \
+        (bool(control["graves"]) and not publicar_igual)
     if not cfg["aprobacion"]["activa"] and floja:
         motivo = ("tiene un error grave: " + control["graves"][0]["problema"]) if control["graves"] \
             else f"sacó {nota_media} (mínimo {minima})"

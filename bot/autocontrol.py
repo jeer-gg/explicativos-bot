@@ -8,8 +8,8 @@ reglas que se aplican a los videos siguientes (el bot se corrige solo).
 3. Memoria de reglas (data/reglas_calidad.json): cada error que se repite gana peso. Las reglas
    más importantes se añaden a las instrucciones del guionista, del dibujante de escenas y del
    revisor en los próximos videos.
-4. Si el video tiene un error grave (por ejemplo, la voz empieza tarde o falta texto), no se
-   publica solo: te llega para decidir y el problema queda apuntado.
+4. Si el video tiene un error grave (por ejemplo, la voz empieza tarde o falta texto), el bot
+   lo arregla solo (rehace la voz o las escenas afectadas), lo vuelve a revisar y lo publica.
 """
 import json
 import re
@@ -88,10 +88,11 @@ def revision_final(claude, guion: dict, hoja: Path) -> list[dict]:
             "cualquier video futuro (no sobre este tema en particular), y a quién va dirigida: "
             "\"escenas\" (quien dibuja), \"guion\" (quien escribe) o \"edicion\" (títulos, "
             "subtítulos, tarjetas). Marca grave=true solo si el error hace que el video no deba "
-            "publicarse (por ejemplo, un dato falso visible o algo ilegible en el gancho).")},
+            "publicarse (por ejemplo, un dato falso visible o algo ilegible en el gancho). En "
+            "\"fotograma\" pon el número (1 a 8) del fotograma donde se ve el error.")},
         imagen(hoja),
         {"type": "text", "text": ('Devuelve JSON: {"problemas": [{"problema": "...", "regla": "...", '
-                                  '"area": "escenas|guion|edicion", "grave": false}], "nota_final": n}')},
+                                  '"area": "escenas|guion|edicion", "grave": false, "fotograma": 1}], "nota_final": n}')},
     ]
     try:
         datos = claude.json("Eres el jefe de control de calidad de un canal de videos explicativos. "
@@ -147,14 +148,25 @@ def texto_reglas(area: str, maximo: int = 8) -> str:
 
 # ---------- 4. Todo junto ----------
 
-def revisar_video(claude, guion: dict, video: Path, voz: Path, duracion: float, trabajo: Path) -> dict:
+def revisar_video(claude, guion: dict, video: Path, voz: Path, duracion: float, trabajo: Path,
+                  aprender: bool = True) -> dict:
     problemas = chequeos_tecnicos(voz, duracion)
     try:
         hoja = hoja_de_fotogramas(video, trabajo / "control_final.png", duracion)
-        problemas += revision_final(claude, guion, hoja)
+        paso = max(0.5, duracion / 8)
+        for p in revision_final(claude, guion, hoja):
+            # Segundo aproximado del error, para saber qué escena hay que rehacer
+            try:
+                k = int(p.get("fotograma") or 0)
+            except (TypeError, ValueError):
+                k = 0
+            if 1 <= k <= 8:
+                p["segundo"] = round((k - 1) * paso + 0.1, 2)
+            problemas.append(p)
     except Exception as e:  # noqa: BLE001
         print("Aviso: no se pudo mirar el video final:", e)
-    nuevas = registrar(problemas)
+    # En los reintentos de arreglo no se vuelven a sumar las mismas reglas
+    nuevas = registrar(problemas) if aprender else []
     graves = [p for p in problemas if p.get("grave")]
     (trabajo / "control_calidad.json").write_text(json.dumps(problemas, ensure_ascii=False, indent=1),
                                                   encoding="utf-8")
