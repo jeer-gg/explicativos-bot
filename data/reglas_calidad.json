@@ -3,10 +3,74 @@
     {
       "regla": "Frases cortas y fáciles de pronunciar; números escritos como se dicen.",
       "area": "voz",
-      "veces": 1,
-      "ultima": "2026-11-21T15:49:23+00:00",
+      "veces": 2,
+      "ultima": "2026-11-21T21:45:40+00:00",
       "clave": "cortas dicen escritos frases fáciles números pronunciar",
       "ejemplo": "solo se entiende el 50 % del guion en el audio"
+    },
+    {
+      "regla": "Los subtítulos no pueden superponerse entre sí ni tapar tarjetas de datos. Cada línea debe terminar de salir antes de que entre la siguiente, y la zona de subtítulos debe estar separada de la zona de tarjetas.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-21T21:45:40+00:00",
+      "clave": "antes datos entre estar línea pueden salir separada siguiente subtítulos superponerse tapar tarjetas terminar",
+      "ejemplo": "En el fotograma 7 el subtítulo se solapa con la palabra «centro»: «GRADOS» y «centro» se pisan y quedan ilegibles. Además, el subtítulo tapa parte de la tarjeta de datos."
+    },
+    {
+      "regla": "Los rótulos y etiquetas de la escena deben colocarse fuera de la franja de subtítulos y no solaparse con ellos. Las líneas de unión no deben cruzar texto.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T21:45:40+00:00",
+      "clave": "colocarse cruzar deben ellos escena etiquetas franja fuera líneas rótulos solaparse subtítulos texto unión",
+      "ejemplo": "En el fotograma 5 el rótulo «20 segundos» está pegado al subtítulo «LAVA TUS MANOS» y se cruza con la línea del reloj. El resultado es confuso y los textos se pisan."
+    },
+    {
+      "regla": "Todas las palabras de un subtítulo deben tener el mismo tamaño y el mismo contraste. Solo se puede resaltar con color una palabra clave, y la resaltada debe seguir siendo legible sobre el fondo.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-21T21:45:40+00:00",
+      "clave": "clave color contraste deben fondo legible mismo palabra palabras puede resaltada resaltar seguir siendo sobre subtítulo tamaño tener todas",
+      "ejemplo": "Los subtítulos mezclan tamaños y colores sin criterio («CON» y «CUATRO» aparecen pequeños y grises, mientras que «SETENTA» va en azul). Parecen palabras apagadas o a medio mostrar."
+    },
+    {
+      "regla": "Todo texto de la escena y toda tarjeta deben quedar completos dentro del encuadre vertical, con un margen de seguridad en los bordes. Si un objeto con texto no cabe, se reencuadra o se acorta el texto.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T21:45:40+00:00",
+      "clave": "acorta bordes completos deben dentro encuadre escena margen objeto quedar reencuadra seguridad tarjeta texto vertical",
+      "ejemplo": "En los fotogramas 6, 7 y 8 las tarjetas y carteles aparecen cortados por el borde («verduras», «solo pollo cru», «¿Y»). Parte del texto se sale del encuadre."
+    },
+    {
+      "regla": "Un mismo objeto debe conservar color y forma en todo el video. No se pintan objetos en colores que no tienen (azul para algo crudo) y los símbolos como la X no deben ocultar el objeto principal.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T21:45:40+00:00",
+      "clave": "color colores conservar crudo deben forma mismo objeto objetos ocultar pintan principal símbolos tienen video",
+      "ejemplo": "En el fotograma 8 el pollo es azul, tiene forma de zapato o pez y lleva una X roja encima. No se entiende qué es y no corresponde con el pollo rosado de los otros planos. Además, el «¿Y» del final queda cortado por el borde."
+    },
+    {
+      "regla": "Encuadra cerca del objeto protagonista y deja poco suelo o pared vacíos. Los textos de carteles que importen deben leerse a tamaño de móvil, o no mostrarse.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T21:45:40+00:00",
+      "clave": "carteles cerca deben encuadra importen leerse mostrarse móvil objeto pared protagonista suelo tamaño textos vacíos",
+      "ejemplo": "Los planos son lejanos y vacíos: más de un tercio del encuadre es suelo gris o pared vacía. Los objetos importantes (pollo, tabla, termómetro) quedan pequeños y mal centrados. El cartel de «4 MITOS» es diminuto e ilegible."
+    },
+    {
+      "regla": "Los elementos gráficos de apoyo, como líneas divisorias, deben tener una función clara y estar rotulados o ser evidentes. Si no aportan, se eliminan.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T21:45:40+00:00",
+      "clave": "aportan apoyo clara deben divisorias elementos eliminan estar evidentes función gráficos líneas rotulados tener",
+      "ejemplo": "En el fotograma 4 una línea roja discontinua vertical cruza la escena sin explicar qué es. Tampoco se entiende la separación entre las dos tablas. El mensaje de «tabla separada» no queda claro."
+    },
+    {
+      "regla": "Cada idea de la narración debe tener una escena visualmente distinta y reconocible. Evita repetir el mismo encuadre de fondo en planos consecutivos.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-21T21:45:40+00:00",
+      "clave": "consecutivos distinta encuadre escena evita fondo mismo narración planos reconocible repetir tener visualmente",
+      "ejemplo": "Las escenas de los mitos (agua, limón, vinagre, agua caliente) no se ven en los fotogramas. Se repite el mismo fondo de cocina con pocos cambios entre planos, y apenas se distingue qué ocurre en cada uno."
     },
     {
       "regla": "El primer fotograma debe mostrar el objeto principal del tema, bien visible y centrado. No se deja un fondo vacío con solo texto.",
