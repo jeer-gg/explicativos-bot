@@ -1,16 +1,5 @@
 {
-  "pendientes": [
-    {
-      "serie": "El misterio del nudo que aparece solo",
-      "parte": 2,
-      "total": 2,
-      "tema": "Qué tipos de nudos salieron en las cajas y cómo se forman, desde un extremo de la cuerda",
-      "angulo": "Salieron nudos complejos de hasta once cruces, y la cuerda se anudaba empezando por un extremo; además, en una caja más pequeña y con cuerda rígida se anudaba menos",
-      "subtema": "por qué las cosas son como son",
-      "estructura": "HISTORIA EN PARTES: una historia real e intrigante detrás de algo cotidiano (un invento por accidente, un error que cambió todo, un misterio con explicación científica) contada en 2 o 3 partes; cada parte responde su propia pregunta y termina con una intriga que lleva a la siguiente",
-      "tendencia": "Cuenta regresiva para el Black Friday (27 de noviembre) y las compras navideñas, con luces y adornos ya en las tiendas.",
-      "anterior": "Guardaste tus luces perfectas y aun así ya están anudadas Las guardaste perfectas en enero y no las tocaste en todo el año pero en diciembre sale una bola de nudos y parece imposible Así que alguien se preguntó si de verdad las cuerdas se anudan solas y la respuesta es sí En dos mil siete Dorian Raymer y Douglas Smith de la Universidad de California en San Diego metieron una cuerda en una caja Y la hicieron girar una y otra vez y luego unieron los extremos para revisar si había nudos Hicieron más de tres mil pruebas y con las cuerdas más largas hasta la mitad terminaron anudadas y todo en cuestión de segundos ¿Por qué pasa? Porque una cuerda larga y flexible tiene un montón de formas de enredarse y poquísimas de quedar suelta Y cuando la mueves en la mochila o en la caja se mezcla y termina en una de las formas enredadas Así que enróllalas en un carrete o en un cartón para que se muevan "
-    }
-  ],
-  "secuelas": []
+  "pendientes": [],
+  "secuelas": [],
+  "ultima_parte_fecha": "2026-11-20"
 }
