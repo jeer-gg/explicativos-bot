@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "id": "20261121-0053",
+    "fecha": "2026-11-21",
+    "publicado_en": "2026-11-21T13:00:00+00:00",
+    "programado": true,
+    "titulo": "Armamos una olla a presión pieza por pieza",
+    "tema": "Construimos una olla a presión desde cero: por qué no explota (casi nunca) y qué pasaría si le quitas la válvula",
+    "subtema": "ciencia de cosas cotidianas (cocina, casa)",
+    "estructura": "PIEZA POR PIEZA: se construye desde cero un objeto o lugar cotidiano, pieza por pieza, explicando para qué sirve cada parte y qué pasaría si faltara",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "situación cotidiana con giro inesperado",
+    "gancho": "No destapes la olla a presión antes de ver esto.",
+    "nota_revisor": 5.3,
+    "video_fb": "1187355840495724",
+    "metricas": {}
+  }
+]
