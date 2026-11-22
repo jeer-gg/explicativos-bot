@@ -15,6 +15,7 @@ from datetime import datetime, timedelta, timezone
 
 from . import estadisticas, estudio, render, revisor, sfx, telegram
 from .claude import Claude
+from . import config
 from .config import DATOS, PUBLICO, SALIDA, cargar_config
 from .director import elegir_tema, sortear_estilo
 from .guionista import escribir_guion, pulir_gancho, verificar_guion
@@ -50,7 +51,10 @@ ESCENARIOS = {
 }
 
 
-def escenario_de(guion: dict) -> str:
+def escenario_de(guion: dict, cfg: dict | None = None) -> str:
+    fijo = ((cfg or {}).get("estilo") or {}).get("escenario_fijo")
+    if fijo in ESCENARIOS:
+        return fijo
     e = str((guion.get("direccion_arte") or {}).get("escenario", "")).strip().lower()
     return e if e in ESCENARIOS else "estudio"
 
@@ -87,8 +91,8 @@ def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
         "audio": tiempos_variante["audio"],
         "musica": cfg["produccion"].get("musica", "") or "",
         "subtitulos": cfg["produccion"].get("subtitulos", True),
-        "paleta": paleta_con_escenario(estilo["colores"], escenario_de(guion)),
-        "escenario": escenario_de(guion),
+        "paleta": paleta_con_escenario(estilo["colores"], escenario_de(guion, cfg)),
+        "escenario": escenario_de(guion, cfg),
         "portada": (guion.get("portada") or "").upper()[:60],
         "escenas": escenas,
         # Un solo mundo que evoluciona (si se pudo dibujar el mundo compartido)
@@ -328,14 +332,17 @@ def producir():
         if avance["escenas"].get("Mundo"):
             estudio.guardar_mundo(avance["escenas"]["Mundo"])
         else:
-            try:
-                print("Dibujando el mundo compartido")
-                avance["escenas"]["Mundo"] = estudio.dibujar_mundo(claude, cfg, guion, estilo)
-            except _Limite:
-                raise
-            except Exception as e:  # noqa: BLE001  (sin mundo, cada escena se dibuja por su cuenta)
-                print("No se pudo dibujar el mundo compartido:", e)
-                estudio.MUNDO.update(activo=False, codigo="")
+            for intento_mundo in range(2):
+                try:
+                    print("Dibujando el mundo compartido")
+                    avance["escenas"]["Mundo"] = estudio.dibujar_mundo(claude, cfg, guion, estilo)
+                    break
+                except _Limite:
+                    raise
+                except Exception as e:  # noqa: BLE001  (sin mundo, cada escena va por su cuenta)
+                    print(f"No se pudo dibujar el mundo compartido (intento {intento_mundo + 1}):", e)
+                    estudio.MUNDO.update(activo=False, codigo="")
+                    avance["escenas"].pop("Mundo", None)
 
     def dibujar_una(nombre, comentarios="", previo="", foto=None):
         esc, t, i = datos_escena(nombre)
@@ -412,8 +419,12 @@ def producir():
 
     # 6b. Control de calidad del video terminado: errores -> reglas para los próximos
     from . import autocontrol
+    def momentos_voz():
+        return [(e["inicio"], e["duracion"], guion["escenas"][k]["voz"] if k < len(guion["escenas"]) else "")
+                for k, e in enumerate(planes["A"]["escenas"])]
+
     control = autocontrol.revisar_video(claude, guion, videos[0], PUBLICO / tiempos["A"]["audio"],
-                                        tiempos["A"]["total"], trabajo)
+                                        tiempos["A"]["total"], trabajo, momentos=momentos_voz())
     aprendidas = len(control["nuevas"])
 
     # 6c. Arreglo automático: si hay errores graves, se corrige solo, se vuelve a revisar y sigue
@@ -472,7 +483,8 @@ def producir():
                 hecho.append("rehice " + ", ".join(n.replace("Escena", "la escena ") for n in por_escena))
             videos = renderizar_todo()
             control = autocontrol.revisar_video(claude, guion, videos[0], PUBLICO / tiempos["A"]["audio"],
-                                                tiempos["A"]["total"], trabajo, aprender=False)
+                                                tiempos["A"]["total"], trabajo, aprender=False,
+                                                momentos=momentos_voz())
         except LimiteDeSuscripcion:
             print("Se acabó el límite de Claude durante el arreglo.")
             break
@@ -635,7 +647,7 @@ def _guardar_avance_en_repo(mensaje: str = "Memoria: avance guardado por límite
     for _ in range(3):
         if git("pull", "-q", "--rebase", "--autostash").returncode != 0:
             git("rebase", "--abort")
-            copia = {f: f.read_bytes() for f in DATOS.glob("*.json")}
+            copia = {f: f.read_bytes() for f in config.DATOS_PRINCIPAL.rglob("*.json")}
             git("fetch", "-q", "origin", rama)
             if git(*firma, "merge", "-q", "-X", "ours", "--no-edit", f"origin/{rama}").returncode != 0:
                 git("merge", "--abort")
@@ -670,9 +682,10 @@ def _relanzar_produccion() -> bool:
 
 def _latido():
     """Marca que hay una tarea viva (el vigilante relanza la cadena si deja de latir)."""
-    e = estado()
-    e["latido"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    guardar_estado(e)
+    from .memoria import cadena, guardar_cadena
+    c = cadena()
+    c["latido"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    guardar_cadena(c)
     _guardar_avance_en_repo("Memoria: el bot sigue trabajando")
 
 
@@ -687,56 +700,86 @@ def _dormir(esperar, minutos: float):
             _latido()
 
 
-# ---------- Turnos de producción ----------
+# ---------- Turnos de producción (de todas las páginas) ----------
+def _lista_turnos(cfg: dict) -> list[tuple[str, str]]:
+    """(hora RD, página) de cada turno. Las páginas sin configurar o sin secretos no tienen turno."""
+    turnos = cfg["produccion"].get("turnos")
+    if not turnos:
+        horas = cfg["produccion"].get("horas_produccion", ["03:17", "09:17", "15:17"])
+        turnos = [{"hora": h, "canal": config.PRINCIPAL} for h in horas]
+    disponibles = set(config.canales())
+    lista = [(t["hora"], t.get("canal", config.PRINCIPAL)) for t in turnos]
+    lista = [(h, c) for h, c in lista if c in disponibles and config.canal_listo(c)]
+    return lista or [(t["hora"], config.PRINCIPAL) for t in turnos]
+
+
 def _turnos(cfg: dict, ahora: datetime):
-    """Turnos de producción alrededor de `ahora` (hora de la página), del más viejo al más nuevo."""
+    """Turnos alrededor de `ahora`, del más viejo al más nuevo: [(momento, página)]."""
     from .horarios import _zona
     zona = _zona(cfg)
     local = ahora.astimezone(zona)
-    horas = sorted(cfg["produccion"].get("horas_produccion", ["03:17", "09:17", "15:17"]))
     lista = []
     for dias in (-1, 0, 1):
         f = (local + timedelta(days=dias)).date()
-        for h in horas:
+        for h, canal in _lista_turnos(cfg):
             hh, mm = (int(x) for x in h.split(":"))
-            lista.append(datetime(f.year, f.month, f.day, hh, mm, tzinfo=zona))
+            lista.append((datetime(f.year, f.month, f.day, hh, mm, tzinfo=zona), canal))
     return sorted(lista)
 
 
-def turno_actual(cfg: dict, ahora: datetime | None = None) -> tuple[datetime, str]:
+def _id_turno(momento: datetime, canal: str) -> str:
+    base = momento.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+    return base if canal == config.PRINCIPAL else f"{canal}@{base}"
+
+
+def turno_actual(cfg: dict, ahora: datetime | None = None) -> tuple[datetime, str, str]:
+    """(momento, id, página) del último turno que ya empezó."""
     ahora = ahora or datetime.now(timezone.utc)
-    t = max(x for x in _turnos(cfg, ahora) if x <= ahora)
-    return t, t.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+    t, canal = max(x for x in _turnos(cfg, ahora) if x[0] <= ahora)
+    return t, _id_turno(t, canal), canal
 
 
 def proximo_turno(cfg: dict, ahora: datetime | None = None) -> datetime:
     ahora = ahora or datetime.now(timezone.utc)
-    return min(x for x in _turnos(cfg, ahora) if x > ahora)
+    return min(x for x in _turnos(cfg, ahora) if x[0] > ahora)[0]
+
+
+def _a_medias() -> tuple[str, str] | None:
+    """(página, id del turno) de un video que quedó a medias, en cualquier página."""
+    for canal in config.canales():
+        archivo = config.ruta_datos(canal) / "en_curso.json"
+        if archivo.exists() and config.canal_listo(canal):
+            try:
+                inicio = datetime.fromisoformat(json.loads(archivo.read_text())["inicio"])
+            except (ValueError, KeyError, OSError):
+                inicio = datetime.now(timezone.utc)
+            momento = max((x for x in _turnos(cargar_config(config.PRINCIPAL), inicio)
+                           if x[0] <= inicio and x[1] == canal), default=(inicio, canal))[0]
+            return canal, _id_turno(momento, canal)
+    return None
 
 
 def _esperar_turno(esperar, arranque: float, tope: float, necesita: float, cfg: dict):
-    """Decide qué toca. Devuelve el turno a producir, o None si pasó el relevo a otra tarea.
+    """Decide qué toca. Devuelve (página, turno) a producir, o None si pasó el relevo.
 
-    - Hay un video a medias: se sigue con él.
+    - Hay un video a medias (en cualquier página): se sigue con él.
     - El turno de ahora aún no tiene video: se hace ya (aunque sea tarde).
     - Si ya está hecho: se espera al próximo turno aquí mismo, o se pasa el relevo si no cabe."""
-    from . import reanudar
-    if reanudar.EN_CURSO.exists():
-        try:
-            inicio = datetime.fromisoformat(json.loads(reanudar.EN_CURSO.read_text())["inicio"])
-            return turno_actual(cfg, inicio)[1]
-        except (ValueError, KeyError, OSError):
-            return turno_actual(cfg)[1]
-    _, id_turno = turno_actual(cfg)
-    if estado().get("turno_hecho") != id_turno:
-        return id_turno
+    from .memoria import cadena
+    medias = _a_medias()
+    if medias:
+        return medias
+    _, id_turno, canal = turno_actual(cfg)
+    if cadena().get("turno_hecho") != id_turno:
+        return canal, id_turno
     siguiente = proximo_turno(cfg)
     falta = (siguiente - datetime.now(timezone.utc)).total_seconds() / 60
     usado = (time.monotonic() - arranque) / 60
     if usado + falta + necesita <= tope:
         print(f"El turno de ahora ya está hecho; espero {falta:.0f} min al siguiente.")
         _dormir(esperar, falta + 1)
-        return turno_actual(cfg, siguiente + timedelta(minutes=1))[1]
+        _, id_sig, canal_sig = turno_actual(cfg, siguiente + timedelta(minutes=1))
+        return canal_sig, id_sig
     margen = max(0.0, min(falta, tope - usado - 10))
     print(f"El siguiente turno es en {falta:.0f} min: espero {margen:.0f} y paso el relevo.")
     _dormir(esperar, margen)
@@ -744,21 +787,74 @@ def _esperar_turno(esperar, arranque: float, tope: float, necesita: float, cfg: 
     return None
 
 
+# ---------- Producción continua (cola de videos programados) ----------
+def _cola(canal: str, ahora: datetime | None = None) -> list[datetime]:
+    """Horas de publicación ya programadas a futuro en una página."""
+    ahora = ahora or datetime.now(timezone.utc)
+    archivo = config.ruta_datos(canal) / "memoria.json"
+    try:
+        items = json.loads(archivo.read_text(encoding="utf-8")) if archivo.exists() else []
+    except ValueError:
+        items = []
+    horas = []
+    for m in items:
+        if m.get("publicado_en") and not m.get("cancelado"):
+            try:
+                t = datetime.fromisoformat(m["publicado_en"])
+            except ValueError:
+                continue
+            if t > ahora:
+                horas.append(t)
+    return sorted(horas)
+
+
+def _esperar_trabajo(esperar, arranque: float, tope: float, necesita: float, cfg: dict):
+    """Modo continuo: elige la página que necesita video (la de menos videos en cola) y lo hace ya.
+    Si todas tienen la cola llena, espera a que se publique el siguiente (o pasa el relevo).
+    Devuelve (página, id) o None si pasó el relevo."""
+    medias = _a_medias()
+    if medias:
+        return medias
+    maximo = int(cfg["produccion"].get("cola_maxima", 5))
+    paginas = [c for c in config.canales() if config.canal_listo(c)]
+    ahora = datetime.now(timezone.utc)
+    colas = {c: _cola(c, ahora) for c in paginas}
+    canal = min(paginas, key=lambda c: (len(colas[c]), paginas.index(c)))
+    if len(colas[canal]) < maximo:
+        return canal, f"{canal}@{ahora:%Y-%m-%dT%H:%M}"
+    # Todas llenas: se espera a que salga el próximo video programado (hay hueco de nuevo)
+    libera = min(paginas, key=lambda c: colas[c][0])  # la página cuyo próximo video sale antes
+    proximo = colas[libera][0]
+    falta = max(1.0, (proximo - ahora).total_seconds() / 60 + 1)
+    usado = (time.monotonic() - arranque) / 60
+    if usado + falta + necesita <= tope:
+        print(f"Todas las páginas tienen {maximo} videos en cola; espero {falta:.0f} min.")
+        _dormir(esperar, falta)
+        # Ya salió ese video: su página tiene hueco
+        return libera, f"{libera}@{datetime.now(timezone.utc):%Y-%m-%dT%H:%M}"
+    margen = max(0.0, min(falta, tope - usado - 10))
+    print(f"Colas llenas: espero {margen:.0f} min y paso el relevo.")
+    _dormir(esperar, margen)
+    _relanzar_produccion()
+    return None
+
+
 def _esperar_renovacion(esperar, arranque: float, tope: float, necesita: float) -> bool:
-    """Si el límite de Claude está agotado (haya o no un video a medias), espera aquí mismo.
+    """Si el límite de Claude está agotado (es el mismo para todas las páginas), espera aquí mismo.
 
     True = ya es hora: seguir produciendo en esta tarea.
     False = la espera no cabe en esta tarea: se esperó lo que se pudo y se lanzó otra tarea que
     sigue esperando (un relevo en cadena que no depende de la revisión de cada 20 minutos)."""
-    e = estado()
-    cuando = e.get("reintentar_desde")
+    from .memoria import cadena, guardar_cadena
+    c = cadena()
+    cuando = c.get("reintentar_desde")
     if not cuando:
         return True
     falta = (datetime.fromisoformat(cuando) - datetime.now(timezone.utc)).total_seconds() / 60
     if falta <= 0:
         return True
-    e["esperando"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    guardar_estado(e)
+    c["esperando"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    guardar_cadena(c)
     _latido()
     usado = (time.monotonic() - arranque) / 60
     if usado + falta + necesita <= tope:
@@ -769,26 +865,27 @@ def _esperar_renovacion(esperar, arranque: float, tope: float, necesita: float) 
     margen = max(0.0, min(falta, tope - usado - 10))
     print(f"Faltan {falta:.0f} min: espero {margen:.0f} y paso el relevo a otra tarea.")
     _dormir(esperar, margen)
-    e = estado()
-    e.pop("esperando", None)
-    guardar_estado(e)
+    c = cadena()
+    c.pop("esperando", None)
+    guardar_cadena(c)
     _guardar_avance_en_repo()
     _relanzar_produccion()
     return False
 
 
 def ejecutar(esperar=time.sleep):
-    """El bot trabaja solo, siempre, en cadena:
+    """El bot trabaja solo, siempre, en cadena, para todas sus páginas:
     1. Si el límite de Claude está agotado, espera a que se renueve.
-    2. Si hay un video a medias, lo termina; si el turno de ahora no tiene video, lo hace; si ya
-       lo tiene, espera al próximo turno.
+    2. Si hay un video a medias, lo termina; si el turno de ahora no tiene video, lo hace (en la
+       página de ese turno); si ya lo tiene, espera al próximo turno.
     3. Al terminar, deja lanzada la siguiente tarea, que repite lo mismo.
     Si una espera no cabe en una tarea de GitHub, pasa el relevo a otra. Si una tarea muere de
     golpe, el vigilante (revisión periódica) relanza la cadena al ver que dejó de latir."""
     global INICIO
     from .claude import LimiteDeSuscripcion
     from . import reanudar
-    cfg = cargar_config()
+    from .memoria import cadena, guardar_cadena
+    cfg = cargar_config(config.PRINCIPAL)
     arranque = time.monotonic()
     # Lo que dura como máximo la tarea de GitHub (lo fija bot.yml; 175 si es el bot.yml viejo de 180 min)
     tope = float(os.environ.get("MINUTOS_TAREA", "175"))
@@ -796,10 +893,15 @@ def ejecutar(esperar=time.sleep):
     _latido()
     if not _esperar_renovacion(esperar, arranque, tope, necesita):
         return
-    turno = _esperar_turno(esperar, arranque, tope, necesita, cfg)
-    if turno is None:
+    continuo = cfg["produccion"].get("modo_cadena", "turnos") == "continuo"
+    elegir = _esperar_trabajo if continuo else _esperar_turno
+    elegido = elegir(esperar, arranque, tope, necesita, cfg)
+    if elegido is None:
         return
-    for vuelta in range(5):
+    canal, turno = elegido
+    config.usar_canal(canal)
+    print(f"Página: {canal} · turno {turno}")
+    for vuelta in range(12 if continuo else 5):
         if (time.monotonic() - arranque) / 60 + necesita > tope:
             _relanzar_produccion()  # no da tiempo a un video entero en esta tarea
             return
@@ -809,10 +911,10 @@ def ejecutar(esperar=time.sleep):
         except LimiteDeSuscripcion as e:
             cuando = reanudar.guardar_por_limite(str(e))
             hora = cuando.astimezone(timezone(timedelta(hours=-4))).strftime("%I:%M %p").lstrip("0")
-            est = estado()
-            if est.get("avisado_limite") != est.get("reintentar_desde"):  # un solo aviso por límite
-                est["avisado_limite"] = est.get("reintentar_desde")
-                guardar_estado(est)
+            c = cadena()
+            if c.get("avisado_limite") != c.get("reintentar_desde"):  # un solo aviso por límite
+                c["avisado_limite"] = c.get("reintentar_desde")
+                guardar_cadena(c)
                 a_medias = reanudar.EN_CURSO.exists()
                 telegram.aviso_seguro(
                     "Se acabó el límite de uso de Claude"
@@ -827,9 +929,23 @@ def ejecutar(esperar=time.sleep):
         if e.pop("rehacer_turno", None):  # salió roto y se descartó: se rehace este mismo turno
             guardar_estado(e)
             continue
-        e["turno_hecho"] = turno
-        guardar_estado(e)
+        c = cadena()
+        c["turno_hecho"] = turno
+        guardar_cadena(c)
         _guardar_avance_en_repo(f"Memoria: video {datetime.now(timezone.utc):%Y-%m-%d}")
+        if continuo:
+            # Sigue con el próximo video en esta misma tarea si da el tiempo (aprovecha el uso
+            # de Claude disponible); si no, la siguiente tarea de la cadena continúa.
+            if (time.monotonic() - arranque) / 60 + necesita > tope:
+                break
+            config.usar_canal(config.PRINCIPAL)
+            elegido = _esperar_trabajo(esperar, arranque, tope, necesita, cfg)
+            if elegido is None:
+                return
+            canal, turno = elegido
+            config.usar_canal(canal)
+            print(f"Página: {canal} · {turno}")
+            continue
         _relanzar_produccion()  # la siguiente tarea espera al próximo turno
         return
     _relanzar_produccion()

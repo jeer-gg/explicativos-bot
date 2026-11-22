@@ -72,12 +72,30 @@ def hoja_de_fotogramas(video: Path, destino: Path, duracion: float, n: int = 8) 
     return destino
 
 
-def revision_final(claude, guion: dict, hoja: Path) -> list[dict]:
+def _voz_en(momentos: list, segundo: float) -> str:
+    for inicio, dur, voz in momentos or []:
+        if inicio - 0.05 <= segundo < inicio + dur:
+            return voz
+    return ""
+
+
+def revision_final(claude, guion: dict, hoja: Path, momentos: list | None = None,
+                   duracion: float = 0.0) -> list[dict]:
     from .claude import imagen
     voz = " / ".join(e["voz"] for e in guion["escenas"])
+    por_fotograma = ""
+    if momentos and duracion:
+        paso = max(0.5, duracion / 8)
+        lineas = [f"- Fotograma {k + 1} (segundo {k * paso + 0.1:.1f}): la voz dice «{_voz_en(momentos, k * paso + 0.1)}»"
+                  for k in range(8)]
+        por_fotograma = ("Lo que dice la voz en cada fotograma:\n" + "\n".join(lineas) + "\n"
+                         "Comprueba que cada fotograma MUESTRA lo que dice la voz en ese momento "
+                         "(el mismo objeto, la misma acción, la misma parte). Si un fotograma "
+                         "muestra otra cosa o algo sin relación, es un error grave (grave=true): "
+                         "desconcierta al que mira.\n")
     contenido = [
         {"type": "text", "text": (
-            f"Video terminado: «{guion['titulo']}». Narración: {voz}\n"
+            f"Video terminado: «{guion['titulo']}». Narración: {voz}\n" + por_fotograma +
             "Te muestro 8 fotogramas repartidos por todo el video ya editado (con subtítulos, título "
             "de portada y tarjetas de datos), en orden de izquierda a derecha y de arriba abajo.\n"
             "Busca ERRORES concretos: textos cortados o tapados, texto en pantalla encima de cosas "
@@ -97,7 +115,8 @@ def revision_final(claude, guion: dict, hoja: Path) -> list[dict]:
                                   '"area": "escenas|guion|edicion", "grave": false, "fotograma": 1}], "nota_final": n}')},
     ]
     try:
-        datos = claude.json("Eres el jefe de control de calidad de un canal de videos explicativos. "
+        from .config import rol
+        datos = claude.json(f"Eres el jefe de control de calidad de una página de {rol()}. "
                             "Eres exigente y concreto.", contenido, max_tokens=2000)
     except Exception as e:  # noqa: BLE001
         print("No se pudo hacer la revisión final:", e)
@@ -163,12 +182,12 @@ def texto_reglas(area: str, maximo: int = 8) -> str:
 # ---------- 4. Todo junto ----------
 
 def revisar_video(claude, guion: dict, video: Path, voz: Path, duracion: float, trabajo: Path,
-                  aprender: bool = True) -> dict:
+                  aprender: bool = True, momentos: list | None = None) -> dict:
     problemas = chequeos_tecnicos(voz, duracion)
     try:
         hoja = hoja_de_fotogramas(video, trabajo / "control_final.png", duracion)
         paso = max(0.5, duracion / 8)
-        for p in revision_final(claude, guion, hoja):
+        for p in revision_final(claude, guion, hoja, momentos, duracion):
             # Segundo aproximado del error, para saber qué escena hay que rehacer
             try:
                 k = int(p.get("fotograma") or 0)

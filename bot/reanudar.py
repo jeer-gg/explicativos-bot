@@ -11,7 +11,7 @@ import re
 from datetime import datetime, timedelta, timezone
 
 from .config import DATOS
-from .memoria import _guardar, _leer, estado, guardar_estado
+from .memoria import _guardar, _leer, cadena, estado, guardar_cadena, guardar_estado
 
 EN_CURSO = DATOS / "en_curso.json"
 AVANCE: dict = {}  # se va llenando durante la producción
@@ -27,10 +27,10 @@ def empezar() -> dict:
     else:
         AVANCE.update({"inicio": datetime.now(timezone.utc).isoformat(timespec="seconds"), "escenas": {}})
     AVANCE.setdefault("escenas", {})
-    e = estado()
-    if e.pop("reintentar_desde", None) or e.pop("esperando", None):
-        e.pop("esperando", None)
-        guardar_estado(e)
+    c = cadena()
+    if c.pop("reintentar_desde", None) or c.pop("esperando", None):
+        c.pop("esperando", None)
+        guardar_cadena(c)
     return AVANCE
 
 
@@ -48,7 +48,20 @@ def terminar():
 def hora_de_renovacion(mensaje: str) -> datetime:
     """Lee "resets 1:50pm (UTC)" del aviso de Claude. Si no se entiende, en 1 hora."""
     ahora = datetime.now(timezone.utc)
-    m = re.search(r"resets?\s+(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", mensaje, re.I)
+    meses = {m: i + 1 for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug",
+                                                "sep", "oct", "nov", "dec"])}
+    f = re.search(r"resets?\s+(?:on\s+)?([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?",
+                  mensaje, re.I)
+    if f and f.group(1).lower() in meses:  # límite semanal: "resets Nov 25, 9am"
+        h, mi = int(f.group(3)), int(f.group(4) or 0)
+        if f.group(5):
+            h = h % 12 + (12 if f.group(5).lower() == "pm" else 0)
+        cuando = ahora.replace(month=meses[f.group(1).lower()], day=int(f.group(2)), hour=h % 24,
+                               minute=mi, second=0, microsecond=0)
+        if cuando <= ahora:
+            cuando = cuando.replace(year=cuando.year + 1)
+        return cuando + timedelta(minutes=5)
+    m = re.search(r"resets?\s+(?:at\s+)?(?:[A-Za-z]{3}[a-z]*\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", mensaje, re.I)
     if not m:
         return ahora + timedelta(hours=1)
     h, mi = int(m.group(1)), int(m.group(2) or 0)
@@ -65,23 +78,7 @@ def guardar_por_limite(mensaje: str) -> datetime:
     if AVANCE.get("tema"):
         _guardar(EN_CURSO, {k: v for k, v in AVANCE.items() if k != "reanudado"})
     cuando = hora_de_renovacion(mensaje)
-    e = estado()
-    e["reintentar_desde"] = cuando.isoformat(timespec="seconds")
-    guardar_estado(e)
+    c = cadena()
+    c["reintentar_desde"] = cuando.isoformat(timespec="seconds")
+    guardar_cadena(c)
     return cuando
-
-
-def toca_reintentar() -> bool:
-    """Lo usa la revisión de cada 20 minutos: ¿ya se renovó el límite?"""
-    e = estado()
-    cuando = e.get("reintentar_desde")
-    if not cuando or datetime.now(timezone.utc) < datetime.fromisoformat(cuando):
-        return False
-    # Si una tarea de producción ya está esperando la renovación, ella sigue sola
-    esperando = e.get("esperando")
-    if esperando and datetime.now(timezone.utc) - datetime.fromisoformat(esperando) < timedelta(hours=6):
-        return False
-    # Se aplaza por si el intento también falla (producir lo borra al empezar)
-    e["reintentar_desde"] = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat(timespec="seconds")
-    guardar_estado(e)
-    return True

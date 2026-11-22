@@ -1,0 +1,90 @@
+# Página de HISTORIAS: historias reales de suspenso, misterios y curiosidades científicas.
+# Solo va aquí lo que cambia respecto a config.yaml (lo demás se toma de ahí).
+# Sus datos viven en data/historias/ y usa los secretos META_PAGE_ID_HISTORIAS y
+# META_PAGE_TOKEN_HISTORIAS. Claude, Gemini y Telegram son los mismos que la otra página.
+
+canal:
+  etiqueta: "Historias"
+  formato: "historia"
+  rol: "historias reales de suspenso, misterios y curiosidades científicas"
+  nombre: "Historias reales que parecen inventadas"
+  idioma: "español latino neutro, como un narrador de misterio cercano"
+  publico: "adultos de 18 a 55 años en Latinoamérica y los hispanos de Estados Unidos y España"
+  ejemplo_tema: >-
+    "la señal de 72 segundos que un radiotelescopio captó en 1977 y nunca volvió a sonar" en vez
+    de "misterios del espacio"
+  subtemas:
+    - "misterios científicos reales (señales, fenómenos o hallazgos que costó explicar)"
+    - "inventos y descubrimientos que salieron por accidente"
+    - "rescates y supervivencias increíbles sin víctimas"
+    - "errores famosos que cambiaron la historia"
+    - "casualidades reales que parecen imposibles"
+    - "experimentos científicos extraños que de verdad se hicieron"
+    - "secretos y enigmas de la historia que se descubrieron mucho después"
+    - "curiosidades extremas de la naturaleza y el espacio"
+  tendencias:
+    activo: false   # las historias no dependen de lo que está en tendencia hoy
+
+produccion:
+  duracion_min: 50
+  duracion_max: 85
+  escenas_min: 10
+  escenas_max: 14
+  voz: "es-MX-JorgeNeural"   # voz de respaldo (Edge), masculina como la principal
+  velocidad_voz: "+8%"
+  voz_marca:
+    activa: true
+    nombre: "Narrador de historias"
+    genero: "male"
+    tono: "low"
+    idioma: "es-419"
+    acento: "Latin American neutral Spanish, no strong regional accent"
+    persona: "Mystery and true-story narrator in his early forties"
+    contexto: "Narration for short viral videos about real mysteries and incredible true stories"
+    descripcion: >
+      A deep, warm and captivating male narrator in his early forties speaking neutral Latin
+      American Spanish. Calm and confident, with a hint of mystery, like telling a true story
+      late at night that keeps everyone leaning in. Clear diction, low pitch, controlled pace
+      that speeds up in tense moments and slows down before each reveal. Never theatrical or
+      exaggerated.
+
+estilo:
+  escenario_fijo: "oscuro"   # siempre el escenario oscuro con foco cálido
+  descripcion_3d: >
+    Estilo de marca de la página: cine oscuro en 3D, como una obra de teatro en miniatura.
+    Escenario oscuro con un foco de luz cálida, sombras largas y bien definidas, contornos
+    negros finos y sombreado de caricatura. Figuras estilizadas tipo maniquí, sin caras ni
+    rasgos: el protagonista de un color fuerte (rojo) y los demás en grises. Objetos clave
+    grandes y detallados, lugares como maquetas de época. El suspenso se cuenta con la luz: el
+    foco se cierra, una luz roja de alarma, una sombra que crece, un destello. Cada fotograma
+    lleno y bonito, cámara cercana que se mueve despacio. Sin emojis ni personas realistas.
+  guia_escenas: >
+    Esta página cuenta HISTORIAS REALES de suspenso. Las personas son figuras tipo maniquí sin
+    cara (cuerpo, cabeza lisa, brazos), nunca rostros ni retratos de gente real: el
+    protagonista en rojo (acentos[0]) y los demás en gris. Lo importante se cuenta con objetos
+    clave grandes (la carta, el reloj, la antena, la puerta) y con la luz: el foco cálido
+    sigue al protagonista; para la tensión, la luz se cierra o se vuelve roja; para la
+    revelación, un destello. Fechas, lugares y cifras van en carteles o tarjetas. Nada de
+    sangre, armas apuntando, heridos ni nada violento.
+  paletas_3d:
+    marca: ["#121318", "#F2EFE9", "#D2452F", "#8C8F99", "#F0B44C", "#4C7BD9", "#1C1D25"]
+
+ganchos:
+  tipos:
+    - "empieza en el momento de máxima tensión («La puerta se abrió… y no había nadie»)"
+    - "dato imposible con fecha («En 1977, una señal de 72 segundos llegó del espacio»)"
+    - "esto pasó de verdad («Esto parece una película, pero pasó en 1958»)"
+    - "pregunta que no te deja ir («¿Cómo sobrevive alguien 76 días solo en el mar?»)"
+    - "el error que lo cambió todo («Un descuido de dos minutos cambió la medicina»)"
+    - "nadie lo creyó («Nadie le creyó… hasta que encontraron esto»)"
+  estructuras:
+    - "EL MISTERIO: un hecho real que nadie supo explicar; se cuenta qué pasó, las teorías que fallaron y la explicación que hay hoy (o por qué sigue abierto)"
+    - "CUENTA ATRÁS: una situación real contra el reloj (un rescate, una falla, un experimento) contada minuto a minuto hasta el desenlace"
+    - "EL ACCIDENTE QUE SALIÓ BIEN: un error o descuido real que terminó en un invento o descubrimiento enorme; del momento del error al resultado"
+    - "NADIE LE CREYÓ: alguien real que vio o dijo algo que nadie creyó, y la prueba que al final le dio la razón"
+    - "LA CASUALIDAD IMPOSIBLE: una coincidencia real tan rara que parece inventada, con los datos que la prueban"
+    - "HISTORIA EN PARTES: una historia real larga contada en 2 o 3 partes; cada parte termina en el momento de más tensión"
+
+publicacion:
+  horarios: ["08:00", "12:30", "21:00"]
+  hashtags: ["#historiasreales", "#misterio", "#curiosidades", "#sabiasque"]

@@ -53,8 +53,9 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
         '"comentario": "resumen en una frase"}'
     )})
     global ULTIMO_COMENTARIO
+    from .config import rol
     resultado = claude.json(
-        "Eres director de arte de videos explicativos 3D virales. Lo que más te importa es que el "
+        f"Eres director de arte de videos 3D virales de {rol()}. Lo que más te importa es que el "
         "video se vea hermoso y profesional. Eres exigente con la estética y justo: no castigas los "
         "recursos que usan los Reels ganadores.",
         contenido, max_tokens=3000)

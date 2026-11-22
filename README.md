@@ -165,3 +165,19 @@ remotion/                animación (React + Remotion)
 data/                    memoria del canal (se actualiza sola)
 pruebas/simulacion.py    prueba completa sin internet
 ```
+
+## Varias páginas con el mismo bot
+
+El bot maneja dos páginas con un solo Claude, un solo Gemini y un solo Telegram:
+
+- **Explicativos** (página principal): `config.yaml`, datos en `data/`, secretos `META_PAGE_ID` y `META_PAGE_TOKEN`.
+- **Historias** (historias reales de suspenso, sin víctimas): `canales/historias.yaml` (solo lo que cambia),
+  datos en `data/historias/`, secretos `META_PAGE_ID_HISTORIAS` y `META_PAGE_TOKEN_HISTORIAS`.
+
+Producción continua (`produccion.modo_cadena: "continuo"`): el bot hace videos sin parar cada vez
+que hay uso de Claude disponible (también de madrugada), siempre para la página con menos videos en
+cola, y los deja programados en Facebook para el siguiente horario libre de esa página (3 por página).
+Descansa cuando todas las páginas tienen `cola_maxima` videos programados por delante. Si la página
+de historias no tiene sus secretos, el bot trabaja solo para la principal.
+Cada aviso de Telegram dice de qué página es. Para agregar otra página: copia
+`canales/historias.yaml` con otro nombre, ajústalo, añade sus turnos y sus dos secretos.

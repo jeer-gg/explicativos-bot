@@ -73,6 +73,9 @@ def _system(cfg: dict, nombre: str) -> str:
     estilo = cfg["estilo"]["descripcion_3d" if tres else "descripcion"].strip()
     from .autocontrol import texto_reglas
     extra = texto_reglas("escenas")
+    guia = (cfg.get("estilo") or {}).get("guia_escenas", "").strip()
+    if guia:
+        extra = "\n## Guía de esta página\n" + guia + "\n" + extra
     if tres and MUNDO["activo"] and MUNDO["codigo"] and nombre != "Mundo":
         extra = BLOQUE_MUNDO.replace("{codigo}", MUNDO["codigo"]) + extra
     return (prompt("escena3d.md" if tres else "escena.md").replace("Responde SOLO con", extra + "\nResponde SOLO con")
@@ -112,10 +115,21 @@ Voz de esta escena: «{escena['voz']}»
 Palabras con su tiempo dentro de la escena: {palabras}
 Palabra clave (momento visual principal): {escena.get('palabra_clave', '')}
 Rótulo: «{escena.get('rotulo', '')}»{(chr(10) + "Encuadre de cámara de esta escena: " + encuadre(indice)) if MOTOR['actual'] == '3d' else ''}{(chr(10) + "Tarjeta de datos que el video pone encima (no la dibujes tú): " + str(escena.get('grafico'))) if escena.get('grafico') else ''}
-Lo que debe mostrar: {escena['visual']}
+Lo que debe mostrar: {escena['visual']}{_vecinas(guion, indice)}
 Paleta sorteada: fondo {estilo['colores']['fondo']}, tinta {estilo['colores']['tinta']}, acentos {', '.join(estilo['colores']['acentos'])}{' (acentos: objeto principal, secundario, resalte, extra, suelo)' if MOTOR['actual'] == '3d' else ''}
 
 {"Todas las escenas están en el mismo mundo: el cielo, el suelo, el sol y las sombras ya los pone el video. Tú construyes solo lo de tu escenario." if MOTOR["actual"] == "3d" else "Las escenas vecinas comparten el mismo tablero y la cámara viaja entre ellas: mantén un fondo coherente con la paleta para que el paso sea fluido."}"""
+
+
+def _vecinas(guion: dict, indice: int) -> str:
+    """Lo de antes y lo de después, para que la escena continúe la anterior y prepare la siguiente."""
+    escenas = guion["escenas"]
+    texto = ""
+    if indice > 0:
+        texto += f"\nJusto antes se vio: {escenas[indice - 1].get('visual', '')} (continúa desde ahí: mismos objetos, mismo lugar)."
+    if indice < len(escenas) - 1:
+        texto += f"\nJusto después se verá: {escenas[indice + 1].get('visual', '')} (deja todo listo para eso)."
+    return texto
 
 
 def _paso_mundo(guion: dict, indice: int) -> str:
@@ -152,7 +166,9 @@ def dibujar_mundo(claude: Claude, cfg: dict, guion: dict, estilo: dict) -> str:
     """Dibuja el mundo compartido (Mundo.tsx) una sola vez por video."""
     lib = (REMOTION / "src" / "lib3d.tsx").read_text(encoding="utf-8")
     ejemplo = (ESCENAS / "Ejemplo3D.tsx").read_text(encoding="utf-8")
-    system = (prompt("mundo3d.md").replace("{estilo}", cfg["estilo"]["descripcion_3d"].strip())
+    guia = (cfg.get("estilo") or {}).get("guia_escenas", "").strip()
+    estilo_txt = cfg["estilo"]["descripcion_3d"].strip() + (("\n\nGuía de esta página:\n" + guia) if guia else "")
+    system = (prompt("mundo3d.md").replace("{estilo}", estilo_txt)
               .replace("{lib}", lib).replace("{ejemplo}", ejemplo))
     texto = claude.texto(system, _pedido_mundo(guion, estilo), modelo=claude.modelo_escenas, max_tokens=14000)
     codigo = extraer_codigo(texto)
