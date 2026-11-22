@@ -18,5 +18,25 @@
     "duracion": 45.67,
     "video_fb": "1709000854111396",
     "metricas": {}
+  },
+  {
+    "id": "20261122-1041",
+    "fecha": "2026-11-22",
+    "publicado_en": "2026-11-22T13:00:00+00:00",
+    "programado": true,
+    "titulo": "Por qué el mar tarda tanto en calentarse",
+    "tema": "¿Por qué el agua tarda tanto en calentarse y tanto en enfriarse? Comparación con números: cuánto calor guarda el agua frente a la arena y el aire",
+    "tendencia": "El Niño 2026-2027 en niveles récord, con alertas de la OMM y emergencias por inundaciones en Perú",
+    "serie": null,
+    "subtema": "ciencia de cosas cotidianas",
+    "estructura": "CON NÚMEROS: una comparación con números grandes en pantalla (barras que crecen, contadores, medidas) que cambia cómo ves algo cotidiano",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "ya lo tienes, pero falta algo («Ya tienes un avión… pero así no vuela»)",
+    "gancho": "¿Por qué tu pie se quema en la arena y el mar no?",
+    "nota_revisor": 5.4,
+    "duracion": 41.79,
+    "video_fb": "2084558012346480",
+    "metricas": {}
   }
 ]

@@ -1,166 +1,165 @@
 {
-  "fecha": "2026-11-21",
+  "fecha": "2026-11-22",
   "tendencias": [
     {
-      "tendencia": "Arranca la temporada de Black Friday (27 de noviembre) con Amazon en oferta desde el 19 de noviembre, y la gente se pregunta si de verdad conviene comprar",
-      "fuente": "https://press.aboutamazon.com/es/news/retail/2026/11/semana-black-friday-amazon-19-30-noviembre-un-millon-ofertas",
+      "tendencia": "El Niño 2026-2027 en niveles récord, con alertas de la OMM y emergencias por inundaciones en Perú",
+      "fuente": "https://wmo.int/es/node/39188 ; https://www.meganoticias.cl/mundo/524381-inicio-fenomeno-el-nino-agencia-estadounidense-cientificos-advierten-temperaturas-record-11-06-2026.html",
       "preguntas": [
         {
-          "pregunta": "¿Por qué un precio terminado en .99 nos parece mucho más barato?",
-          "angulo": "El cerebro lee de izquierda a derecha y se ancla en el primer dígito: $2.99 se siente como «2 y algo», no como 3.",
-          "subtema": "psicología cotidiana (hábitos, memoria, decisiones)"
+          "pregunta": "¿Por qué el agua tarda tanto en calentarse y tanto en enfriarse?",
+          "angulo": "El agua guarda mucho más calor que el aire o la arena. Por eso unos grados extra en el océano cambian el clima de medio planeta.",
+          "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué el «precio anterior» tachado nos hace sentir que ganamos dinero?",
-          "angulo": "El efecto ancla: el número tachado funciona como referencia, aunque el producto nunca se haya vendido a ese precio.",
-          "subtema": "el dinero en la vida diaria (inflación, intereses, precios)"
+          "pregunta": "¿Por qué sale vapor de una taza de café si no lo vemos salir del líquido?",
+          "angulo": "El vapor de agua es invisible. Lo que vemos son gotitas diminutas que se condensan al enfriarse, igual que las nubes.",
+          "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué compramos cosas que no necesitábamos cuando hay una cuenta regresiva?",
-          "angulo": "La escasez y la urgencia activan la aversión a la pérdida: duele más perder la oferta que gastar el dinero.",
-          "subtema": "psicología cotidiana (hábitos, memoria, decisiones)"
+          "pregunta": "¿Por qué el aire se siente más pesado y pegajoso cuando hay humedad?",
+          "angulo": "El aire húmedo en realidad pesa menos que el seco. La sensación viene de que el sudor no se evapora y el cuerpo no se enfría.",
+          "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué en las tiendas ponen lo básico al fondo y las ofertas en la entrada?",
-          "angulo": "El diseño de la tienda es un recorrido planeado para que pases frente a más productos y compres más de lo que ibas a comprar.",
-          "subtema": "por qué las cosas son como son (diseños, costumbres, objetos)"
+          "pregunta": "¿Por qué los charcos desaparecen aunque no haga calor?",
+          "angulo": "La evaporación ocurre a cualquier temperatura. Las moléculas más rápidas de la superficie escapan solas, sin necesidad de hervir.",
+          "subtema": "ciencia de cosas cotidianas"
         }
       ]
     },
     {
-      "tendencia": "La memoria RAM, los SSD y las tarjetas gráficas están más caros por la demanda de la IA, y se espera que el Black Friday traiga descuentos modestos",
-      "fuente": "https://paraibabusiness.com.br/black-friday-2026-deve-ter-descontos-fracos-em-memoria-ram-e-ssd-diz-canaltech/",
+      "tendencia": "Lluvia de estrellas Leónidas, con máximo en la noche del 17 al 18 de noviembre",
+      "fuente": "https://astronomia.ign.es/es/web/guest/leonidas ; https://starwalk.space/es/news/november-meteor-showers",
       "preguntas": [
         {
-          "pregunta": "¿Qué hace realmente la memoria RAM de tu celular o computadora?",
-          "angulo": "Es como el escritorio de trabajo: cuanto más grande, más cosas abiertas a la vez, y se borra por completo al apagar.",
-          "subtema": "tecnología que usamos sin entender (celular, wifi, GPS)"
-        },
-        {
-          "pregunta": "¿Por qué un celular de 128 GB muestra menos espacio libre del que dice la caja?",
-          "angulo": "El sistema operativo ocupa parte, y los fabricantes cuentan en unidades de 1000 mientras la computadora cuenta en 1024.",
-          "subtema": "tecnología que usamos sin entender (celular, wifi, GPS)"
-        },
-        {
-          "pregunta": "¿Por qué cuando algo escasea y mucha gente lo quiere, el precio sube?",
-          "angulo": "Los fabricantes de chips destinan su producción a quien paga más, y lo que queda para los demás cuesta más.",
-          "subtema": "el dinero en la vida diaria (inflación, intereses, precios)"
-        },
-        {
-          "pregunta": "¿Por qué el celular se calienta cuando juega o graba video?",
-          "angulo": "Cada operación del chip libera calor, y el celular no tiene ventilador: el calor solo sale por la superficie y por eso se reduce el rendimiento.",
-          "subtema": "tecnología que usamos sin entender (celular, wifi, GPS)"
-        }
-      ]
-    },
-    {
-      "tendencia": "Lluvia de estrellas Leónidas (pico del 17 al 18 de noviembre) y la actividad de meteoros de todo noviembre siguen generando conversación y fotos",
-      "fuente": "https://www.cronica.com.mx/tendencias/2026/11/17/lluvia-de-estrellas-leonidas-2026-a-que-hora-y-como-se-podra-ver-mejor-este-martes-17-de-noviembre/",
-      "preguntas": [
-        {
-          "pregunta": "¿Por qué las estrellas fugaces dejan una estela brillante si son del tamaño de un grano de arena?",
-          "angulo": "No brillan por quemarse: el aire se comprime delante de la roca a velocidad enorme y se calienta hasta el punto de volverse incandescente.",
-          "subtema": "ciencia de cosas cotidianas (cocina, casa, clima)"
-        },
-        {
-          "pregunta": "¿Por qué después de unos minutos en la oscuridad empezamos a ver muchas más estrellas?",
-          "angulo": "La retina tarda unos 20-30 minutos en adaptarse a la oscuridad, y una mirada breve al celular reinicia el proceso.",
-          "subtema": "el cuerpo humano en el día a día (sin consejos médicos)"
-        },
-        {
-          "pregunta": "¿Por qué la pantalla del celular en modo nocturno es rojiza y ayuda a ver el cielo?",
-          "angulo": "La luz roja afecta menos a los bastones del ojo, las células que ven con poca luz.",
-          "subtema": "tecnología que usamos sin entender (celular, wifi, GPS)"
+          "pregunta": "¿Por qué los ojos se acostumbran a la oscuridad y tardan unos 20 minutos en ver bien?",
+          "angulo": "La retina cambia de los conos a los bastones y regenera un pigmento sensible a la luz. Una mirada al celular reinicia buena parte de ese proceso.",
+          "subtema": "cómo funciona el cuerpo por dentro"
         },
         {
           "pregunta": "¿Por qué las estrellas parpadean pero los planetas casi no?",
-          "angulo": "El parpadeo viene de la turbulencia del aire. Una estrella es un punto de luz que se desvía fácil, y un planeta es un disco diminuto que promedia esas variaciones.",
-          "subtema": "ciencia de cosas cotidianas (cocina, casa, clima)"
+          "angulo": "El parpadeo viene de la turbulencia del aire. Una estrella es un punto de luz que se desvía fácil, y un planeta es un pequeño disco que promedia esas desviaciones.",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Por qué una estrella fugaz deja una estela brillante si la mayoría son del tamaño de un grano de arena?",
+          "angulo": "El brillo no viene de la roca ardiendo. Viene del aire que se comprime y se calienta a su paso a unos 70 km/s.",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Por qué al mirar de reojo vemos mejor las cosas tenues en la noche?",
+          "angulo": "El centro de la retina tiene conos, que ven poco con luz débil. Los bastones, muy sensibles, están alrededor.",
+          "subtema": "cómo funciona el cuerpo por dentro"
         }
       ]
     },
     {
-      "tendencia": "Google lanza Gemini 3.6 Flash y Google Maps añade un velocímetro en tiempo real para Android Auto",
-      "fuente": "https://es.digitaltrends.com/?p=1085214",
+      "tendencia": "GTA 6 en boca de todos: se confirma que no saldrá en PS4, solo en consolas nuevas",
+      "fuente": "https://heyupnow.com/es-es/blogs/noticias-tecnologicas",
       "preguntas": [
         {
-          "pregunta": "¿Cómo sabe el GPS tu velocidad sin tener un velocímetro?",
-          "angulo": "Calcula la distancia entre posiciones sucesivas con el efecto Doppler y la diferencia de tiempo de las señales de los satélites.",
-          "subtema": "tecnología que usamos sin entender (celular, wifi, GPS)"
+          "pregunta": "¿Por qué una consola nueva puede mostrar mundos enormes sin trabarse y una vieja no?",
+          "angulo": "La GPU dibuja millones de triángulos en paralelo. La memoria y el disco rápido cargan solo lo que ves, no todo el mapa.",
+          "subtema": "tecnología que usamos sin entender"
         },
         {
-          "pregunta": "¿Por qué el GPS funciona sin internet pero el mapa no carga?",
-          "angulo": "El GPS solo recibe señales de satélites, no envía nada. Los mapas, el tráfico y las búsquedas sí necesitan datos.",
-          "subtema": "tecnología que usamos sin entender (celular, wifi, GPS)"
+          "pregunta": "¿Por qué la consola suena como avión cuando juegas?",
+          "angulo": "El procesador convierte electricidad en calor. El ventilador sube de revoluciones para empujar ese calor fuera de la caja.",
+          "subtema": "tecnología que usamos sin entender"
         },
         {
-          "pregunta": "¿Por qué el GPS falla en túneles y entre edificios altos?",
-          "angulo": "Las señales son débiles y no atraviesan bien el concreto, y en la ciudad rebotan y confunden el cálculo de la distancia.",
-          "subtema": "tecnología que usamos sin entender (celular, wifi, GPS)"
+          "pregunta": "¿Por qué cuesta tanto dejar de jugar \"una partida más\"?",
+          "angulo": "Las metas cortas sin un final claro mantienen abierta una tarea pendiente en la cabeza. Es el efecto Zeigarnik.",
+          "subtema": "psicología cotidiana"
         },
         {
-          "pregunta": "¿Cómo sabe el celular qué tan atascada está una calle?",
-          "angulo": "Mide de forma anónima la velocidad de miles de celulares que pasan por ahí y la compara con la velocidad habitual.",
-          "subtema": "tecnología que usamos sin entender (celular, wifi, GPS)"
+          "pregunta": "¿Por qué el control se siente vibrar con distintas texturas?",
+          "angulo": "Dentro hay motores con pesas descentradas. Al girar a distintas velocidades simulan desde un golpe hasta una lluvia fina.",
+          "subtema": "tecnología que usamos sin entender"
         }
       ]
     },
     {
-      "tendencia": "La final de la Serie Mundial 2026 de béisbol y el Balón de Oro 2026 están entre lo más buscado en Google Trends",
-      "fuente": "https://trends.google.com/trending?hl=es",
+      "tendencia": "Acción de Gracias y comidas familiares de fin de año a la vista",
+      "fuente": "https://trends.google.com/trending?hl=es-419",
       "preguntas": [
         {
-          "pregunta": "¿Por qué la pelota de béisbol tiene exactamente 108 costuras rojas?",
-          "angulo": "Las costuras dan agarre para los lanzamientos con efecto, y el cosido a mano sigue siendo el estándar en las pelotas oficiales.",
-          "subtema": "por qué las cosas son como son (diseños, costumbres, objetos)"
+          "pregunta": "¿Por qué el horno hace que las cosas se doren y la olla no?",
+          "angulo": "El dorado es la reacción de Maillard, que necesita superficies secas y más de unos 140 °C. El agua hirviendo se queda en 100 °C.",
+          "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué una bola curva realmente curva en el aire?",
-          "angulo": "El giro crea más presión de un lado que del otro (efecto Magnus) y empuja la pelota hacia el lado de menor presión.",
-          "subtema": "ciencia de cosas cotidianas (cocina, casa, clima)"
+          "pregunta": "¿Por qué la sartén de teflón no pega y por qué se estropea con el metal?",
+          "angulo": "El recubrimiento es un polímero tan resbaloso que casi nada se adhiere a él. Rayarlo lo daña porque es una capa finísima.",
+          "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué los trofeos dorados no son de oro macizo?",
-          "angulo": "El oro puro es muy blando y carísimo, así que se usa un baño de oro sobre otro metal, y eso basta para que se vea igual.",
-          "subtema": "por qué las cosas son como son (diseños, costumbres, objetos)"
+          "pregunta": "¿Por qué el papel aluminio tiene un lado brillante y otro opaco?",
+          "angulo": "Se laminan dos hojas juntas al mismo tiempo. Solo las caras que tocan el rodillo salen brillantes, y no cambia nada al cocinar.",
+          "subtema": "por qué las cosas son como son"
         },
         {
-          "pregunta": "¿Por qué sentimos tanta emoción viendo ganar a un equipo al que nunca hemos conocido?",
-          "angulo": "Las neuronas espejo y la identidad de grupo hacen que el cerebro viva la victoria del equipo como propia.",
-          "subtema": "psicología cotidiana (hábitos, memoria, decisiones)"
+          "pregunta": "¿Por qué después de una comida larga con la familia da tanto sueño y el tiempo parece pasar volando?",
+          "angulo": "Una charla animada y sin relojes hace que prestemos poca atención al tiempo. El cerebro mide el tiempo según cuánto lo notamos.",
+          "subtema": "psicología cotidiana"
         }
       ]
     },
     {
-      "tendencia": "Se habla de la posible salida a bolsa de Anthropic y de lo que significa que una empresa «salga a bolsa»",
-      "fuente": "https://trends.google.com/trending?hl=es",
+      "tendencia": "Arranca la temporada navideña: luces, adornos y villancicos en todas partes",
+      "fuente": "https://www.que.es/2026/10/30/trends-tiktok-noviembre-2026/",
       "preguntas": [
         {
-          "pregunta": "¿Qué significa realmente que una empresa «salga a bolsa»?",
-          "angulo": "Vende pedacitos de sí misma (acciones) a cualquiera, y quien compra pasa a ser dueño de una parte diminuta.",
-          "subtema": "el dinero en la vida diaria (inflación, intereses, precios)"
+          "pregunta": "¿Por qué las lucecitas de Navidad se enredan solas en la caja?",
+          "angulo": "Un cable largo sacudido dentro de una caja forma nudos en segundos. Es cuestión de probabilidad y de la longitud del cable.",
+          "subtema": "por qué las cosas son como son"
         },
         {
-          "pregunta": "¿Por qué el precio de una acción sube y baja todo el día?",
-          "angulo": "No lo fija nadie: es el último precio al que un comprador y un vendedor se pusieron de acuerdo, como una subasta continua.",
-          "subtema": "el dinero en la vida diaria (inflación, intereses, precios)"
+          "pregunta": "¿Por qué las luces LED casi no se calientan y los focos viejos quemaban?",
+          "angulo": "El foco antiguo desperdiciaba más del 90 % de la energía como calor. Un LED saca luz directamente de un semiconductor.",
+          "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué una empresa puede valer miles de millones sin ganar dinero?",
-          "angulo": "El valor se calcula con lo que los inversionistas esperan que gane a futuro, no con lo que gana hoy.",
-          "subtema": "el dinero en la vida diaria (inflación, intereses, precios)"
+          "pregunta": "¿Por qué una canción navideña que odiamos se nos queda pegada en la cabeza?",
+          "angulo": "El cerebro repite en bucle las melodías simples y repetitivas. Es un gusano musical, y la exposición constante lo empeora.",
+          "subtema": "psicología cotidiana"
         },
         {
-          "pregunta": "¿Cómo hace un chatbot para «entender» lo que le escribes?",
-          "angulo": "No entiende como una persona: convierte las palabras en números y predice cuál es la siguiente más probable, millones de veces.",
-          "subtema": "tecnología que usamos sin entender (celular, wifi, GPS)"
+          "pregunta": "¿Por qué huele a Navidad con solo sentir canela o pino?",
+          "angulo": "El olfato se conecta directo con las zonas de memoria y emoción del cerebro, sin pasar por el filtro que usan los demás sentidos.",
+          "subtema": "cómo funciona el cuerpo por dentro"
+        }
+      ]
+    },
+    {
+      "tendencia": "Nuevos lanzamientos de celulares y relojes (Honor 500, Xiaomi 18 Pro) previstos para finales de noviembre",
+      "fuente": "https://heyupnow.com/es-es/blogs/noticias-tecnologicas",
+      "preguntas": [
+        {
+          "pregunta": "¿Cómo sabe el celular en qué dirección lo giras para voltear la pantalla?",
+          "angulo": "Un acelerómetro diminuto mide la gravedad con una estructura microscópica que se mueve. Es un chip del tamaño de un grano de arena.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Cómo sabe el GPS dónde estás si el celular solo recibe señal?",
+          "angulo": "El celular nunca envía su ubicación. Calcula la posición midiendo cuánto tardan en llegar las señales de varios satélites, con relojes atómicos.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Por qué la pantalla del celular sabe dónde la tocas con el dedo y no con un guante?",
+          "angulo": "La pantalla capacitiva detecta la mínima carga eléctrica que tu dedo cambia al acercarse. Un guante común la aísla.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Por qué el celular se calienta al cargar o al grabar video?",
+          "angulo": "Pasar energía por el circuito y la batería siempre pierde un poco como calor. El procesador al máximo también genera calor.",
+          "subtema": "tecnología que usamos sin entender"
         }
       ]
     }
   ],
   "usadas": [
-    "¿Por qué un celular de 128 GB muestra menos espacio libre del que dice la caja?",
-    "¿Por qué la pelota de béisbol tiene exactamente 108 costuras rojas?"
+    "¿Por qué el agua tarda tanto en calentarse y tanto en enfriarse?"
   ],
-  "clasicos": 1
+  "clasicos": 0
 }

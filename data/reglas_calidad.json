@@ -9,6 +9,62 @@
       "ejemplo": "solo se entiende el 50 % del guion en el audio"
     },
     {
+      "regla": "Cada cifra en pantalla debe ser idéntica a la narración y a las demás tarjetas del mismo momento. No se permiten dos tarjetas con valores distintos para el mismo dato.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T11:14:07+00:00",
+      "clave": "cifra demás distintos idéntica mismo momento narración pantalla permiten tarjetas valores",
+      "ejemplo": "En el fotograma 5 la tarjeta grande dice «3500 veces más calor», pero la tarjeta amarilla de abajo dice «1,900x». Es un dato contradictorio que no coincide con la narración."
+    },
+    {
+      "regla": "Las etiquetas de temperatura deben mostrar el valor exacto de la narración (por ejemplo «+1 °C»), nunca cero. Ningún texto puede quedar cortado por el borde del encuadre.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T11:14:07+00:00",
+      "clave": "borde cortado deben ejemplo encuadre etiquetas exacto mostrar narración ningún nunca puede quedar temperatura texto valor",
+      "ejemplo": "En el fotograma 3 la etiqueta «+0 °C» dice que el agua no se calienta, pero la narración dice que sube un grado. En el lado de la arena el texto «°C» queda cortado en el borde izquierdo."
+    },
+    {
+      "regla": "Los subtítulos deben mostrar frases completas, con tamaño y color uniformes en todas sus palabras. No se deben partir las frases dejando una palabra suelta o disminuida.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T11:14:07+00:00",
+      "clave": "color completas deben dejando disminuida frases mostrar palabra palabras partir subtítulos suelta tamaño todas uniformes",
+      "ejemplo": "En el fotograma 4 el subtítulo «EL MAR APENAS SE» termina con «SE» pequeño, gris y pegado, como si estuviera cortado. La frase queda incompleta y poco legible."
+    },
+    {
+      "regla": "No dejar rótulos de la escena cortados por el borde superior. Los objetos de una comparación deben mostrar claramente qué representa cada lado, con etiquetas legibles, y el título no debe tapar elementos clave.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-22T11:14:07+00:00",
+      "clave": "borde claramente clave comparación cortados deben dejar elementos escena etiquetas legibles mostrar objetos representa rótulos superior tapar título",
+      "ejemplo": "En el fotograma 8 aparece un texto cortado arriba («osfera») y una línea negra suelta. Además, el título «TRES METROS DE MAR» tapa parte de la escena. La balanza con el bloque amarillo y el vaso no explica con claridad la comparación entre el océano y la atmósfera."
+    },
+    {
+      "regla": "El objeto protagonista de la idea (por ejemplo un pie o la arena caliente) debe ser reconocible a primera vista. Los elementos importantes no deben cortarse por el borde del encuadre.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-22T11:14:07+00:00",
+      "clave": "arena borde caliente cortarse deben ejemplo elementos encuadre importantes objeto primera protagonista reconocible vista",
+      "ejemplo": "En el fotograma 2 el sol y los rayos quedan cortados arriba. La figura beige junto a la sombrilla no se reconoce (¿pie, persona?) y no se ve que la arena queme."
+    },
+    {
+      "regla": "En las comparaciones de dos materiales, ambos deben aparecer enteros, del mismo tamaño y con etiquetas legibles. Los objetos auxiliares no deben tapar la escena ni quedar cortados.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-22T11:14:07+00:00",
+      "clave": "ambos aparecer auxiliares comparaciones cortados deben enteros escena etiquetas legibles materiales mismo objetos quedar tamaño tapar",
+      "ejemplo": "En el fotograma 3 un cubo verde grande y un termómetro tapan parte del agua y la arena. Las etiquetas «1 g agua» son diminutas y no hay etiqueta clara para la arena. En el fotograma 5 el cubo de «1 cm³ agua» queda cortado abajo y no se ve el cubo de aire que se compara."
+    },
+    {
+      "regla": "Las etiquetas de lugar deben tener un tamaño legible en pantalla vertical. Los mapas o esquemas deben incluir referencias reconocibles, como los continentes.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-22T11:14:07+00:00",
+      "clave": "continentes deben esquemas etiquetas incluir legible lugar mapas pantalla reconocibles referencias tamaño tener vertical",
+      "ejemplo": "En el fotograma 7 el texto «PACÍFICO» es diminuto e ilegible. El mapa es solo un óvalo naranja con flechas, sin continentes, y no se entiende qué muestra."
+    },
+    {
       "regla": "Los subtítulos no pueden superponerse entre sí ni tapar tarjetas de datos. Cada línea debe terminar de salir antes de que entre la siguiente, y la zona de subtítulos debe estar separada de la zona de tarjetas.",
       "area": "edicion",
       "veces": 1,
