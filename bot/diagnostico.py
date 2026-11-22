@@ -47,24 +47,31 @@ def revisar_telegram():
 
 
 def revisar_meta():
-    pagina, token = os.environ.get("META_PAGE_ID", ""), os.environ.get("META_PAGE_TOKEN", "")
+    _revisar_pagina("", "Facebook")
+    if os.environ.get("META_PAGE_ID_HISTORIAS") or os.environ.get("META_PAGE_TOKEN_HISTORIAS"):
+        _revisar_pagina("_HISTORIAS", "Facebook (historias)")
+
+
+def _revisar_pagina(sufijo: str, nombre: str):
+    pagina = os.environ.get("META_PAGE_ID" + sufijo, "")
+    token = os.environ.get("META_PAGE_TOKEN" + sufijo, "")
     if not pagina or not token:
-        return informar("Facebook", False, "faltan META_PAGE_ID o META_PAGE_TOKEN")
+        return informar(nombre, False, f"faltan META_PAGE_ID{sufijo} o META_PAGE_TOKEN{sufijo}")
     r = requests.get(f"{GRAPH}/{pagina}", params={"fields": "name,followers_count", "access_token": token},
                      timeout=30)
     if not r.ok:
-        return informar("Facebook", False, f"el token o el id de la página no sirven: {r.text[:300]}")
+        return informar(nombre, False, f"el token o el id de la página no sirven: {r.text[:300]}")
     datos = r.json()
-    informar("Facebook", True, f"página «{datos.get('name')}» ({datos.get('followers_count', '?')} seguidores)")
+    informar(nombre, True, f"página «{datos.get('name')}» ({datos.get('followers_count', '?')} seguidores)")
     r = requests.get(f"{GRAPH}/me/permissions", params={"access_token": token}, timeout=30)
     if r.ok:
         concedidos = {p["permission"] for p in r.json().get("data", []) if p.get("status") == "granted"}
         faltan = {"pages_manage_posts", "pages_read_engagement", "pages_show_list"} - concedidos
         if faltan:
-            informar("Permisos de Facebook", False, "faltan: " + ", ".join(sorted(faltan)))
+            informar(f"Permisos de {nombre}", False, "faltan: " + ", ".join(sorted(faltan)))
         else:
             extra = "" if "read_insights" in concedidos else " (sin read_insights: no habrá métricas)"
-            informar("Permisos de Facebook", True, "puede publicar Reels" + extra)
+            informar(f"Permisos de {nombre}", True, "puede publicar Reels" + extra)
 
 
 def main():

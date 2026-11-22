@@ -27,7 +27,9 @@ def _normal(s: str) -> str:
     return "".join(c for c in s if c.isalnum() and unicodedata.category(c) != "Mn")
 
 
-VOZ = Path(__file__).resolve().parent.parent / "data" / "voz.json"
+from .config import DATOS as _DATOS
+
+VOZ = _DATOS / "voz.json"  # cada página tiene su propia voz
 URL_VOCES = "https://generativelanguage.googleapis.com/v1beta/voices"
 
 
@@ -284,7 +286,8 @@ def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, 
         for w in t.split():
             tokens.append(w)
             escena_de.append(i)
-    texto = " ".join(textos)
+    # Cada escena en su propio párrafo: la voz hace una pausa natural entre una idea y la otra
+    texto = "\n\n".join(t.strip() for t in textos)
 
     # Se intenta hasta 3 veces conseguir una narración que diga el guion completo desde el principio
     mejor = None
@@ -329,8 +332,15 @@ def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, 
     tiempos[0] = (min(tiempos[0][0], AIRE_INICIAL + 0.05), tiempos[0][1])
 
     total = tiempos[-1][1] + 0.3
+    # Ritmo natural: si la voz salió atropellada (más de 2,8 palabras por segundo), se frena un
+    # poco (hasta un 10 %), sin pasar de los 88 s que acepta Facebook.
+    habla = max(1.0, tiempos[-1][1] - tiempos[0][0])
+    por_segundo = len(tokens) / habla
     factor = 1.0
-    if total > 88:  # Facebook acepta hasta 90 s: se acelera un poco si hace falta
+    if por_segundo > 2.8:
+        factor = max(0.9, 2.6 / por_segundo)
+        print(f"La voz va a {por_segundo:.1f} palabras por segundo: se frena a {factor:.2f}")
+    if total / factor > 88:  # Facebook acepta hasta 90 s: se acelera un poco si hace falta
         factor = min(1.25, total / 86)
     archivo = f"voz_{nombre}.wav"
     _ffmpeg("-i", str(limpio), "-t", f"{total:.3f}",

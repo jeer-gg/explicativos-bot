@@ -35,6 +35,25 @@ def guardar_estado(e: dict):
     _guardar(ESTADO, e)
 
 
+# Estado de la cadena de trabajo: uno solo para todas las páginas (el límite de Claude, los
+# turnos y el vigilante son compartidos). Vive en data/estado.json de la página principal.
+CLAVES_CADENA = ("latido", "reintentar_desde", "esperando", "avisado_limite", "turno_hecho",
+                 "vigilante", "telegram_offset")
+
+
+def _ruta_cadena():
+    from .config import DATOS_PRINCIPAL
+    return DATOS_PRINCIPAL / "estado.json"
+
+
+def cadena() -> dict:
+    return _leer(_ruta_cadena(), {"telegram_offset": 0, "pendientes": {}})
+
+
+def guardar_cadena(c: dict):
+    _guardar(_ruta_cadena(), c)
+
+
 def resumen_para_director(n: int = 40) -> str:
     """Texto compacto con lo publicado y cómo le fue, para el director."""
     items = memoria()[-n:]

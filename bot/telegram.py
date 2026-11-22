@@ -3,6 +3,7 @@ import json
 
 import requests
 
+from . import config
 from .config import secreto
 
 API = "https://api.telegram.org/bot{token}/{metodo}"
@@ -16,8 +17,20 @@ def _chat() -> str:
     return secreto("TELEGRAM_CHAT_ID")
 
 
+def _pagina() -> str:
+    """Con más de una página trabajando, cada aviso dice de cuál es."""
+    try:
+        activas = [c for c in config.canales() if config.canal_listo(c)]
+    except Exception:  # noqa: BLE001
+        return ""
+    if len(activas) < 2:
+        return ""
+    nombre = config.cargar_config(config.CANAL)["canal"].get("etiqueta") or config.CANAL.capitalize()
+    return f"[{nombre}] "
+
+
 def mensaje(texto: str, botones: list | None = None):
-    datos = {"chat_id": _chat(), "text": texto[:4000]}
+    datos = {"chat_id": _chat(), "text": (_pagina() + texto)[:4000]}
     if botones:
         datos["reply_markup"] = json.dumps({"inline_keyboard": botones})
     r = requests.post(_url("sendMessage"), data=datos, timeout=60)
@@ -25,7 +38,7 @@ def mensaje(texto: str, botones: list | None = None):
 
 
 def video(ruta, texto: str, botones: list | None = None):
-    datos = {"chat_id": _chat(), "caption": texto[:1000], "supports_streaming": "true"}
+    datos = {"chat_id": _chat(), "caption": (_pagina() + texto)[:1000], "supports_streaming": "true"}
     if botones:
         datos["reply_markup"] = json.dumps({"inline_keyboard": botones})
     with open(ruta, "rb") as f:
@@ -36,7 +49,7 @@ def video(ruta, texto: str, botones: list | None = None):
 
 def audio(ruta, texto: str):
     with open(ruta, "rb") as f:
-        r = requests.post(_url("sendAudio"), data={"chat_id": _chat(), "caption": texto[:1000]},
+        r = requests.post(_url("sendAudio"), data={"chat_id": _chat(), "caption": (_pagina() + texto)[:1000]},
                           files={"audio": f}, timeout=300)
     if not r.ok:
         mensaje(f"No pude enviar el audio ({r.status_code}). {texto}")

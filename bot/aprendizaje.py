@@ -103,7 +103,8 @@ def actualizar_lecciones(claude, cfg: dict, forzar: bool = False):
             "porcentaje_visto": round(r * 100) if r is not None else None,
             "nota_revisor": m.get("nota_revisor"),
         })
-    system = ("Eres analista de datos de una página de Reels explicativos. Sacas conclusiones "
+    from .config import rol
+    system = (f"Eres analista de datos de una página de Reels de {rol()}. Sacas conclusiones "
               "concretas y accionables de los resultados reales, sin inventar ni exagerar.")
     usuario = f"""Resultados de los videos publicados (vistas, cuántas veces lo normal, % visto):
 {json.dumps(filas, ensure_ascii=False)}

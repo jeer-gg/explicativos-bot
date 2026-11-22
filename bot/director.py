@@ -170,7 +170,7 @@ def elegir_tema(claude: Claude, cfg: dict, estilo: dict) -> dict:
     bloque = _bloque_tendencias(datos_tendencias) if datos_tendencias else ""
     usados = [m.get("tema", "") for m in memoria()]
     system = (
-        "Eres el director creativo de una página de Facebook de videos explicativos animados "
+        f"Eres el director creativo de una página de Facebook de {canal.get('rol', 'videos explicativos animados')} "
         f"en {canal['idioma']}. Público: {canal['publico']}. Tu trabajo es elegir el próximo "
         "tema con más potencial de retención y de compartirse, que sea verificable y nuevo."
     )
@@ -191,8 +191,7 @@ Para este video ya se sorteó:
 - Tipo de gancho: {estilo['tipo_gancho']}
 - Formato ganador (el tema DEBE encajar en él): {estilo['estructura']}
 
-Propón 3 temas candidatos concretos (no genéricos: "por qué el pan se pone duro y no blando
-como las galletas" en vez de "la ciencia del pan"), cada uno con su ángulo sorprendente, y elige
+Propón 3 temas candidatos concretos (no genéricos: {canal.get('ejemplo_tema', '"por qué el pan se pone duro y no blando como las galletas" en vez de "la ciencia del pan"')}), cada uno con su ángulo sorprendente, y elige
 el mejor según: ganas de enviárselo a alguien (lo que más reparte Facebook), curiosidad inmediata, que se pueda explicar visualmente en menos de 80 segundos,
 que los datos sean verificables, y lo aprendido de las métricas.
 

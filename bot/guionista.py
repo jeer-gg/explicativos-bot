@@ -39,14 +39,74 @@ SERIE NUEVA: este video es la PARTE 1 de una historia en 2 o 3 partes.
     return ""
 
 
+REGLAS_MUNDO_EXPLICATIVO = """- UN SOLO MUNDO QUE EVOLUCIONA (así son los Reels 3D con millones de vistas): todo el video pasa
+  en el mismo lugar con el mismo protagonista (un objeto, una máquina, un sistema), y cada
+  escena le cambia UNA cosa: se agrega una pieza, se llena, se abre, falla, se arregla. Nada de
+  saltar a otro lugar u otro objeto. En cada escena escribe en "mundo" cómo queda al terminarla.
+  · Empieza muchas veces por la versión más simple o rota del objeto («ya tienes un avión: una
+    tabla y un palo») y cada frase le agrega la pieza que resuelve el siguiente problema.
+  · Muestra qué pasa SIN la pieza (se cae, se desborda, no sube, se rompe) justo antes de
+    ponerla: el fallo exagerado es lo que más retiene.
+  · Nombra cada parte con su nombre real («el flotador», «el estabilizador horizontal»): la
+    gente se queda para aprender cómo se llama.
+"""
+
+REGLAS_VISUAL_EXPLICATIVO = """- Lo visual es protagonista: casi siempre un OBJETO o lugar cotidiano grande y detallado que se
+  arma, se abre en corte, se compara o se transforma (no gente hablando). Cada escena dice
+  qué pieza aparece, qué parte se señala con una etiqueta corta, qué se mide o qué flecha se ve.
+"""
+
+REGLAS_MUNDO_HISTORIA = """- HECHOS REALES: la historia pasó de verdad (fechas, lugares y nombres verificables con la
+  búsqueda web; pon las fuentes en "datos"). Si un detalle no se sabe, no lo inventes: dilo
+  («nadie sabe qué pasó en esos veinte minutos»), porque eso también da suspenso.
+- SIN VÍCTIMAS: nada de muertes, tragedias, crímenes con víctimas ni accidentes con heridos.
+  El suspenso sale de misterios, enigmas científicos, rescates sin muertos, experimentos,
+  inventos, errores famosos, casualidades increíbles y secretos que se descubrieron.
+- ESTRUCTURA DE SUSPENSO:
+  · Arranca en el momento de máxima tensión o con el dato imposible («En 1977, un
+    radiotelescopio captó una señal de 72 segundos… y nunca más volvió a sonar»).
+  · Vuelve atrás solo lo necesario para entender, y sube la tensión con 2 o 3 giros.
+  · Antes del desenlace, una pausa de intriga («pero lo que encontraron después…»).
+  · El desenlace SIEMPRE llega: la respuesta, lo que se descubrió o la mejor explicación que
+    hay hoy. Si sigue sin resolverse, dilo y cierra con la pregunta abierta.
+  · Remate que deje pensando o que invite a comentar qué habrían hecho.
+- Narra como un narrador de misterio: frases cortas, presente narrativo en los momentos de
+  tensión («la puerta se abre… y no hay nadie»), sin exagerar lo que pasó.
+- UN SOLO ESCENARIO QUE EVOLUCIONA: toda la historia pasa en un escenario de teatro en miniatura,
+  oscuro y con un foco de luz cálida, donde la escena va cambiando: entran y salen figuras, aparece
+  el objeto clave, cambia la luz. En cada escena escribe en "mundo" cómo queda el escenario al
+  terminarla (quién está, qué objeto hay, qué cambió).
+"""
+
+REGLAS_VISUAL_HISTORIA = """- Lo visual cuenta la historia como una obra de teatro en miniatura: figuras estilizadas tipo
+  maniquí, sin caras ni rasgos (el protagonista de un color fuerte, los demás grises), objetos
+  clave grandes y detallados (la carta, el reloj, la antena, la puerta), lugares como maquetas
+  de época, y cambios de luz para el suspenso (el foco se apaga, una luz roja, una sombra que
+  crece). Nada de personas realistas ni retratos de gente real. Cada escena dice qué figura u
+  objeto aparece, qué hace y qué se ilumina. Fechas y cifras clave como tarjeta ("grafico").
+"""
+
+
 def escribir_guion(claude: Claude, cfg: dict, tema: dict, estilo: dict) -> dict:
     p = cfg["produccion"]
     canal = cfg["canal"]
-    system = (
-        "Eres guionista de videos explicativos animados cortos para Facebook Reels en "
-        f"{canal['idioma']}. Escribes como se habla, con frases cortas, ritmo rápido y humor ligero. "
-        "Cada dato que afirmas debe ser cierto y tener fuente confiable. Investiga antes de escribir."
-    )
+    historia = canal.get("formato") == "historia"
+    if historia:
+        system = (
+            "Eres guionista de historias reales de suspenso para Facebook Reels en "
+            f"{canal['idioma']}. Cuentas como un gran narrador de misterio: frases cortas, tensión "
+            "que sube, giros y un desenlace que se paga. Todo lo que cuentas pasó de verdad y tiene "
+            "fuente confiable: investiga con la búsqueda web antes de escribir y nunca inventes.")
+        reglas_mundo, reglas_visual = REGLAS_MUNDO_HISTORIA, REGLAS_VISUAL_HISTORIA
+        cierre_salud = "Cuenta lo que pasó, sin dar consejos."
+    else:
+        system = (
+            "Eres guionista de videos explicativos animados cortos para Facebook Reels en "
+            f"{canal['idioma']}. Escribes como se habla, con frases cortas, ritmo ágil y natural y humor ligero. "
+            "Cada dato que afirmas debe ser cierto y tener fuente confiable. Investiga antes de escribir."
+        )
+        reglas_mundo, reglas_visual = REGLAS_MUNDO_EXPLICATIVO, REGLAS_VISUAL_EXPLICATIVO
+        cierre_salud = "Explica cómo funcionan las cosas, no qué le conviene a la gente."
     palabras_max = int(p["duracion_max"] * 2.6)
     palabras_min = int(p["duracion_min"] * 2.4)
     usuario = f"""Tema: {tema['tema']}
@@ -62,9 +122,10 @@ Reglas:
 - Cada escena dura entre 3 y 5 segundos de voz y muestra UNA idea visual clara (en los videos
   ganadores cambia algo cada 3 a 4 segundos). Muchas escenas
   cortas mantienen la atención mejor que pocas largas.
-- Habla corrida, como un narrador entusiasta que no se detiene: frases que se encadenan con
-  "y", "pero", "porque", "así que". Evita puntos y comas innecesarios, porque cada signo crea
-  una pausa en la voz. Nada de frases de relleno.
+- Ritmo NATURAL, como alguien que te cuenta algo fascinante en persona: ágil pero sin
+  atropellarse. Usa puntuación normal: punto al terminar cada idea y coma donde se respira,
+  porque esas pausas son las que hacen que se entienda. Calcula unas 2,5 palabras por segundo
+  de video (40 segundos ≈ 100 palabras). Nada de frases de relleno.
 - Retención: en los primeros 5 segundos promete algo concreto que se revela al final ("y lo
   más raro es lo que pasa al final"), mete una vuelta de tuerca o dato inesperado cada 2 o 3
   escenas, y termina con un remate que haga querer verlo otra vez o comentar.
@@ -85,29 +146,16 @@ Reglas:
 - La descripción visual de cada escena debe ser concreta y dibujable: qué personajes u objetos
   hay, qué hacen, qué se mueve, qué metáfora visual explica la idea. Sin texto largo en pantalla
   (máximo 3 palabras de rótulo por escena).
-- UN SOLO MUNDO QUE EVOLUCIONA (así son los Reels 3D con millones de vistas): todo el video pasa
-  en el mismo lugar con el mismo protagonista (un objeto, una máquina, un sistema), y cada
-  escena le cambia UNA cosa: se agrega una pieza, se llena, se abre, falla, se arregla. Nada de
-  saltar a otro lugar u otro objeto. En cada escena escribe en "mundo" cómo queda al terminarla.
-  · Empieza muchas veces por la versión más simple o rota del objeto («ya tienes un avión: una
-    tabla y un palo») y cada frase le agrega la pieza que resuelve el siguiente problema.
-  · Muestra qué pasa SIN la pieza (se cae, se desborda, no sube, se rompe) justo antes de
-    ponerla: el fallo exagerado es lo que más retiene.
-  · Nombra cada parte con su nombre real («el flotador», «el estabilizador horizontal»): la
-    gente se queda para aprender cómo se llama.
-- "concepto" en cada escena: de 1 a 4 palabras que se DICEN TAL CUAL en la voz de esa escena y
+{reglas_mundo}- "concepto" en cada escena: de 1 a 4 palabras que se DICEN TAL CUAL en la voz de esa escena y
   resumen el momento («LA BOLA SUBE», «EL FLOTADOR», «NO SUBE SOLA», «POCA FUERZA»). Es el texto
   grande que aparece arriba de la pantalla; si hay negación, que empiece por ella.
 - Nada de afirmaciones de salud ni de dinero (qué es bueno o malo para el cuerpo, riesgos,
   enfermedades, precios, ahorrar o gastar): Facebook no recomienda esos videos a gente nueva.
-  Explica cómo funcionan las cosas, no qué le conviene a la gente.
+  {cierre_salud}
 - Escribe números como se pronuncian si pueden leerse mal ("dos mil" en vez de "2.000").
 - Formato: sigue al pie de la letra la estructura sorteada; es un formato probado con cientos
   de miles de vistas.
-- Lo visual es protagonista: casi siempre un OBJETO o lugar cotidiano grande y detallado que se
-  arma, se abre en corte, se compara o se transforma (no gente hablando). Cada escena dice
-  qué pieza aparece, qué parte se señala con una etiqueta corta, qué se mide o qué flecha se ve.
-- "portada": el título grande que aparece al inicio y en la miniatura, de 3 a 6 palabras en
+{reglas_visual}- "portada": el título grande que aparece al inicio y en la miniatura, de 3 a 6 palabras en
   mayúsculas, que dé ganas de ver (como «ESTE TRIÁNGULO NO ES DE ADORNO» o «SI TE QUEMAS
   COCINANDO...»). Debe decir lo mismo que la primera frase, no otra cosa.
 - "grafico" (opcional, en 2 o 3 escenas como máximo): una tarjeta con datos que aparece en

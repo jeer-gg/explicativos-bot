@@ -2,6 +2,8 @@
 # Puedes editar este archivo desde el iPhone en github.com (botón del lápiz).
 
 canal:
+  etiqueta: "Explicativos"   # así aparece en los avisos de Telegram
+  formato: "explicativo"
   nombre: "Explicativos de la vida cotidiana"
   idioma: "español latino neutro, cercano, con humor ligero"
   publico: "adultos de 25 a 55 años en Latinoamérica y República Dominicana"
@@ -38,7 +40,7 @@ produccion:
   # Voces gratis de Edge TTS. Ejemplos: es-MX-JorgeNeural, es-MX-DaliaNeural,
   # es-DO-EmilioNeural, es-DO-RamonaNeural, es-US-AlonsoNeural
   voz: "es-MX-DaliaNeural"        # voz de respaldo (Edge), femenina como la principal
-  velocidad_voz: "+15%"          # solo para la voz de respaldo (Edge)
+  velocidad_voz: "+3%"           # solo para la voz de respaldo (Edge): ritmo natural
   # Voz principal: Google Gemini (gratis con la clave GEMINI_API_KEY de Google AI Studio)
   voz_motor: "gemini"             # "gemini" o "edge"
   # Voz de marca: se diseña UNA vez con Gemini (Voice Design) y es la misma en todos los videos.
@@ -56,7 +58,8 @@ produccion:
       A warm, bright and confident female narrator in her early thirties speaking neutral
       Latin American Spanish. Friendly and close, like a smart friend telling you a secret
       you will love. Clear diction, medium pitch, natural smile in the voice, energetic but
-      never shouting, fast and fluid pace with expressive intonation and real curiosity.
+      never shouting. Natural conversational pace, not rushed: brief pauses after each
+      sentence, a slightly longer pause between ideas, expressive intonation and real curiosity.
   voz_gemini: "Laomedeia"         # voz fija de reserva si la voz de marca no estuviera disponible
   # Siempre el mismo modelo para que la voz suene igual; los otros solo si el primero falla.
   modelos_voz_gemini: ["gemini-3.8-flash-tts", "gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts"]
@@ -66,7 +69,7 @@ produccion:
   estilo_voz_gemini: >
     Narra como una divulgadora de videos virales en español latinoamericano neutro: cercana,
     cálida y con sonrisa en la voz, como quien le cuenta a un amigo algo fascinante. Arranca
-    la primera frase con energía y sorpresa. Ritmo rápido y continuo, sin pausas largas.
+    la primera frase con energía y sorpresa. Ritmo natural, con pausas breves entre frases.
     Sube la intensidad en los datos sorprendentes, baja un poco y hazlo íntimo antes de la
     respuesta, y remata con énfasis. Lee exactamente este texto, sin añadir ni quitar palabras:
   whisper_modelo: "base"          # para saber en qué momento se dice cada palabra
@@ -75,9 +78,18 @@ produccion:
   # true = todo el video pasa en UN mundo que evoluciona (el objeto se arma, se llena, falla,
   # se arregla), como los Reels 3D con millones de vistas. false = un escenario por escena.
   mundo_continuo: true
-  # Turnos de producción (hora de RD). El bot trabaja en cadena: hace el video de cada turno y
-  # espera al siguiente. Separados 6 horas para que cada video tenga su propio límite de Claude.
-  horas_produccion: ["03:17", "09:17", "15:17"]
+  # Producción CONTINUA: el bot hace videos sin parar cada vez que hay uso de Claude disponible
+  # (también de madrugada), siempre para la página con menos videos en cola, y los deja
+  # programados en Facebook para el siguiente horario libre de esa página. Descansa cuando todas
+  # las páginas tienen ya esta cantidad de videos programados por delante.
+  modo_cadena: "continuo"     # "continuo" o "turnos" (horas fijas de abajo)
+  cola_maxima: 5              # videos programados por delante, por página (unos 1,5 días)
+  # Solo si modo_cadena es "turnos": horas fijas de producción (hora de RD).
+  turnos:
+    - {hora: "03:17", canal: "explicativos"}
+    - {hora: "09:17", canal: "historias"}
+    - {hora: "15:17", canal: "explicativos"}
+    - {hora: "21:17", canal: "historias"}
   concurrencia_3d: "50%"
   tiempo_maximo_min: 170          # debe ser menor que timeout-minutes del trabajo producir
   # Dos versiones del gancho (A y B) para que elijas la mejor.

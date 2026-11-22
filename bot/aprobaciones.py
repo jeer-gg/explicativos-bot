@@ -7,14 +7,22 @@ import traceback
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from . import telegram
+from . import config, telegram
 from .config import SALIDA, secreto
-from .memoria import estado, guardar_estado
+from .memoria import cadena, estado, guardar_cadena, guardar_estado
 from .publicador import borrar_pendiente, descargar_pendiente, publicar
 
 
 def caducar_pendientes(horas: int = 72):
-    """Borra videos pendientes que nadie aprobó en 3 días, para no acumular archivos."""
+    """Borra videos pendientes que nadie aprobó en 3 días (en todas las páginas)."""
+    actual = config.CANAL
+    for canal in config.canales():
+        config.usar_canal(canal)
+        _caducar(horas)
+    config.usar_canal(actual)
+
+
+def _caducar(horas: int):
     est = estado()
     ahora = datetime.now(timezone.utc)
     for id_video, info in list(est["pendientes"].items()):
@@ -41,28 +49,53 @@ def relanzar_si_toca():
     """Vigilante: si la cadena de producción dejó de latir (una tarea murió de golpe o nunca se
     lanzó la siguiente), la relanza. La tarea nueva decide sola qué hacer (seguir, esperar...)."""
     from datetime import datetime, timedelta, timezone
-    e = estado()
+    e = cadena()
     ahora = datetime.now(timezone.utc)
     latido = e.get("latido")
     muerta = not latido or ahora - datetime.fromisoformat(latido) > timedelta(minutes=200)
     ultimo = e.get("vigilante")
     if muerta and (not ultimo or ahora - datetime.fromisoformat(ultimo) > timedelta(minutes=90)):
         e["vigilante"] = ahora.isoformat(timespec="seconds")
-        guardar_estado(e)
+        guardar_cadena(e)
         print("La cadena de producción no da señales de vida: la relanzo")
         subprocess.run(["gh", "workflow", "run", "bot.yml", "-f", "tarea=producir"], check=False)
 
 
+def _pagina_del_video(accion: str, id_video: str) -> str | None:
+    """Los botones de todas las páginas llegan al mismo chat: busca en qué página está el video."""
+    from .memoria import memoria
+    for canal in config.canales():
+        config.usar_canal(canal)
+        if accion == "borrar":
+            if any(m.get("video_fb") == id_video for m in memoria()):
+                return canal
+        elif id_video in estado()["pendientes"]:
+            return canal
+    return None
+
+
+def _avanzar_offset(update_id: int):
+    c = cadena()
+    c["telegram_offset"] = update_id + 1
+    guardar_cadena(c)
+
+
 def procesar(espera: int = 0, caducar: bool = True):
+    actual = config.CANAL
+    try:
+        _procesar(espera, caducar)
+    finally:
+        config.usar_canal(actual)
+
+
+def _procesar(espera: int, caducar: bool):
     if caducar:
         caducar_pendientes()
         relanzar_si_toca()
     chat_autorizado = secreto("TELEGRAM_CHAT_ID")
-    est = estado()
-    updates = telegram.actualizaciones(est.get("telegram_offset", 0), espera)
+    updates = telegram.actualizaciones(cadena().get("telegram_offset", 0), espera)
     for up in updates:
-        est["telegram_offset"] = up["update_id"] + 1
-        guardar_estado(est)
+        _avanzar_offset(up["update_id"])
         cb = up.get("callback_query")
         if not cb:
             continue
@@ -71,9 +104,11 @@ def procesar(espera: int = 0, caducar: bool = True):
             continue
         partes = cb.get("data", "").split(":")
         accion, id_video = partes[0], partes[1] if len(partes) > 1 else ""
-        if accion != "borrar" and id_video not in estado()["pendientes"]:
+        pagina = _pagina_del_video(accion, id_video)
+        if pagina is None:
             telegram.responder_boton(cb["id"], "Ese video ya no está pendiente")
             continue
+        config.usar_canal(pagina)  # lo que sigue se hace en la página de ese video
 
         if accion == "pub":
             variante = partes[2]
@@ -120,9 +155,7 @@ def procesar(espera: int = 0, caducar: bool = True):
                 telegram.mensaje("Descartado. Ya empecé otro video; te llega en unos minutos.")
             else:
                 telegram.responder_boton(cb["id"], "Descartado")
-        est = estado()
-        est["telegram_offset"] = up["update_id"] + 1
-        guardar_estado(est)
+        _avanzar_offset(up["update_id"])
 
 
 if __name__ == "__main__":

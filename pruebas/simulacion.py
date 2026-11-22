@@ -81,6 +81,7 @@ def responder(system: str, contenido) -> str:
         return "Aquí va:\n```json\n" + json.dumps(guion_falso(), ensure_ascii=False) + "\n```"
     if "control de calidad" in system:
         REGISTRO["control"] = REGISTRO.get("control", 0) + 1
+        REGISTRO["control_texto"] = texto
         if GRAVE["n"] > 0:
             GRAVE["n"] -= 1
             return json.dumps({"problemas": [{"problema": "dato falso visible en una etiqueta",
@@ -170,7 +171,8 @@ def gemini_post(url, json=None, timeout=None, headers=None):  # noqa: A002
         return types.SimpleNamespace(status_code=200, json=lambda: datos, text="", ok=True,
                                      raise_for_status=lambda: None)
     GEMINI.setdefault("voces_usadas", []).append(json["generationConfig"]["speechConfig"]["voiceConfig"])
-    texto = json["contents"][0]["parts"][0]["text"].split("\n\n", 1)[-1]
+    texto = json["contents"][0]["parts"][0]["text"]
+    assert not texto.lower().startswith(("narra", "lee ")), "a Gemini solo se le manda el guion"
     GEMINI["textos"].append(texto)
     dur = 0.3 * (len(texto.split()) + 2)
     pcm = subprocess.run(["ffmpeg", "-loglevel", "error", "-f", "lavfi", "-i", f"sine=f=220:d={dur}",
@@ -203,7 +205,7 @@ from bot import aprobaciones, estadisticas, meta, publicador, render, telegram, 
 voz_gemini.requests = types.SimpleNamespace(post=gemini_post, RequestException=Exception)
 from bot import producir as prod  # noqa: E402
 from bot.config import ESCENAS, PUBLICO  # noqa: E402
-from bot.memoria import estado, memoria  # noqa: E402
+from bot.memoria import cadena, estado, guardar_cadena, memoria  # noqa: E402
 
 FALLOS = {"bundle": 1}
 
@@ -450,7 +452,6 @@ assert guardado["guion"] and guardado["tema"] and len(guardado["escenas"]) >= 1,
 assert estado()["reintentar_desde"]
 # La revisión de cada 20 minutos lo relanza cuando ya pasó la hora
 e = estado(); e["reintentar_desde"] = "2000-01-01T00:00:00+00:00"; from bot.memoria import guardar_estado as _ge; _ge(e)  # noqa: E702
-assert reanudar.toca_reintentar() and not reanudar.toca_reintentar(), "relanza una sola vez"
 # Su horario ya pasó: al terminar debe publicarse en el momento
 guardado["inicio"] = "2000-01-01T08:00:00+00:00"
 reanudar.EN_CURSO.write_text(json.dumps(guardado))
@@ -465,6 +466,8 @@ est_mod.dibujar = _dibujar_real
 
 # ---------- 6b) Límite con espera en la misma tarea y relevo en cadena ----------
 print("== Límite: espera en la misma tarea y relevo ==")
+_cfg_actual = (REPO / "config.yaml").read_text()
+(REPO / "config.yaml").write_text(_cfg_actual.replace('modo_cadena: "continuo"', 'modo_cadena: "turnos"'))
 import os  # noqa: E402
 from datetime import datetime as _dt, timedelta as _td, timezone as _tz  # noqa: E402
 
@@ -484,10 +487,8 @@ def esperar_falso(segundos):
     if not estado().get("reintentar_desde"):
         return  # espera de turno (no de límite)
     assert estado().get("esperando"), "mientras espera debe marcarlo"
-    # la revisión de cada 20 minutos no debe lanzar otra producción mientras esta espera
-    e = estado(); hora = e["reintentar_desde"]; e["reintentar_desde"] = "2000-01-01T00:00:00+00:00"; _ge(e)  # noqa: E702
-    assert not reanudar.toca_reintentar(), "no debe relanzar si una tarea ya está esperando"
-    e = estado(); e["reintentar_desde"] = hora; _ge(e)  # noqa: E702
+    # mientras espera, la cadena late: el vigilante no lanza otra producción
+    assert estado().get("latido")
 
 
 # A) La espera cabe: espera en la misma tarea y termina el video
@@ -596,7 +597,7 @@ assert estado()["turno_hecho"] == prod.turno_actual(cfg_sim)[1]
 # G) Turnos: siempre hay uno actual y uno próximo, a la hora correcta
 for h in range(0, 24 * 60, 37):
     t = _dt(2026, 11, 21, tzinfo=_tz.utc) + _td(minutes=h)
-    a, _ = prod.turno_actual(cfg_sim, t)
+    a, _, _c = prod.turno_actual(cfg_sim, t)
     b = prod.proximo_turno(cfg_sim, t)
     assert a <= t < b and (b - a) <= _td(hours=12)
     assert a.astimezone(_tz(_td(hours=-4))).strftime("%H:%M") in ("03:17", "09:17", "15:17")
@@ -786,7 +787,9 @@ def _ffmpeg_v(*args):
     Path(args[-1]).write_bytes(b"x")
 
 
-_vg.sintetizar = lambda texto, cfg, destino: (Path(destino).write_bytes(b"x"), destino)[1]
+_sint_orig, _esc_orig, _ff_orig, _dur_orig = _vg.sintetizar, _vg.escuchar_palabras, _vg._ffmpeg, _vg.duracion
+TEXTOS_VOZ = []
+_vg.sintetizar = lambda texto, cfg, destino: (TEXTOS_VOZ.append(texto), Path(destino).write_bytes(b"x"), destino)[2]
 _vg.escuchar_palabras = _escuchar
 _vg._ffmpeg = _ffmpeg_v
 _vg.duracion = lambda ruta: 20.0
@@ -794,6 +797,9 @@ carpeta = Path(TMP) / "voz_prueba"
 cfg_v = prod.cargar_config()
 # A) lee las instrucciones y después el guion: se corta justo donde empieza el guion
 r = _vg.narrar_variante(GUION_V, cfg_v, carpeta, carpeta, "T")
+assert TEXTOS_VOZ[-1] == "\n\n".join(GUION_V), "cada escena en su párrafo (pausa natural entre ideas)"
+# las palabras falsas van a 3,3 por segundo: se frena para un ritmo natural
+assert r["total"] > 0
 inicio_guion = 0.3 + 0.3 * len(INSTR)
 assert abs(CASO["cortes"][-1] - (inicio_guion - 0.12)) < 0.05, CASO["cortes"]
 # B) las instrucciones se leen y el comienzo del guion no se entiende: NUNCA se usa ese audio
@@ -834,5 +840,99 @@ os.environ.setdefault("GEMINI_API_KEY", "x")
 _real.sintetizar("Tu pan se pone duro", cfg_v, carpeta / "s.wav")
 _vg.requests.post = _req
 assert ENVIADO["texto"] == "Tu pan se pone duro", ENVIADO["texto"]
+
+# El control final sabe qué dice la voz en cada fotograma (para pillar imágenes sin relación)
+assert "la voz dice" in REGISTRO.get("control_texto", ""), REGISTRO.get("control_texto", "")[:200]
+
+# ---------- 12) Segunda página: historias (mismo bot, mismo Claude y Gemini, otra página) ----------
+print("== Segunda página: historias ==")
+from bot import config as _config  # noqa: E402
+_vg.sintetizar, _vg.escuchar_palabras, _vg._ffmpeg, _vg.duracion = _sint_orig, _esc_orig, _ff_orig, _dur_orig
+assert _config.canales() == ["explicativos", "historias"]
+assert not _config.canal_listo("historias"), "sin sus secretos, la página no trabaja"
+cfg_p = prod.cargar_config("explicativos")
+solo = {prod.turno_actual(cfg_p, _dt(2026, 11, 23, h, 30, tzinfo=_tz.utc))[2] for h in range(24)}
+assert solo == {"explicativos"}, "sin secretos, todos los turnos son de la página principal"
+os.environ["META_PAGE_ID_HISTORIAS"] = "pagina_historias"
+os.environ["META_PAGE_TOKEN_HISTORIAS"] = "token_historias"
+assert _config.canal_listo("historias")
+# 4 turnos al día que se alternan: 3:17 explicativos, 9:17 historias, 3:17 p. m. explicativos, 9:17 p. m. historias
+quien = [prod.turno_actual(cfg_p, _dt(2026, 11, 23, h, 30, tzinfo=_tz.utc))[2] for h in (8, 14, 20)]
+quien.append(prod.turno_actual(cfg_p, _dt(2026, 11, 24, 2, 30, tzinfo=_tz.utc))[2])
+assert quien == ["explicativos", "historias", "explicativos", "historias"], quien
+ids = {prod.turno_actual(cfg_p, _dt(2026, 11, 23, h, 30, tzinfo=_tz.utc))[1] for h in (8, 14)}
+assert len(ids) == 2 and any(i.startswith("historias@") for i in ids)
+
+memoria_explicativos = (REPO / "data" / "memoria.json").read_text()
+_config.usar_canal("historias")
+cfg_h = prod.cargar_config()
+assert cfg_h["canal"]["formato"] == "historia" and cfg_h["estilo"]["escenario_fijo"] == "oscuro"
+assert cfg_h["claude"]["modelo"] == cfg_p["claude"]["modelo"], "hereda lo que no cambia"
+assert cfg_h["publicacion"]["horarios"] == ["08:00", "12:30", "21:00"]
+assert any("muertes" in x for x in cfg_h["canal"]["prohibidos"]), "sin víctimas"
+assert _config.secreto("META_PAGE_ID") == "pagina_historias" and _config.secreto("TELEGRAM_CHAT_ID") == "123"
+from bot import voz_gemini as _vz  # noqa: E402
+assert _vz.VOZ == REPO / "data" / "historias" / "voz.json", "cada página tiene su propia voz"
+from bot import telegram as _tg_mod  # noqa: E402
+assert _tg_mod._pagina() == "[Historias] ", _tg_mod._pagina()
+llamadas_antes = len(REGISTRO["claude"])
+antes = len(REGISTRO["meta"])
+prod.producir()
+assert len(REGISTRO["meta"]) == antes + 1, "publica en la página de historias"
+nuevos = REGISTRO["claude"][llamadas_antes:]
+assert any(x.startswith("Eres guionista de historias reales") for x in nuevos), nuevos[:6]
+plan_h = json.loads((REPO / "remotion" / "plan_A.json").read_text())
+assert plan_h["escenario"] == "oscuro" and plan_h["paleta"]["fondo"] == "#121318"
+mem_h = json.loads((REPO / "data" / "historias" / "memoria.json").read_text())
+assert len(mem_h) == 1, "la memoria de historias es aparte"
+assert (REPO / "data" / "memoria.json").read_text() == memoria_explicativos, "no toca la otra página"
+assert "Por qué el pan" not in (REPO / "data" / "historias" / "tendencias.json").read_text() if (REPO / "data" / "historias" / "tendencias.json").exists() else True
+
+# Un botón de un video de historias se atiende desde la revisión (que arranca en la página principal)
+_config.usar_canal("explicativos")
+eh = json.loads((REPO / "data" / "historias" / "estado.json").read_text())
+eh["pendientes"]["hist1"] = {"titulo": "La señal", "creado": _dt.now(_tz.utc).isoformat()}
+(REPO / "data" / "historias" / "estado.json").write_text(json.dumps(eh))
+oferta = [{"update_id": 900, "callback_query": {"id": "c9", "from": {"id": 123}, "data": "descartar:hist1"}}]
+telegram.actualizaciones = lambda offset, espera=0: oferta if offset <= 900 else []
+aprobaciones.procesar(caducar=False)
+assert "hist1" not in json.loads((REPO / "data" / "historias" / "estado.json").read_text())["pendientes"]
+assert _config.CANAL == "explicativos", "vuelve a la página principal"
+assert estado()["telegram_offset"] == 901, "el chat de Telegram es uno solo"
+
+# ---------- 13) Producción continua: siempre para la página con menos videos en cola ----------
+print("== Producción continua ==")
+(REPO / "config.yaml").write_text((REPO / "config.yaml").read_text()
+                                  .replace('modo_cadena: "turnos"', 'modo_cadena: "continuo"')
+                                  .replace("cola_maxima: 5", "cola_maxima: 2"))
+cfg_c = prod.cargar_config("explicativos")
+assert cfg_c["produccion"]["modo_cadena"] == "continuo" and cfg_c["publicacion"]["horarios"] == ["09:00", "13:00", "20:00"]
+futuro = lambda horas: (_dt.now(_tz.utc) + _td(hours=horas)).isoformat(timespec="seconds")  # noqa: E731
+mem_e = [{"tema": "x", "publicado_en": futuro(10)}, {"tema": "y", "publicado_en": futuro(30)}]  # cola llena (2)
+mem_h_prev = json.loads((REPO / "data" / "historias" / "memoria.json").read_text())
+for m in mem_h_prev:
+    m["publicado_en"] = futuro(-50)  # ya publicados: no cuentan
+mem_h = mem_h_prev + [{"tema": "z", "publicado_en": futuro(12)}]                              # cola 1
+(REPO / "data" / "memoria.json").write_text(json.dumps(mem_e))
+(REPO / "data" / "historias" / "memoria.json").write_text(json.dumps(mem_h))
+assert len(prod._cola("explicativos")) == 2 and len(prod._cola("historias")) == 1
+_config.usar_canal("explicativos")
+c = cadena(); c.pop("reintentar_desde", None); c.pop("esperando", None); guardar_cadena(c)  # noqa: E702
+ESPERAS.clear(); RELEVOS.clear()  # noqa: E702
+prod._relanzar_produccion = lambda: RELEVOS.append(1)
+os.environ["MINUTOS_TAREA"] = "175"
+antes = len(REGISTRO["meta"])
+prod.ejecutar(esperar=esperar_falso)
+os.environ.pop("MINUTOS_TAREA")
+nuevo_h = json.loads((REPO / "data" / "historias" / "memoria.json").read_text())
+assert len(REGISTRO["meta"]) == antes + 1 and len(nuevo_h) == len(mem_h) + 1, "hace el video de la página con menos cola"
+assert len(json.loads((REPO / "data" / "memoria.json").read_text())) == 2, "no toca la página con la cola llena"
+_prox = min(min(prod._cola(c)) for c in ("explicativos", "historias"))
+_falta = (_prox - _dt.now(_tz.utc)).total_seconds() / 60
+assert RELEVOS == [1] and abs(sum(ESPERAS) - min(_falta + 1, 165)) < 3, (RELEVOS, ESPERAS, _falta)
+# Elección directa: con hueco, toca la página con menos videos en cola
+(REPO / "data" / "memoria.json").write_text(json.dumps([]))
+eleccion = prod._esperar_trabajo(esperar_falso, __import__("time").monotonic(), 340, 170, cfg_c)
+assert eleccion[0] == "explicativos", eleccion
 
 print("\nSIMULACIÓN CORRECTA. Archivos en", TMP)
