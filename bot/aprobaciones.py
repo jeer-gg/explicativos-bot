@@ -104,6 +104,15 @@ def _procesar(espera: int, caducar: bool):
             continue
         partes = cb.get("data", "").split(":")
         accion, id_video = partes[0], partes[1] if len(partes) > 1 else ""
+        if accion == "voz" and len(partes) == 3:
+            from . import voces
+            try:
+                texto = voces.elegir(partes[1], int(partes[2]))
+            except (ValueError, OSError):
+                texto = "No pude guardar esa voz"
+            telegram.responder_boton(cb["id"], texto[:190])
+            telegram.aviso_seguro(texto)
+            continue
         pagina = _pagina_del_video(accion, id_video)
         if pagina is None:
             telegram.responder_boton(cb["id"], "Ese video ya no está pendiente")

@@ -203,6 +203,8 @@ sys.modules["faster_whisper"] = fw
 # ---------- Cargar el bot y reemplazar lo externo ----------
 from bot import aprobaciones, estadisticas, meta, publicador, render, telegram, voz_gemini  # noqa: E402
 voz_gemini.requests = types.SimpleNamespace(post=gemini_post, RequestException=Exception)
+from bot import voces as _voces_mod  # noqa: E402
+_voces_mod.requests = types.SimpleNamespace(post=gemini_post)
 from bot import producir as prod  # noqa: E402
 from bot.config import ESCENAS, PUBLICO  # noqa: E402
 from bot.memoria import cadena, estado, guardar_cadena, memoria  # noqa: E402
@@ -303,12 +305,15 @@ aprobaciones.escuchar = lambda minutos: ESCUCHA.append(minutos)
 prod.producir()
 aprobaciones.escuchar = _escuchar_real
 assert ESCUCHA and ESCUCHA[0] > 2, "al terminar debe quedarse escuchando los botones"
-assert len(GEMINI["textos"]) == 1, "una sola versión, con voz de Gemini"
+narraciones = [t for t in GEMINI["textos"] if t != _voces_mod.FRASE]
+assert len(narraciones) == 1, "una sola versión, con voz de Gemini"
+assert len(GEMINI["textos"]) - 1 >= 7, "antes del primer video manda las muestras de voz para elegir"
 assert REGISTRO.get("pulir"), "debe pulir el gancho"
 assert REGISTRO.get("control") == 1, "debe revisar el video terminado"
 assert any("Control de calidad" in str(t) for t in REGISTRO["telegram"])
 assert GEMINI["voz_creada"]["voice"]["type"] == "prompted" and GEMINI["voz_creada"]["store"] is True
-assert all(v == {"voice": "voice_prueba123"} for v in GEMINI["voces_usadas"]), "siempre la voz de marca"
+# la narración (la última llamada) siempre con la voz de marca; antes van las muestras para elegir
+assert GEMINI["voces_usadas"][-1] == {"voice": "voice_prueba123"}, "siempre la voz de marca"
 assert any(t[0] == "audio" for t in REGISTRO["telegram"]), "debe enviar la muestra de la voz"
 assert not any("respaldo" in str(t) or "3D no funcion" in str(t) for t in REGISTRO["telegram"]), REGISTRO["telegram"]
 est = estado()
@@ -839,6 +844,8 @@ _real.voz_de_marca = lambda cfg: None
 os.environ.setdefault("GEMINI_API_KEY", "x")
 _real.sintetizar("Tu pan se pone duro", cfg_v, carpeta / "s.wav")
 _vg.requests.post = _req
+_real.requests.post = _req  # no dejar el requests de verdad cambiado para el resto
+_real.requests = types.SimpleNamespace(post=gemini_post, RequestException=Exception)
 assert ENVIADO["texto"] == "Tu pan se pone duro", ENVIADO["texto"]
 
 # El control final sabe qué dice la voz en cada fotograma (para pillar imágenes sin relación)
@@ -934,5 +941,38 @@ assert RELEVOS == [1] and abs(sum(ESPERAS) - min(_falta + 1, 165)) < 3, (RELEVOS
 (REPO / "data" / "memoria.json").write_text(json.dumps([]))
 eleccion = prod._esperar_trabajo(esperar_falso, __import__("time").monotonic(), 340, 170, cfg_c)
 assert eleccion[0] == "explicativos", eleccion
+
+# ---------- 14) Elegir la voz escuchando ----------
+print("== Elegir la voz escuchando ==")
+from bot import voces as _voces  # noqa: E402
+_config.usar_canal("explicativos")
+cfg_v2 = prod.cargar_config()
+AUDIOS = []
+telegram.audio = lambda ruta, texto="": AUDIOS.append(texto)
+(_config.DATOS / "voces_candidatas.json").unlink(missing_ok=True)
+assert _voces.ofrecer_si_toca(cfg_v2), "manda las muestras la primera vez"
+opciones = json.loads((_config.DATOS / "voces_candidatas.json").read_text())["opciones"]
+assert [o["nombre"] for o in opciones][0] == "La voz actual" and len(opciones) == 8, [o["nombre"] for o in opciones]
+assert len(AUDIOS) == 8 and AUDIOS[1].startswith("Voz 2:")
+assert any("voz:explicativos:8" in str(t) for t in REGISTRO["telegram"][-3:]), "botones Elegir"
+assert not _voces.ofrecer_si_toca(cfg_v2), "no se repite en la misma ronda"
+sulafat = next(o["n"] for o in opciones if o.get("prebuilt") == "Sulafat")
+telegram.actualizaciones = lambda offset, espera=0: ([{"update_id": 950, "callback_query": {
+    "id": "cv", "from": {"id": 123}, "data": f"voz:explicativos:{sulafat}"}}] if offset <= 950 else [])
+aprobaciones.procesar(caducar=False)
+elegida = json.loads((_config.DATOS / "voz.json").read_text())
+assert elegida.get("elegida") and elegida.get("prebuilt") == "Sulafat", elegida
+_vg2 = importlib.reload(__import__("bot.voz_gemini", fromlist=["x"]))
+_vg2.requests = types.SimpleNamespace(post=gemini_post, RequestException=Exception)
+_vg2.sintetizar("Hola", cfg_v2, Path(TMP) / "prueba_voz.wav")
+assert GEMINI["voces_usadas"][-1] == {"prebuiltVoiceConfig": {"voiceName": "Sulafat"}}, GEMINI["voces_usadas"][-1]
+# Una voz diseñada elegida tampoco se cambia aunque cambie la descripción del config
+disenada = next(o for o in opciones if o.get("id") and o["nombre"] != "La voz actual")
+_voces.elegir("explicativos", disenada["n"])
+assert _vg2.voz_de_marca({"produccion": {"voz_marca": {"activa": True, "descripcion": "otra cosa"}}}) == disenada["id"]
+# La página de historias (voz de hombre) no ofrece voces de mujer
+_config.usar_canal("historias")
+assert not _voces.ofrecer_si_toca(prod.cargar_config())
+_config.usar_canal("explicativos")
 
 print("\nSIMULACIÓN CORRECTA. Archivos en", TMP)

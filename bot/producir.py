@@ -223,6 +223,11 @@ def _revisar(cfg, claude, planes, rutas_plan, trabajo, guion, todos, codigos, di
 
 def producir():
     cfg = cargar_config()
+    try:  # elegir la voz escuchando (una vez por página; no frena el video si falla)
+        from . import voces
+        voces.ofrecer_si_toca(cfg)
+    except Exception as e:  # noqa: BLE001
+        print("No se pudieron ofrecer las voces:", e)
     claude = Claude()
     id_video = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M")
     trabajo = SALIDA / id_video
@@ -689,14 +694,26 @@ def _latido():
     _guardar_avance_en_repo("Memoria: el bot sigue trabajando")
 
 
+def _atender_botones():
+    """Atiende los botones de Telegram (cancelar, elegir voz...) sin esperar a la revisión periódica."""
+    try:
+        from . import aprobaciones
+        aprobaciones.procesar(espera=0, caducar=False)
+    except Exception as e:  # noqa: BLE001
+        print("No se pudieron revisar los botones de Telegram:", e)
+
+
 def _dormir(esperar, minutos: float):
-    """Espera en tramos de 30 minutos, dando señales de vida entre tramos."""
+    """Espera en tramos de 10 minutos, atendiendo los botones de Telegram y dando señales de vida."""
     restante = max(0.0, minutos)
+    vueltas = 0
     while restante > 0:
-        tramo = min(30.0, restante)
+        tramo = min(10.0, restante)
         esperar(tramo * 60)
         restante -= tramo
-        if restante > 0:
+        vueltas += 1
+        _atender_botones()
+        if restante > 0 and vueltas % 3 == 0:
             _latido()
 
 
@@ -891,6 +908,7 @@ def ejecutar(esperar=time.sleep):
     tope = float(os.environ.get("MINUTOS_TAREA", "175"))
     necesita = float(cfg["produccion"].get("tiempo_maximo_min", 170))
     _latido()
+    _atender_botones()
     if not _esperar_renovacion(esperar, arranque, tope, necesita):
         return
     continuo = cfg["produccion"].get("modo_cadena", "turnos") == "continuo"
