@@ -1,0 +1,20 @@
+{
+ "ronda": 1,
+ "opciones": [
+  {
+   "n": 1,
+   "nombre": "Sulafat (Gemini, cálida)",
+   "prebuilt": "Sulafat"
+  },
+  {
+   "n": 2,
+   "nombre": "Despina (Gemini, suave)",
+   "prebuilt": "Despina"
+  },
+  {
+   "n": 3,
+   "nombre": "Callirrhoe (Gemini, relajada)",
+   "prebuilt": "Callirrhoe"
+  }
+ ]
+}
