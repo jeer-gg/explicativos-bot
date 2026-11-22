@@ -60,6 +60,9 @@ produccion:
   voz_gemini: "Laomedeia"         # voz fija de reserva si la voz de marca no estuviera disponible
   # Siempre el mismo modelo para que la voz suene igual; los otros solo si el primero falla.
   modelos_voz_gemini: ["gemini-3.8-flash-tts", "gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts"]
+  # Notas de tono para Gemini: DESACTIVADAS (a veces las leía en voz alta al principio del video).
+  # El tono ya está en la descripción de la voz de marca de arriba.
+  notas_de_voz: false
   estilo_voz_gemini: >
     Narra como una divulgadora de videos virales en español latinoamericano neutro: cercana,
     cálida y con sonrisa en la voz, como quien le cuenta a un amigo algo fascinante. Arranca
@@ -178,8 +181,8 @@ claude:
   # Tope de llamadas a la API por video, para controlar el gasto.
   max_llamadas: 75
   # Rondas máximas en que el revisor puede pedir rehacer escenas.
-  rondas_revision: 3
-  nota_minima: 7
+  rondas_revision: 1   # una sola ronda: rehace solo lo que de verdad se ve mal
+  nota_minima: 5       # solo se redibujan las escenas claramente malas, no las mejorables
   # En modo automático todos los videos se programan solos. Si pones un número (por ejemplo 6.5),
   # los que saquen menos te llegarán a Telegram para decidir en vez de publicarse solos.
   nota_para_publicar: 0

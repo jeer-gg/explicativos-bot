@@ -32,7 +32,10 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
         "un dato visible que contradice la voz. NO son errores (no bajes por eso): un plano abierto "
         "para ubicar si el protagonista se distingue, un color fuerte para resaltar, repetir el "
         "mismo lugar y protagonista entre escenas (es un solo mundo que cambia). Lo importante "
-        "debe quedar en el centro (se recorta al 4:5 del feed). En la PRIMERA escena exige además "
+        "debe quedar en el centro (se recorta al 4:5 del feed). No te fijes en detalles pequeños: "
+        "si falta un objeto secundario de lo que pedía el guion pero la idea se entiende y se ve "
+        "bien, no bajes la nota. En «problemas» escribe como mucho los 2 cambios que más "
+        "mejorarían la escena. En la PRIMERA escena exige además "
         "un gancho visual hermoso que detenga el scroll desde el fotograma 0 (es la miniatura)."
     )}]
     from .autocontrol import texto_reglas

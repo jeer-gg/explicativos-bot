@@ -57,6 +57,8 @@ Formato ganador: {estilo['estructura']}
 Reglas:
 - La voz arranca en el segundo 0: la primera frase ES el gancho, de 6 a 12 palabras.
 - Entre {palabras_min} y {palabras_max} palabras en total, en {p['escenas_min']} a {p['escenas_max']} escenas.
+- En "visual" pide UNA acción principal por escena, con el mundo que ya existe y como mucho
+  un objeto nuevo (nada de listas de utilería: lupa, globo, sello, moneda...).
 - Cada escena dura entre 3 y 5 segundos de voz y muestra UNA idea visual clara (en los videos
   ganadores cambia algo cada 3 a 4 segundos). Muchas escenas
   cortas mantienen la atención mejor que pocas largas.

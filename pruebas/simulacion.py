@@ -115,7 +115,7 @@ def responder(system: str, contenido) -> str:
         notas = {f"Escena{i}": {"nota": 8, "problemas": ""} for i in range(6)}
         notas["EscenaB"] = {"nota": 9, "problemas": ""}
         if RONDA_REVISOR["n"] == 1:
-            notas["Escena3"] = {"nota": 5, "problemas": "el pan se ve plano"}
+            notas["Escena3"] = {"nota": 4, "problemas": "el pan se ve plano"}
         return json.dumps({"escenas": notas, "comentario": "bien"})
     raise AssertionError("Prompt inesperado: " + system[:80])
 
@@ -747,5 +747,92 @@ oidas = [{"w": w, "ini": 0.5 + 0.3 * k, "fin": 0.75 + 0.3 * k} for k, w in enume
 assert _vg._cobertura_inicio(tok, oidas) < 0.5, "un corte tardío debe detectarse"
 t = _vg.alinear(tok, oidas)
 assert all(t[k][0] < t[k + 1][0] for k in range(len(t) - 1)), "las palabras no se apilan en el mismo instante"
+
+# ---------- 11) La voz lee instrucciones al principio: nunca debe quedar en el video ----------
+print("== Voz que lee instrucciones ==")
+import re as _re  # noqa: E402
+INSTR = "narra como una divulgadora de videos virales cercana y cálida lee exactamente este texto".split()
+GUION_V = ["Tu pan se pone duro por culpa del agua", "y no del aire como casi todos creen"]
+TOK_V = " ".join(GUION_V).split()
+CASO = {"modo": "lee_instrucciones", "cortes": [], "intentos": 0}
+
+
+def _palabras(lista, t0):
+    return [{"w": w, "ini": round(t0 + 0.3 * k, 2), "fin": round(t0 + 0.3 * k + 0.25, 2)} for k, w in enumerate(lista)]
+
+
+def _crudo():
+    CASO["intentos"] += 1
+    if CASO["modo"] == "lee_instrucciones":  # siempre lee las instrucciones y luego el guion
+        return _palabras(INSTR + TOK_V, 0.3)
+    if CASO["modo"] == "solo_instrucciones_mal_oidas":  # el guion empieza irreconocible
+        return _palabras(INSTR + ["tú", "pan", "sé", "pone"] + TOK_V[4:], 0.3)
+    return _palabras(TOK_V, 0.3)
+
+
+def _escuchar(ruta, cfg, pista):
+    crudo = CASO.setdefault("ultimo", [])
+    if "gemini_" in str(ruta):
+        CASO["ultimo"] = _crudo()
+        return CASO["ultimo"]
+    corte = CASO["cortes"][-1]
+    return [{"w": o["w"], "ini": round(o["ini"] - corte + 0.25, 2), "fin": round(o["fin"] - corte + 0.25, 2)}
+            for o in CASO["ultimo"] if o["ini"] >= corte - 0.01]
+
+
+def _ffmpeg_v(*args):
+    if "-ss" in args:
+        CASO["cortes"].append(float(args[args.index("-ss") + 1]))
+    Path(args[-1]).write_bytes(b"x")
+
+
+_vg.sintetizar = lambda texto, cfg, destino: (Path(destino).write_bytes(b"x"), destino)[1]
+_vg.escuchar_palabras = _escuchar
+_vg._ffmpeg = _ffmpeg_v
+_vg.duracion = lambda ruta: 20.0
+carpeta = Path(TMP) / "voz_prueba"
+cfg_v = prod.cargar_config()
+# A) lee las instrucciones y después el guion: se corta justo donde empieza el guion
+r = _vg.narrar_variante(GUION_V, cfg_v, carpeta, carpeta, "T")
+inicio_guion = 0.3 + 0.3 * len(INSTR)
+assert abs(CASO["cortes"][-1] - (inicio_guion - 0.12)) < 0.05, CASO["cortes"]
+# B) las instrucciones se leen y el comienzo del guion no se entiende: NUNCA se usa ese audio
+CASO.update(modo="solo_instrucciones_mal_oidas", cortes=[], intentos=0)
+try:
+    _vg.narrar_variante(GUION_V, cfg_v, carpeta, carpeta, "T2")
+    usado = CASO["cortes"][-1] if CASO["cortes"] else None
+    # si se usó, el corte tiene que estar DESPUÉS de las instrucciones
+    assert usado is not None and usado >= 0.3 + 0.3 * len(INSTR) - 0.2, ("se coló la instrucción", CASO["cortes"])
+except RuntimeError:
+    pass  # sin un audio que empiece bien, se usa la voz de respaldo (Edge): correcto
+# C) el texto enviado a Gemini es solo el guion, sin notas de tono
+ENVIADO = {}
+_req = _vg.requests.post
+
+
+class _R:
+    status_code = 200
+
+    def json(self):
+        import base64 as b64
+        return {"candidates": [{"content": {"parts": [{"inlineData": {"mimeType": "audio/L16;rate=24000", "data": b64.b64encode(b"\0\0" * 10).decode()}}]}}]}
+
+
+def _post(url, json=None, **k):
+    ENVIADO["texto"] = json["contents"][0]["parts"][0]["text"]
+    return _R()
+
+
+_vg.requests.post = _post
+_vg.voz_de_marca = lambda cfg: None
+_sint = __import__("bot.voz_gemini", fromlist=["x"])
+import importlib  # noqa: E402
+_real = importlib.reload(_sint)
+_real.requests.post = _post
+_real.voz_de_marca = lambda cfg: None
+os.environ.setdefault("GEMINI_API_KEY", "x")
+_real.sintetizar("Tu pan se pone duro", cfg_v, carpeta / "s.wav")
+_vg.requests.post = _req
+assert ENVIADO["texto"] == "Tu pan se pone duro", ENVIADO["texto"]
 
 print("\nSIMULACIÓN CORRECTA. Archivos en", TMP)

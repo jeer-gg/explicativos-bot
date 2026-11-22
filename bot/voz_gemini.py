@@ -78,7 +78,9 @@ def voz_de_marca(cfg: dict) -> str | None:
 def sintetizar(texto: str, cfg: dict, destino: Path) -> Path:
     """Devuelve un WAV con la narración, siempre con la misma voz y el mismo modelo."""
     p = cfg["produccion"]
-    indicacion = p.get("estilo_voz_gemini", "").strip()
+    # Solo el texto que se lee. El tono ya viene en la voz de marca (diseñada con ese estilo):
+    # mandar instrucciones junto al texto hacía que a veces se leyeran en voz alta al principio.
+    indicacion = p.get("estilo_voz_gemini", "").strip() if p.get("notas_de_voz") else ""
     voz_id = voz_de_marca(cfg)
     voz = ({"voice": voz_id} if voz_id
            else {"prebuiltVoiceConfig": {"voiceName": p.get("voz_gemini", "Laomedeia")}})
@@ -241,7 +243,7 @@ def _inicio_tolerante(tokens: list[str], oidas: list[dict]) -> float | None:
                 # Retrocede por las palabras oídas justo antes (habla seguida, sin pausa), que son las
                 # del guion que no se reconocieron; una sigla puede oírse como varias («ese ese de»).
                 k, pasos = i, 0
-                while k > 0 and pasos < 3 * j and oidas[k]["ini"] - oidas[k - 1]["fin"] < 0.45:
+                while k > 0 and pasos < j + 2 and oidas[k]["ini"] - oidas[k - 1]["fin"] < 0.45:
                     k -= 1
                     pasos += 1
                 return max(0.0, oidas[k]["ini"])
@@ -308,11 +310,14 @@ def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, 
         cob_ini = _cobertura_inicio(tokens, oidas)
         print(f"Voz intento {intento + 1}: se oye el {round(cob * 100)} % del guion "
               f"(comienzo: {round(cob_ini * 100)} %)")
-        # Si el comienzo no se oye, el corte quedó tarde o se perdió el gancho: vale menos
-        puntaje = cob if cob_ini >= 0.5 else cob * 0.5
-        if mejor is None or puntaje > mejor[0]:
-            mejor = (puntaje, limpio, oidas, cob)
-        if cob >= 0.8 and cob_ini >= 0.5:
+        # El audio tiene que empezar con las primeras palabras del guion. Si no (se leyó otra
+        # cosa al principio o el corte quedó tarde), este intento no sirve y se repite.
+        if cob_ini < 0.6:
+            print("El audio no empieza con el guion; se repite la voz.")
+            continue
+        if mejor is None or cob > mejor[0]:
+            mejor = (cob, limpio, oidas, cob)
+        if cob >= 0.8:
             break
     if mejor is None:
         raise RuntimeError("La voz no dijo el guion en ninguno de los intentos")
