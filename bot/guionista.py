@@ -96,6 +96,9 @@ Reglas:
 - "concepto" en cada escena: de 1 a 4 palabras que se DICEN TAL CUAL en la voz de esa escena y
   resumen el momento («LA BOLA SUBE», «EL FLOTADOR», «NO SUBE SOLA», «POCA FUERZA»). Es el texto
   grande que aparece arriba de la pantalla; si hay negación, que empiece por ella.
+- Nada de afirmaciones de salud ni de dinero (qué es bueno o malo para el cuerpo, riesgos,
+  enfermedades, precios, ahorrar o gastar): Facebook no recomienda esos videos a gente nueva.
+  Explica cómo funcionan las cosas, no qué le conviene a la gente.
 - Escribe números como se pronuncian si pueden leerse mal ("dos mil" en vez de "2.000").
 - Formato: sigue al pie de la letra la estructura sorteada; es un formato probado con cientos
   de miles de vistas.

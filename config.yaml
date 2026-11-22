@@ -8,8 +8,7 @@ canal:
   # Subtemas que el director rota. Puedes añadir o quitar.
   subtemas:
     - "ciencia de cosas cotidianas (cocina, casa, clima)"
-    - "el cuerpo humano en el día a día (sin consejos médicos)"
-    - "el dinero en la vida diaria (inflación, intereses, precios)"
+    - "cómo funciona el cuerpo por dentro (pura mecánica: cómo ve el ojo, cómo suena la voz; sin decir qué es bueno o malo para la salud)"
     - "por qué las cosas son como son (diseños, costumbres, objetos)"
     - "psicología cotidiana (hábitos, memoria, decisiones)"
     - "tecnología que usamos sin entender (celular, wifi, GPS)"
@@ -26,6 +25,9 @@ canal:
     - "tragedias, muertes, crímenes o desastres con víctimas"
     - "religión"
     - "consejos de inversión concretos"
+    # Facebook no recomienda a gente nueva contenido con afirmaciones de salud o de dinero:
+    - "salud: lo que es bueno o malo para el cuerpo, comida y bacterias, dietas, enfermedades, riesgos"
+    - "dinero: precios, ofertas, compras, inflación, intereses, inversiones, bolsa, criptomonedas"
 
 produccion:
   # Duración objetivo del Reel en segundos (Facebook acepta de 3 a 90).

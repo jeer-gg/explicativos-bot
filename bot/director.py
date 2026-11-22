@@ -39,7 +39,10 @@ def sortear_estilo(cfg: dict) -> dict:
 
 
 REGLAS_TENDENCIAS = """Nunca: tragedias con víctimas, muertes, crímenes, política, religión, salud o dosis,
-rumores sin confirmar ni nada que se aproveche del dolor ajeno."""
+rumores sin confirmar ni nada que se aproveche del dolor ajeno.
+Facebook NO recomienda a gente nueva contenido con afirmaciones de salud o de dinero: nada de lo que es bueno o malo para el cuerpo, comida y bacterias, dietas, enfermedades, riesgos para la salud, precios, ofertas, compras, inflación, inversiones, bolsa ni criptomonedas. Si una tendencia es de eso (por ejemplo, el Black Friday o una empresa que sale a bolsa),
+úsala solo si hay detrás un porqué cotidiano que NO hable de salud ni de dinero (cómo funciona
+la máquina, el objeto o el fenómeno); si no, descártala."""
 
 
 def _hoy(cfg: dict) -> str:
@@ -106,7 +109,7 @@ def recuento_del_dia(claude: Claude, cfg: dict) -> dict:
 1) INVESTIGA con la búsqueda web lo que está pasando y lo que la gente busca y comenta hoy o en
 los últimos 3 días en {", ".join(t.get("paises", []))}: tendencias de Google, noticias más
 leídas, lo viral en TikTok, Facebook e Instagram, deportes, lanzamientos, clima y fenómenos
-naturales, precios, fiestas y fechas de la temporada.
+naturales, fiestas y fechas de la temporada.
 2) Elige las 6 tendencias con más conversación que encajen con las reglas. Prefiere lo que
 interesa a todo el mundo o a toda Latinoamérica (ciencia, tecnología, clima, fenómenos
 naturales, lanzamientos, eventos mundiales, fechas y temporadas compartidas). Evita lo que
@@ -174,6 +177,7 @@ def elegir_tema(claude: Claude, cfg: dict, estilo: dict) -> dict:
     usuario = f"""Canal: {canal['nombre']}
 Subtemas posibles: {", ".join(canal['subtemas'])}
 Temas prohibidos: {", ".join(canal['prohibidos'])}
+Facebook NO recomienda a gente nueva contenido con afirmaciones de salud o de dinero: nada de lo que es bueno o malo para el cuerpo, comida y bacterias, dietas, enfermedades, riesgos para la salud, precios, ofertas, compras, inflación, inversiones, bolsa ni criptomonedas. Esos temas se quedan sin alcance aunque el video sea bueno.
 
 Videos publicados y su rendimiento (usa esto para aprender qué funciona):
 {resumen_para_director()}
