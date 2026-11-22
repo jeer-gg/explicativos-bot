@@ -1,5 +1,28 @@
 {
-  "pendientes": [],
+  "pendientes": [
+    {
+      "serie": "El GPS y Einstein",
+      "parte": 2,
+      "total": 3,
+      "tema": "Cómo se mide el tiempo con esa precisión: relojes atómicos a bordo y el desfase de los relojes de los satélites respecto a los de la Tierra",
+      "angulo": "Un error de una millonésima de segundo son unos trescientos metros, y aun con relojes atómicos algo no cuadra.",
+      "subtema": "tecnología que usamos sin entender",
+      "estructura": "HISTORIA EN PARTES: una historia real e intrigante detrás de algo cotidiano (un invento por accidente, un error que cambió todo, un misterio con explicación científica) contada en 2 o 3 partes; cada parte responde su propia pregunta y termina con una intriga que lleva a la siguiente",
+      "tendencia": "Nuevos lanzamientos de celulares y relojes (Honor 500, Xiaomi 18 Pro) previstos para finales de noviembre",
+      "anterior": "Cuidado: tu celular no sabe dónde estás, lo adivina. Y lo más raro es que el GPS no envía nada, solo escucha. Allá arriba, a unos veinte mil kilómetros, hay satélites gritando la hora sin parar. Cada uno dice quién es, dónde está y a qué hora exacta habló. Tu celular compara esa hora con la suya y ve cuánto tardó la señal en llegar. Y como viaja a la velocidad de la luz, el retraso es de apenas unas centésimas de segundo. Tiempo por velocidad es igual a distancia, así sabes qué tan lejos está cada satélite. Con un satélite estás en una esfera gigante, con tres ya quedas en un punto, el otro cae en el espacio. Pero el reloj de tu celular es barato, se desajusta y el punto se corre. Por eso hace falta un cuarto satélite que corrija ese error. Pero todo esto exige medir el tiempo con una precisión absurda. Un error de una millonésima de segundo ya te pierde unos trescientos metros. Y aun co"
+    },
+    {
+      "serie": "El GPS y Einstein",
+      "parte": 3,
+      "total": 3,
+      "tema": "Por qué los relojes de los satélites se adelantan: relatividad especial y general de Einstein",
+      "angulo": "Sin corregirlo, el GPS se desviaría unos diez kilómetros por día.",
+      "subtema": "tecnología que usamos sin entender",
+      "estructura": "HISTORIA EN PARTES: una historia real e intrigante detrás de algo cotidiano (un invento por accidente, un error que cambió todo, un misterio con explicación científica) contada en 2 o 3 partes; cada parte responde su propia pregunta y termina con una intriga que lleva a la siguiente",
+      "tendencia": "Nuevos lanzamientos de celulares y relojes (Honor 500, Xiaomi 18 Pro) previstos para finales de noviembre",
+      "anterior": "Cuidado: tu celular no sabe dónde estás, lo adivina. Y lo más raro es que el GPS no envía nada, solo escucha. Allá arriba, a unos veinte mil kilómetros, hay satélites gritando la hora sin parar. Cada uno dice quién es, dónde está y a qué hora exacta habló. Tu celular compara esa hora con la suya y ve cuánto tardó la señal en llegar. Y como viaja a la velocidad de la luz, el retraso es de apenas unas centésimas de segundo. Tiempo por velocidad es igual a distancia, así sabes qué tan lejos está cada satélite. Con un satélite estás en una esfera gigante, con tres ya quedas en un punto, el otro cae en el espacio. Pero el reloj de tu celular es barato, se desajusta y el punto se corre. Por eso hace falta un cuarto satélite que corrija ese error. Pero todo esto exige medir el tiempo con una precisión absurda. Un error de una millonésima de segundo ya te pierde unos trescientos metros. Y aun co"
+    }
+  ],
   "secuelas": [],
   "ultima_parte_fecha": "2026-11-20"
 }

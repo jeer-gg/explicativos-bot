@@ -38,5 +38,29 @@
     "duracion": 41.79,
     "video_fb": "2084558012346480",
     "metricas": {}
+  },
+  {
+    "id": "20261122-1318",
+    "fecha": "2026-11-22",
+    "publicado_en": "2026-11-22T17:00:00+00:00",
+    "programado": true,
+    "titulo": "Tu celular nunca dice dónde estás (parte 1)",
+    "tema": "Cómo sabe el GPS dónde estás si tu celular nunca envía su ubicación (y por qué los satélites tienen que corregir el tiempo con la relatividad de Einstein)",
+    "tendencia": "Nuevos lanzamientos de celulares y relojes (Honor 500, Xiaomi 18 Pro) previstos para finales de noviembre",
+    "serie": {
+      "titulo": "El GPS y Einstein",
+      "parte": 1,
+      "total": 3
+    },
+    "subtema": "tecnología que usamos sin entender",
+    "estructura": "HISTORIA EN PARTES: una historia real e intrigante detrás de algo cotidiano (un invento por accidente, un error que cambió todo, un misterio con explicación científica) contada en 2 o 3 partes; cada parte responde su propia pregunta y termina con una intriga que lleva a la siguiente",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "afirmación que parece falsa pero es cierta",
+    "gancho": "Cuidado: tu celular no sabe dónde estás, lo adivina.",
+    "nota_revisor": 5.2,
+    "duracion": 49.61,
+    "video_fb": "1441870567589457",
+    "metricas": {}
   }
 ]

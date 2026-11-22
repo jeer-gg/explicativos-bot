@@ -9,6 +9,46 @@
       "ejemplo": "solo se entiende el 50 % del guion en el audio"
     },
     {
+      "regla": "Las tarjetas de datos deben ir en una zona libre, lejos del protagonista y del objeto que explica la escena. Ningún texto debe quedar cortado por el borde del cuadro.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T14:01:08+00:00",
+      "clave": "borde cortado cuadro datos deben escena explica lejos libre ningún objeto protagonista quedar tarjetas texto",
+      "ejemplo": "En el fotograma 2 la tarjeta de datos «20.200 km de altura» tapa la cara y el cuerpo del celular, que es el protagonista. Además, justo a su derecha queda un «20» cortado por el borde."
+    },
+    {
+      "regla": "Los títulos en pantalla deben ubicarse donde no haya objetos de la escena. Los rótulos dentro de la escena deben quedar completos y dentro del encuadre vertical, con margen a los bordes.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T14:01:08+00:00",
+      "clave": "bordes completos deben dentro donde encuadre escena margen objetos pantalla quedar rótulos títulos ubicarse vertical",
+      "ejemplo": "En el fotograma 4 el título «VELOCIDAD DE LA LUZ» se superpone a los satélites y a las líneas punteadas, y «LUZ» queda sobre un satélite, lo que le resta legibilidad. También se ve un texto cortado «tentésim…» en el borde derecho, un rótulo de la escena que sale del cuadro."
+    },
+    {
+      "regla": "Todo texto dentro de la escena debe ser legible a tamaño de celular, o no ponerse. Los objetos clave, como los satélites, deben quedar completos dentro del encuadre.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-22T14:01:08+00:00",
+      "clave": "celular clave completos deben dentro encuadre escena legible objetos ponerse quedar satélites tamaño texto",
+      "ejemplo": "Los carteles pequeños de la escena (en el fotograma 4, el cartel de la casita con «guías / dónde / hora») son ilegibles por su tamaño. Los satélites y el texto «su hora» del fotograma 3 quedan cortados por el borde superior."
+    },
+    {
+      "regla": "Los datos numéricos clave deben mostrarse en una tarjeta grande y despejada, sin objetos de la escena encima ni al lado.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T14:01:08+00:00",
+      "clave": "clave datos deben despejada encima escena grande mostrarse numéricos objetos tarjeta",
+      "ejemplo": "En el fotograma 8 la etiqueta «300 m» queda pequeña, pegada al árbol y al borde de la plataforma, y cuesta leerla. Es el dato clave del cierre y no se destaca."
+    },
+    {
+      "regla": "Verificar que los subtítulos de la narración estén visibles y legibles en toda la duración del video.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T14:01:08+00:00",
+      "clave": "duración estén legibles narración subtítulos verificar video visibles",
+      "ejemplo": "En ninguno de los 8 fotogramas se ven subtítulos de la narración. Solo aparecen títulos sueltos."
+    },
+    {
       "regla": "Cada cifra en pantalla debe ser idéntica a la narración y a las demás tarjetas del mismo momento. No se permiten dos tarjetas con valores distintos para el mismo dato.",
       "area": "edicion",
       "veces": 1,
@@ -199,38 +239,6 @@
       "ultima": "2026-11-21T07:26:10+00:00",
       "clave": "colocarse color contorno contraste deben incluida líneas objetos oscuro palabra principal resaltada subtítulos sujeto tarjetas todas",
       "ejemplo": "Los subtítulos de dos líneas tienen la segunda línea casi ilegible (gris claro sobre fondo claro: 'LOS TRAMOS', 'RESUELTO'). Además se solapan con objetos importantes: la tarjeta '11 cruces' queda tapada por 'UNA SIMPLE CUERDA', y el signo '?' choca con 'SALEN Y CÓMO'."
-    },
-    {
-      "regla": "No dibujar carteles, pizarras ni rectángulos negros sin contenido legible. Si hay un cartel, debe llevar texto claro y visible. Evitar que los subtítulos se superpongan con elementos oscuros del decorado.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-21T07:26:10+00:00",
-      "clave": "cartel carteles claro contenido decorado dibujar elementos evitar legible llevar negros oscuros pizarras rectángulos subtítulos superpongan texto visible",
-      "ejemplo": "Hay tarjetas negras vacías o ilegibles ('ASÍ QUE GUARDA', 'EL MISTERIO', 'SALEN Y CÓMO'). El subtítulo se coloca encima de rectángulos negros sin texto que parecen errores de render."
-    },
-    {
-      "regla": "Mostrar cada dato una sola vez por escena, con una única tarjeta completa y dentro del encuadre. Cada objeto que ilustra un dato debe estar claramente señalado.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-21T07:26:10+00:00",
-      "clave": "claramente completa dentro encuadre escena estar ilustra mostrar objeto señalado tarjeta única",
-      "ejemplo": "Aparecen dos veces el dato '11 cruces' (tarjeta superior y etiqueta azul abajo), y la etiqueta inferior está cortada en el borde. Los nudos de la mesa son poco legibles y no es claro cuál es el de 11 cruces."
-    },
-    {
-      "regla": "Los objetos deben ser reconocibles y fieles a lo que describe la narración (por ejemplo, la punta de la cuerda y el experimento real). Evitar colores saturados como el rojo chillón en los resaltados. Variar el encuadre y el contenido entre escenas, en lugar de repetir el mismo fondo.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-21T07:26:10+00:00",
-      "clave": "chillón colores contenido cuerda deben describe ejemplo encuadre entre escenas evitar experimento fieles fondo lugar mismo narración objetos punta reconocibles repetir resaltados saturados variar",
-      "ejemplo": "El gancho muestra un enchufe con ojos dentro de un círculo rojo chillón y una caja abierta, pero no se entiende la punta ni el nudo. En otros planos, la maqueta (caja con marco de alambre, cuerda gruesa tipo salchicha) no se parece a una caja giratoria real con luces. Muchas escenas repiten el mismo árbol y las mismas cajas con poca variación."
-    },
-    {
-      "regla": "Escribir frases cortas, una idea por frase, y cerrar el guion con una frase completa y relacionada con el tema, sin cortes ni referencias comerciales sin sentido.",
-      "area": "guion",
-      "veces": 1,
-      "ultima": "2026-11-21T07:26:10+00:00",
-      "clave": "cerrar comerciales completa cortas cortes escribir frase frases guion referencias relacionada sentido",
-      "ejemplo": "La narración usa frases largas y cargadas, y el final se corta con un gancho comercial ('Black Friday') sin relación con el tema."
     }
   ]
 }
