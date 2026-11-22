@@ -46,6 +46,8 @@ def voz_de_marca(cfg: dict) -> str | None:
         return None
     descripcion = d.get("descripcion", "").strip()
     guardada = json.loads(VOZ.read_text(encoding="utf-8")) if VOZ.exists() else {}
+    if guardada.get("elegida"):  # la eligió el dueño escuchando: no se cambia aunque cambie la descripción
+        return guardada.get("id")
     if guardada.get("id") and guardada.get("descripcion") == descripcion:
         return guardada["id"]
     cuerpo = {"voice": {"type": "prompted", "display_name": d.get("nombre", "Voz del canal"),
@@ -84,8 +86,12 @@ def sintetizar(texto: str, cfg: dict, destino: Path) -> Path:
     # mandar instrucciones junto al texto hacía que a veces se leyeran en voz alta al principio.
     indicacion = p.get("estilo_voz_gemini", "").strip() if p.get("notas_de_voz") else ""
     voz_id = voz_de_marca(cfg)
-    voz = ({"voice": voz_id} if voz_id
-           else {"prebuiltVoiceConfig": {"voiceName": p.get("voz_gemini", "Laomedeia")}})
+    elegida = json.loads(VOZ.read_text(encoding="utf-8")) if VOZ.exists() else {}
+    if elegida.get("elegida") and elegida.get("prebuilt"):  # el dueño eligió una voz de Gemini
+        voz = {"prebuiltVoiceConfig": {"voiceName": elegida["prebuilt"]}}
+    else:
+        voz = ({"voice": voz_id} if voz_id
+               else {"prebuiltVoiceConfig": {"voiceName": p.get("voz_gemini", "Laomedeia")}})
     # Formato recomendado para Gemini TTS: notas de dirección + transcripción. Solo se lee la
     # transcripción (antes, al ir todo junto, a veces leía las instrucciones en voz alta).
     prompt = (f"### NOTAS DEL DIRECTOR (no se leen en voz alta)\n{indicacion}\n\n"

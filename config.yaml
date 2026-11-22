@@ -54,6 +54,10 @@ produccion:
     acento: "Latin American neutral Spanish, Caribbean warmth, no strong regional accent"
     persona: "Popular science explainer and storyteller in her early thirties"
     contexto: "Narration for short viral explainer videos about everyday science"
+    # Elegir escuchando: el bot manda por Telegram varias voces de mujer diciendo la misma frase
+    # y tú tocas "Elegir" en la que más te guste. Para que vuelva a ofrecerlas, sube ronda_muestras.
+    elegir_escuchando: true
+    ronda_muestras: 1
     descripcion: >
       A warm, bright and confident female narrator in her early thirties speaking neutral
       Latin American Spanish. Friendly and close, like a smart friend telling you a secret
