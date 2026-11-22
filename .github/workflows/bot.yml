@@ -14,6 +14,8 @@ on:
     - cron: "17 19 * * *"
     # Revisar los botones de Telegram (cancelar) cada 20 minutos
     - cron: "*/20 * * * *"
+    # Vigilante: si la cadena de trabajo del bot se detuvo, la relanza (cada 2 horas)
+    - cron: "43 */2 * * *"
   workflow_dispatch:
     inputs:
       tarea:
@@ -54,7 +56,7 @@ jobs:
 
   producir:
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule != '*/20 * * * *') ||
+      (github.event_name == 'schedule' && github.event.schedule != '*/20 * * * *' && github.event.schedule != '43 */2 * * *') ||
       (github.event_name == 'workflow_dispatch' && inputs.tarea == 'producir')
     runs-on: ubuntu-latest
     # Hasta 6 horas: si se acaba el límite de Claude, la tarea espera aquí mismo a que se renueve
@@ -117,7 +119,7 @@ jobs:
 
   aprobaciones:
     if: >-
-      (github.event_name == 'schedule' && github.event.schedule == '*/20 * * * *') ||
+      (github.event_name == 'schedule' && (github.event.schedule == '*/20 * * * *' || github.event.schedule == '43 */2 * * *')) ||
       (github.event_name == 'workflow_dispatch' && inputs.tarea == 'aprobaciones')
     runs-on: ubuntu-latest
     timeout-minutes: 20
