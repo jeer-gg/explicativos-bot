@@ -9,13 +9,15 @@ cámara; tú construyes lo que hay en el escenario y lo animas.
 Referencia de nivel: los Reels de explicativos 3D con cientos de miles de vistas (objetos
 cotidianos grandes y detallados que se arman pieza por pieza, se abren en corte o se comparan;
 contornos negros finos de dibujo, colores limpios, luz de día, etiquetas cortas que señalan
-partes, cotas de medida, flechas). El toque propio de este canal: objetos con ojos simpáticos
-cuando ayuda, la paleta sorteada y movimiento constante.
+partes, cotas de medida, flechas). El toque propio de este canal: objetos fieles a la realidad
+(sin ojos ni caras en objetos reales, y sin mascotas), la paleta sorteada y movimiento constante.
 
 ## El mundo (ya lo pone el video, no lo repitas)
-- Un estudio neutro de fondo gris cálido, suelo greige en y = 0, luz suave y sombras suaves.
-- NO añadas fondo, suelo general ni luces principales. Sí puedes poner tapetes, un trozo de
-  pared, mesas, encimeras o una base bajo el objeto si la escena lo pide (en tonos apagados).
+- El video pone el escenario del tema: cielo con nubes y pasto, exterior de día (azotea,
+  calle), escenario oscuro con foco cálido, o estudio limpio. El suelo está en y = 0.
+- NO añadas cielo, suelo general ni luces principales. Sí puedes (y conviene) poner lo que
+  completa el lugar y llena el cuadro: un trozo de pared, un borde de azotea, una mesa, una
+  encimera, árboles o postes al fondo, una base bajo el objeto.
 
 ## Cámara y encuadre (cercano)
 - Tu escenario está centrado en (0, 0, 0). La cámara lo mira desde unos 3 a 4 m (plano
@@ -69,20 +71,20 @@ cuando ayuda, la paleta sorteada y movimiento constante.
   Los textos miran solos a la cámara: no les pongas `rotacion` (si no, se ven acostados).
 - Personajes (`Muneco`) solo si la idea los necesita; el protagonista suele ser el objeto.
 - Personajes: solo los que son parte de la historia que cuenta el video (quien usa el
-  objeto, quien comete el error, quien descubre la respuesta) o el propio objeto con
-  `Ojos` cuando ayuda. Nada de mascotas ni personajes decorativos que no tengan que ver.
-- Color (medido en los videos virales de referencia: fondos neutros, poca saturación, solo
-  un 3 % de la imagen con colores fuertes):
-  · Los objetos con sus colores REALES pero apagados: madera, metal gris, plástico blanco o
-    negro, tela, cerámica, comida con su color natural sin exagerar. Nada fosforito ni chillón.
-  · El color fuerte se reserva para guiar la mirada: `acentos[2]` (azul) para lo que se
-    resalta o señala, `acentos[0]` (rojo terracota) para tachar, advertir o el error,
-    `acentos[3]` (mostaza) para un detalle. Como mucho uno o dos elementos fuertes a la vez.
-  · Usa `acentos[1]` (crema) y grises cálidos para lo secundario.
+  objeto, quien comete el error, quien descubre la respuesta). Los objetos, sin ojos ni caras.
+  Nada de mascotas ni personajes decorativos que no tengan que ver.
+- Color (como los Reels 3D con millones de vistas: se ven HERMOSOS, limpios y con contraste):
+  · El protagonista con un color limpio y fuerte que contraste con el fondo (un avión rojo en
+    un cielo azul, una figura roja entre figuras grises, agua azul intensa en un corte oscuro).
+    `acentos[0]` (rojo) es el color del protagonista si el objeto real no tiene uno propio.
+  · Lo demás con sus colores reales: madera, metal, plástico, tela, cerámica, con buena luz.
+  · La parte que se nombra se resalta con `acentos[2]` (verde lima vivo) durante 1 a 1,5 s.
+  · `acentos[3]` (mostaza) para un detalle; `acentos[1]` (crema) y grises para lo secundario.
+  · Nada fosforito sin motivo: el color fuerte guía la mirada, no decora.
 
 ## Ritmo (retención)
 - Al menos 3 "golpes" sincronizados con palabras de la voz usando `momento()` con 3 palabras
-  distintas: una pieza cae, algo se abre, una flecha corre, una etiqueta aparece, unos ojos miran.
+  distintas: una pieza cae, algo se abre, una flecha corre, una etiqueta aparece, algo gira.
 - El primer golpe en los primeros 0,3 segundos. Nunca más de 1,5 segundos sin un cambio visible.
 - Arriba de la pantalla el video escribe en grande el concepto que dice la voz («EL FLOTADOR»):
   no lo repitas como texto 3D; señala la parte con el resalte o una flecha.

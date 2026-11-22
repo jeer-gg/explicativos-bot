@@ -475,12 +475,14 @@ def aviso_limite(minutos):
 
 
 ESPERAS, RELEVOS = [], []
-prod._guardar_avance_en_repo = lambda: None
+prod._guardar_avance_en_repo = lambda *a: None
 prod._relanzar_produccion = lambda: RELEVOS.append(1)
 
 
 def esperar_falso(segundos):
     ESPERAS.append(segundos / 60)
+    if not estado().get("reintentar_desde"):
+        return  # espera de turno (no de límite)
     assert estado().get("esperando"), "mientras espera debe marcarlo"
     # la revisión de cada 20 minutos no debe lanzar otra producción mientras esta espera
     e = estado(); hora = e["reintentar_desde"]; e["reintentar_desde"] = "2000-01-01T00:00:00+00:00"; _ge(e)  # noqa: E702
@@ -504,9 +506,11 @@ est_mod.dibujar = dibujar_con_limite_b
 os.environ["MINUTOS_TAREA"] = "340"
 antes = len(REGISTRO["meta"])
 guiones_antes = sum(1 for c in REGISTRO["claude"] if "guionista" in c)
+e = estado(); e.pop("turno_hecho", None); _ge(e)  # noqa: E702
 prod.ejecutar(esperar=esperar_falso)
-assert len(ESPERAS) == 1 and 30 <= ESPERAS[0] <= 37, ESPERAS
-assert not RELEVOS, "si cabe, no hace falta relevo"
+assert 30 <= sum(ESPERAS) <= 37, ESPERAS
+assert RELEVOS == [1], "al terminar deja lanzada la siguiente tarea de la cadena"
+RELEVOS.clear()
 assert len(REGISTRO["meta"]) == antes + 1, "debe terminar y publicar el video"
 assert sum(1 for c in REGISTRO["claude"] if "guionista" in c) == guiones_antes + 1, "un solo guion: sigue el mismo video"
 assert not reanudar.EN_CURSO.exists() and not estado().get("reintentar_desde") and not estado().get("esperando")
@@ -518,9 +522,10 @@ MINUTOS["n"] = 240
 ESPERAS.clear()
 os.environ["MINUTOS_TAREA"] = "200"
 antes = len(REGISTRO["meta"])
+e = estado(); e.pop("turno_hecho", None); _ge(e)  # noqa: E702
 prod.ejecutar(esperar=esperar_falso)
 assert RELEVOS == [1], "debe pasar el relevo a otra tarea"
-assert len(ESPERAS) == 1 and 185 <= ESPERAS[0] <= 191, ESPERAS  # espera todo lo que cabe (200 - 10)
+assert 185 <= sum(ESPERAS) <= 191, ESPERAS  # espera todo lo que cabe (200 - 10)
 assert reanudar.EN_CURSO.exists() and len(REGISTRO["meta"]) == antes, "el video sigue a medias"
 assert not estado().get("esperando"), "al pasar el relevo deja de marcar que espera"
 
@@ -530,10 +535,82 @@ ESPERAS.clear()
 os.environ["MINUTOS_TAREA"] = "340"
 guiones_antes = sum(1 for c in REGISTRO["claude"] if "guionista" in c)
 prod.ejecutar(esperar=esperar_falso)
-assert len(ESPERAS) == 1 and RELEVOS == [1]
+assert RELEVOS == [1, 1], "termina el video y deja lanzada la siguiente"
 assert len(REGISTRO["meta"]) == antes + 1 and not reanudar.EN_CURSO.exists()
+RELEVOS.clear()
 assert sum(1 for c in REGISTRO["claude"] if "guionista" in c) == guiones_antes, "no debe reescribir el guion"
 est_mod.dibujar = _dibujar_real
+
+# D) El límite se acaba al EMPEZAR (sin nada guardado): igual espera, no reintenta en bucle
+_tema_real = prod.elegir_tema
+LLAMADAS_TEMA = {"n": 0}
+
+
+def tema_con_limite(*a, **k):
+    LLAMADAS_TEMA["n"] += 1
+    if LLAMADAS_TEMA["n"] == 1:
+        raise LimiteDeSuscripcion(aviso_limite(45))
+    return _tema_real(*a, **k)
+
+
+prod.elegir_tema = tema_con_limite
+ESPERAS.clear()
+e = estado(); e.pop("turno_hecho", None); _ge(e)  # noqa: E702
+avisos_antes = sum(1 for t in REGISTRO["telegram"] if "límite de uso" in str(t))
+antes = len(REGISTRO["meta"])
+prod.ejecutar(esperar=esperar_falso)
+prod.elegir_tema = _tema_real
+assert 45 <= sum(ESPERAS) <= 52, ESPERAS
+assert LLAMADAS_TEMA["n"] == 2, "un intento, espera, y el segundo funciona"
+assert len(REGISTRO["meta"]) == antes + 1, "después de esperar hace el video"
+assert sum(1 for t in REGISTRO["telegram"] if "límite de uso" in str(t)) == avisos_antes + 1, "un solo aviso"
+assert any("sigo solo con el video" in str(t) for t in REGISTRO["telegram"][-10:])
+os.environ.pop("MINUTOS_TAREA")
+
+# E) Cadena: el turno ya está hecho -> espera al siguiente aquí mismo y lo hace
+print("== Trabajo en cadena ==")
+os.environ["MINUTOS_TAREA"] = "340"
+cfg_sim = prod.cargar_config()
+RELEVOS.clear(); ESPERAS.clear()  # noqa: E702
+ahora = _dt.now(_tz.utc)
+siguiente = prod.proximo_turno(cfg_sim, ahora)
+falta = (siguiente - ahora).total_seconds() / 60
+e = estado(); e["turno_hecho"] = prod.turno_actual(cfg_sim)[1]; _ge(e)  # noqa: E702
+antes = len(REGISTRO["meta"])
+prod.ejecutar(esperar=esperar_falso)
+if falta + 170 <= 340:  # cabe: espera y hace el video del siguiente turno
+    assert len(REGISTRO["meta"]) == antes + 1 and abs(sum(ESPERAS) - falta - 1) < 2, (ESPERAS, falta)
+    assert estado()["turno_hecho"] == siguiente.astimezone(_tz.utc).strftime("%Y-%m-%dT%H:%M")
+else:  # no cabe: espera lo que puede y pasa el relevo, sin hacer video
+    assert len(REGISTRO["meta"]) == antes and RELEVOS == [1]
+assert RELEVOS == [1] and estado().get("latido"), "siempre deja la siguiente tarea y da señales de vida"
+
+# F) Turno pendiente aunque ya sea tarde (el bot estuvo caído): se hace ya
+RELEVOS.clear(); ESPERAS.clear()  # noqa: E702
+e = estado(); e["turno_hecho"] = "2000-01-01T00:00"; _ge(e)  # noqa: E702
+antes = len(REGISTRO["meta"])
+prod.ejecutar(esperar=esperar_falso)
+assert len(REGISTRO["meta"]) == antes + 1 and not ESPERAS and RELEVOS == [1]
+assert estado()["turno_hecho"] == prod.turno_actual(cfg_sim)[1]
+
+# G) Turnos: siempre hay uno actual y uno próximo, a la hora correcta
+for h in range(0, 24 * 60, 37):
+    t = _dt(2026, 11, 21, tzinfo=_tz.utc) + _td(minutes=h)
+    a, _ = prod.turno_actual(cfg_sim, t)
+    b = prod.proximo_turno(cfg_sim, t)
+    assert a <= t < b and (b - a) <= _td(hours=12)
+    assert a.astimezone(_tz(_td(hours=-4))).strftime("%H:%M") in ("03:17", "09:17", "15:17")
+
+# H) Vigilante: si la cadena dejó de latir, la relanza (una vez, no cada 20 minutos)
+from bot import aprobaciones as _ap  # noqa: E402
+gh_antes = len(REGISTRO["gh"])
+e = estado(); e["latido"] = (_dt.now(_tz.utc) - _td(hours=5)).isoformat(); e.pop("vigilante", None); _ge(e)  # noqa: E702
+_ap.relanzar_si_toca(); _ap.relanzar_si_toca()  # noqa: E702
+assert [g for g in REGISTRO["gh"][gh_antes:] if g[:3] == ["gh", "workflow", "run"]].__len__() == 1
+e = estado(); e["latido"] = _dt.now(_tz.utc).isoformat(); e.pop("vigilante", None); _ge(e)  # noqa: E702
+gh_antes = len(REGISTRO["gh"])
+_ap.relanzar_si_toca()
+assert not any(g[:3] == ["gh", "workflow", "run"] for g in REGISTRO["gh"][gh_antes:]), "si late, no relanza"
 os.environ.pop("MINUTOS_TAREA")
 
 # ---------- 7) Error grave: el bot lo arregla solo y publica sin preguntar ----------
@@ -573,5 +650,102 @@ prod.producir()
 GRAVE["n"] = 0
 assert len(REGISTRO["meta"]) == antes + 1, "aunque quede un error, se publica"
 assert any("lo publico igual" in str(t) for t in REGISTRO["telegram"][-6:])
+
+# ---------- 8) Facebook falla al publicar: el video no se pierde ----------
+print("== Facebook caído o token vencido ==")
+from bot import meta as _meta  # noqa: E402
+_reel_real = meta.publicar_reel
+
+
+def reel_token_vencido(*a, **k):
+    raise _meta.ErrorDeFacebook("El token de la página de Facebook (META_PAGE_TOKEN) venció o no es válido.")
+
+
+meta.publicar_reel = reel_token_vencido
+antes = len(REGISTRO["meta"])
+pend_antes = set(estado()["pendientes"])
+prod.producir()  # no debe romperse
+meta.publicar_reel = _reel_real
+nuevos = set(estado()["pendientes"]) - pend_antes
+assert len(nuevos) == 1, "el video queda guardado como pendiente"
+assert any(g[:3] == ["gh", "release", "create"] for g in REGISTRO["gh"][-5:]), "se sube el video para no perderlo"
+assert any("No pude publicar" in str(t) and "META_PAGE_TOKEN" in str(t) and "pub:" in str(t) for t in REGISTRO["telegram"][-6:])
+assert not reanudar.EN_CURSO.exists()
+for _id in nuevos:  # limpiar
+    e = estado(); e["pendientes"].pop(_id, None); _ge(e)  # noqa: E702
+
+# Un error pasajero de Facebook (500) se reintenta solo
+import requests as _rq  # noqa: E402
+_post_real = _rq.post
+RESPUESTAS = [500, 200]
+
+
+class _Resp:
+    def __init__(self, code):
+        self.status_code, self.ok, self.text = code, code < 400, ""
+
+    def json(self):
+        return {"video_id": "v1"}
+
+    def raise_for_status(self):
+        if not self.ok:
+            raise _rq.HTTPError(str(self.status_code))
+
+
+_meta.time = types.SimpleNamespace(sleep=lambda s: None)
+r = _meta._pedir(lambda *a, **k: _Resp(RESPUESTAS.pop(0)), "url")
+assert r.status_code == 200 and not RESPUESTAS, "debe reintentar tras un 500"
+try:
+    _meta._revisar(type("R", (), {"ok": False, "status_code": 400, "json": lambda self: {"error": {"code": 190, "message": "Error validating access token"}}})())
+    raise AssertionError("debía avisar del token")
+except _meta.ErrorDeFacebook as e:
+    assert "META_PAGE_TOKEN" in str(e)
+
+# ---------- 9) Videos rotos seguidos: como mucho 2 rehechos por día ----------
+print("== Descartes en bucle ==")
+from bot import revisor as _rev  # noqa: E402
+_revisar_real = _rev.revisar
+_rev.revisar = lambda claude, cfg, guion, fotos: {"escenas": {f["nombre"]: {"nota": 2, "problemas": "vacía"} for f in fotos}}
+RELANZA = []
+prod._relanzar_produccion = lambda: RELANZA.append(1)
+e = estado(); e.pop("descartes", None); _ge(e)  # noqa: E702
+antes = len(REGISTRO["meta"])
+for _ in range(3):
+    prod.producir()
+_rev.revisar = _revisar_real
+assert len(REGISTRO["meta"]) == antes, "un video roto no se publica"
+assert estado().get("rehacer_turno"), "un descarte pide rehacer el turno"
+assert any("no rehago otro" in str(t) for t in REGISTRO["telegram"][-4:])
+e = estado(); e.pop("rehacer_turno", None); _ge(e)  # noqa: E702
+
+# Nota baja pero no rota (4.5): se publica igual
+_rev.revisar = lambda claude, cfg, guion, fotos: {"escenas": {f["nombre"]: {"nota": 4.5, "problemas": "mejorable"} for f in fotos}}
+e = estado(); e.pop("descartes", None); e.pop("rehacer_turno", None); _ge(e)  # noqa: E702
+antes = len(REGISTRO["meta"])
+prod.producir()
+_rev.revisar = _revisar_real
+assert len(REGISTRO["meta"]) == antes + 1, "con nota 4.5 se publica igual"
+assert not estado().get("rehacer_turno")
+
+# Escenario según el tema: cambia el fondo y el suelo, no los colores del protagonista
+base = {"fondo": "#D3CEC6", "tinta": "#1B1B1F", "acentos": ["#D2452F", "#E9E4DB", "#A3D92B", "#E0A526", "#C2BBAF"]}
+c = prod.paleta_con_escenario(base, prod.escenario_de({"direccion_arte": {"escenario": "Cielo"}}))
+assert c["fondo"] == "#9CCDF2" and c["acentos"][4] == "#7DBE4E" and c["acentos"][0] == "#D2452F"
+o = prod.paleta_con_escenario(base, "oscuro")
+assert o["tinta"] == "#F2EFE9" and base["acentos"][4] == "#C2BBAF", "no debe tocar la paleta original"
+assert prod.escenario_de({"direccion_arte": {"escenario": "marte"}}) == "estudio"
+
+# ---------- 10) Voz: ninguna escena queda con duración cero ----------
+print("== Tiempos de escena seguros ==")
+sys.modules.setdefault("edge_tts", types.ModuleType("edge_tts"))
+from bot import voz_gemini as _vg  # noqa: E402
+ini = _vg.inicios_seguros([0.0, 0.0, 0.0, 0.05, 6.0, 9.0], total=12.0)
+assert all(b - a >= 1.0 for a, b in zip(ini, ini[1:] + [12.0])), ini
+textos = ["uno dos tres cuatro cinco", "seis siete ocho nueve diez", "once doce trece catorce quince"]
+tok = " ".join(textos).split()
+oidas = [{"w": w, "ini": 0.5 + 0.3 * k, "fin": 0.75 + 0.3 * k} for k, w in enumerate(tok[8:])]  # corte tardío
+assert _vg._cobertura_inicio(tok, oidas) < 0.5, "un corte tardío debe detectarse"
+t = _vg.alinear(tok, oidas)
+assert all(t[k][0] < t[k + 1][0] for k in range(len(t) - 1)), "las palabras no se apilan en el mismo instante"
 
 print("\nSIMULACIÓN CORRECTA. Archivos en", TMP)

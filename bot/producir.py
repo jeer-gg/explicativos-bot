@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 
 from . import estadisticas, estudio, render, revisor, sfx, telegram
 from .claude import Claude
-from .config import PUBLICO, SALIDA, cargar_config
+from .config import DATOS, PUBLICO, SALIDA, cargar_config
 from .director import elegir_tema, sortear_estilo
 from .guionista import escribir_guion, pulir_gancho, verificar_guion
 from .memoria import estado, guardar_estado, memoria
@@ -41,6 +41,34 @@ def momento_clave(palabras: list, clave: str):
     return None
 
 
+# Escenarios según el tema (los Reels ganadores llenan la pantalla con un lugar que va con el tema)
+ESCENARIOS = {
+    "cielo": {"fondo": "#9CCDF2", "suelo": "#7DBE4E"},
+    "exterior": {"fondo": "#D7E6EF", "suelo": "#D3CDC1"},
+    "oscuro": {"fondo": "#121318", "suelo": "#1C1D25", "tinta": "#F2EFE9"},
+    "estudio": {},
+}
+
+
+def escenario_de(guion: dict) -> str:
+    e = str((guion.get("direccion_arte") or {}).get("escenario", "")).strip().lower()
+    return e if e in ESCENARIOS else "estudio"
+
+
+def paleta_con_escenario(colores: dict, escenario: str) -> dict:
+    cambio = ESCENARIOS.get(escenario, {})
+    paleta = {**colores, "acentos": list(colores["acentos"])}
+    if cambio.get("fondo"):
+        paleta["fondo"] = cambio["fondo"]
+    if cambio.get("tinta"):
+        paleta["tinta"] = cambio["tinta"]
+    if cambio.get("suelo"):
+        while len(paleta["acentos"]) < 5:
+            paleta["acentos"].append(paleta["acentos"][-1])
+        paleta["acentos"][4] = cambio["suelo"]
+    return paleta
+
+
 def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
     fuentes = list(guion["escenas"])
     if variante == "B":
@@ -59,7 +87,8 @@ def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
         "audio": tiempos_variante["audio"],
         "musica": cfg["produccion"].get("musica", "") or "",
         "subtitulos": cfg["produccion"].get("subtitulos", True),
-        "paleta": estilo["colores"],
+        "paleta": paleta_con_escenario(estilo["colores"], escenario_de(guion)),
+        "escenario": escenario_de(guion),
         "portada": (guion.get("portada") or "").upper()[:60],
         "escenas": escenas,
         # Un solo mundo que evoluciona (si se pudo dibujar el mundo compartido)
@@ -208,6 +237,11 @@ def producir():
         estadisticas.actualizar()
     except Exception as e:  # noqa: BLE001
         print("Aviso: no se actualizaron métricas:", e)
+    try:
+        from .aprobaciones import caducar_pendientes
+        caducar_pendientes()
+    except Exception as e:  # noqa: BLE001
+        print("Aviso: no se revisaron los pendientes viejos:", e)
 
     # 1. Director: primero, si hay una parte de serie pendiente o un video que despegó, va eso
     from . import series
@@ -492,11 +526,23 @@ def producir():
         e["pendientes"].pop(id_video, None)
         guardar_estado(e)
         reanudar.terminar()
+        hoy = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        e = estado()
+        cuenta = e.get("descartes", {}) if e.get("descartes", {}).get("dia") == hoy else {"dia": hoy, "n": 0}
+        cuenta["n"] = cuenta.get("n", 0) + 1
+        e["descartes"] = cuenta
+        guardar_estado(e)
+        otro = cuenta["n"] <= cfg["claude"].get("descartes_por_dia", 2)
         telegram.aviso_seguro(
             f"Descarté «{guion['titulo']}»: salió muy mal (nota {nota_media}"
             + (f": {revisor.ULTIMO_COMENTARIO}" if revisor.ULTIMO_COMENTARIO else "")
-            + "). No lo publico; ya empecé otro video para ese horario.")
-        subprocess.run(["gh", "workflow", "run", "bot.yml", "-f", "tarea=producir"], check=False)
+            + ("). No lo publico; ya empecé otro video para ese horario." if otro else
+               "). No lo publico. Ya van varios descartes hoy, así que no rehago otro para no gastar "
+               "el límite de Claude: sigo en el próximo horario."))
+        if otro:
+            e = estado()
+            e["rehacer_turno"] = True
+            guardar_estado(e)
         return
 
     minima = cfg["claude"].get("nota_para_publicar", 0)
@@ -515,7 +561,18 @@ def producir():
         cuando = horarios.proximo(cfg, reanudar.inicio())
         if cuando <= datetime.now(timezone.utc) + timedelta(minutes=12):
             cuando = None
-        video_fb = publicar(id_video, "A", videos[0], cuando)
+        try:
+            video_fb = publicar(id_video, "A", videos[0], cuando)
+        except Exception as e:  # noqa: BLE001  (sin conexión, token vencido...): el video no se pierde
+            print("No se pudo publicar:", e)
+            reanudar.terminar()
+            subir_pendiente(id_video, videos, guion["titulo"])
+            telegram.video(videos[0], f"«{guion['titulo']}»")
+            telegram.mensaje(f"No pude publicar «{guion['titulo']}» en Facebook: {str(e)[:400]}\n"
+                             "Lo dejé guardado. Cuando esté resuelto, toca Publicar.",
+                             [[{"text": "Publicar", "callback_data": f"pub:{id_video}:A"}],
+                              [{"text": "Descartar", "callback_data": f"descartar:{id_video}"}]])
+            return
         reanudar.terminar()
         if meta.ULTIMA.get("programado"):
             aviso = f"Programado para {horarios.texto(cuando)}: «{guion['titulo']}»"
@@ -563,47 +620,155 @@ def producir():
         escuchar(minutos)
 
 
-def _guardar_avance_en_repo():
-    """Sube data/ al repo antes de esperar, por si GitHub corta la tarea durante la espera."""
-    for orden in (["git", "add", "data"],
-                  ["git", "-c", "user.name=bot-explicativos", "-c", "user.email=bot@users.noreply.github.com",
-                   "commit", "-q", "-m", "Memoria: avance guardado por límite de Claude"],
-                  ["git", "pull", "-q", "--rebase", "--autostash"], ["git", "push", "-q"]):
-        subprocess.run(orden, check=False, capture_output=True)
+def _guardar_avance_en_repo(mensaje: str = "Memoria: avance guardado por límite de Claude") -> bool:
+    """Sube data/ al repo. Si otra tarea cambió los datos a la vez (conflicto), los une quedándose
+    con lo de esta tarea en lo que choque, y comprueba que los archivos sigan siendo válidos."""
+    def git(*a):
+        return subprocess.run(["git", *a], check=False, capture_output=True, text=True)
+
+    if git("rev-parse", "--is-inside-work-tree").returncode != 0:
+        return False
+    firma = ["-c", "user.name=bot-explicativos", "-c", "user.email=bot@users.noreply.github.com"]
+    git("add", "data")
+    git(*firma, "commit", "-q", "-m", mensaje)
+    rama = git("rev-parse", "--abbrev-ref", "HEAD").stdout.strip() or "main"
+    for _ in range(3):
+        if git("pull", "-q", "--rebase", "--autostash").returncode != 0:
+            git("rebase", "--abort")
+            copia = {f: f.read_bytes() for f in DATOS.glob("*.json")}
+            git("fetch", "-q", "origin", rama)
+            if git(*firma, "merge", "-q", "-X", "ours", "--no-edit", f"origin/{rama}").returncode != 0:
+                git("merge", "--abort")
+                continue
+            for f, contenido in copia.items():  # un JSON roto por la unión se cambia por el nuestro
+                try:
+                    json.loads(f.read_text(encoding="utf-8"))
+                except (ValueError, OSError):
+                    f.write_bytes(contenido)
+            git("add", "data")
+            git(*firma, "commit", "-q", "-m", mensaje + " (unido)")
+        if git("push", "-q").returncode == 0:
+            return True
+    print("No se pudo subir data/ al repo")
+    return False
 
 
-def _relanzar_produccion():
-    subprocess.run(["gh", "workflow", "run", "bot.yml", "-f", "tarea=producir"], check=False)
+def _relanzar_produccion() -> bool:
+    """Lanza la siguiente tarea de la cadena (queda en fila hasta que termine esta)."""
+    for _ in range(3):
+        r = subprocess.run(["gh", "workflow", "run", "bot.yml", "-f", "tarea=producir"], check=False,
+                           capture_output=True, text=True)
+        if getattr(r, "returncode", 0) == 0:
+            return True
+        print("No se pudo lanzar la siguiente tarea:", (getattr(r, "stderr", "") or "")[-300:])
+        time.sleep(20)
+    telegram.aviso_seguro("No pude dejar lanzada la siguiente tarea del bot en GitHub. El vigilante o los "
+                          "horarios fijos la retomarán; si en unas horas no hay videos, entra a Actions y "
+                          "ejecuta «producir».")
+    return False
+
+
+def _latido():
+    """Marca que hay una tarea viva (el vigilante relanza la cadena si deja de latir)."""
+    e = estado()
+    e["latido"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    guardar_estado(e)
+    _guardar_avance_en_repo("Memoria: el bot sigue trabajando")
+
+
+def _dormir(esperar, minutos: float):
+    """Espera en tramos de 30 minutos, dando señales de vida entre tramos."""
+    restante = max(0.0, minutos)
+    while restante > 0:
+        tramo = min(30.0, restante)
+        esperar(tramo * 60)
+        restante -= tramo
+        if restante > 0:
+            _latido()
+
+
+# ---------- Turnos de producción ----------
+def _turnos(cfg: dict, ahora: datetime):
+    """Turnos de producción alrededor de `ahora` (hora de la página), del más viejo al más nuevo."""
+    from .horarios import _zona
+    zona = _zona(cfg)
+    local = ahora.astimezone(zona)
+    horas = sorted(cfg["produccion"].get("horas_produccion", ["03:17", "09:17", "15:17"]))
+    lista = []
+    for dias in (-1, 0, 1):
+        f = (local + timedelta(days=dias)).date()
+        for h in horas:
+            hh, mm = (int(x) for x in h.split(":"))
+            lista.append(datetime(f.year, f.month, f.day, hh, mm, tzinfo=zona))
+    return sorted(lista)
+
+
+def turno_actual(cfg: dict, ahora: datetime | None = None) -> tuple[datetime, str]:
+    ahora = ahora or datetime.now(timezone.utc)
+    t = max(x for x in _turnos(cfg, ahora) if x <= ahora)
+    return t, t.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+
+
+def proximo_turno(cfg: dict, ahora: datetime | None = None) -> datetime:
+    ahora = ahora or datetime.now(timezone.utc)
+    return min(x for x in _turnos(cfg, ahora) if x > ahora)
+
+
+def _esperar_turno(esperar, arranque: float, tope: float, necesita: float, cfg: dict):
+    """Decide qué toca. Devuelve el turno a producir, o None si pasó el relevo a otra tarea.
+
+    - Hay un video a medias: se sigue con él.
+    - El turno de ahora aún no tiene video: se hace ya (aunque sea tarde).
+    - Si ya está hecho: se espera al próximo turno aquí mismo, o se pasa el relevo si no cabe."""
+    from . import reanudar
+    if reanudar.EN_CURSO.exists():
+        try:
+            inicio = datetime.fromisoformat(json.loads(reanudar.EN_CURSO.read_text())["inicio"])
+            return turno_actual(cfg, inicio)[1]
+        except (ValueError, KeyError, OSError):
+            return turno_actual(cfg)[1]
+    _, id_turno = turno_actual(cfg)
+    if estado().get("turno_hecho") != id_turno:
+        return id_turno
+    siguiente = proximo_turno(cfg)
+    falta = (siguiente - datetime.now(timezone.utc)).total_seconds() / 60
+    usado = (time.monotonic() - arranque) / 60
+    if usado + falta + necesita <= tope:
+        print(f"El turno de ahora ya está hecho; espero {falta:.0f} min al siguiente.")
+        _dormir(esperar, falta + 1)
+        return turno_actual(cfg, siguiente + timedelta(minutes=1))[1]
+    margen = max(0.0, min(falta, tope - usado - 10))
+    print(f"El siguiente turno es en {falta:.0f} min: espero {margen:.0f} y paso el relevo.")
+    _dormir(esperar, margen)
+    _relanzar_produccion()
+    return None
 
 
 def _esperar_renovacion(esperar, arranque: float, tope: float, necesita: float) -> bool:
-    """Si hay un video a medias esperando a que se renueve el límite de Claude, espera aquí mismo.
+    """Si el límite de Claude está agotado (haya o no un video a medias), espera aquí mismo.
 
     True = ya es hora: seguir produciendo en esta tarea.
     False = la espera no cabe en esta tarea: se esperó lo que se pudo y se lanzó otra tarea que
     sigue esperando (un relevo en cadena que no depende de la revisión de cada 20 minutos)."""
-    from . import reanudar
     e = estado()
     cuando = e.get("reintentar_desde")
-    if not cuando or not reanudar.EN_CURSO.exists():
+    if not cuando:
         return True
     falta = (datetime.fromisoformat(cuando) - datetime.now(timezone.utc)).total_seconds() / 60
     if falta <= 0:
         return True
-    # Marca que esta tarea está esperando, para que la revisión de cada 20 minutos no lance otra
     e["esperando"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     guardar_estado(e)
-    _guardar_avance_en_repo()
+    _latido()
     usado = (time.monotonic() - arranque) / 60
     if usado + falta + necesita <= tope:
         print(f"Espero {falta:.0f} min a que se renueve el límite de Claude y sigo.")
-        esperar(falta * 60 + 60)
+        _dormir(esperar, falta + 1)
         return True
     # No cabe esperar y además producir: espera todo lo que permite esta tarea y pasa el relevo
     margen = max(0.0, min(falta, tope - usado - 10))
     print(f"Faltan {falta:.0f} min: espero {margen:.0f} y paso el relevo a otra tarea.")
-    if margen > 0:
-        esperar(margen * 60)
+    _dormir(esperar, margen)
     e = estado()
     e.pop("esperando", None)
     guardar_estado(e)
@@ -613,34 +778,61 @@ def _esperar_renovacion(esperar, arranque: float, tope: float, necesita: float) 
 
 
 def ejecutar(esperar=time.sleep):
-    """Produce el video. Si se acaba el límite de Claude, guarda el avance, espera aquí mismo a que
-    se renueve y sigue desde donde se quedó. Si la espera no cabe en esta tarea de GitHub, lanza
-    otra tarea que sigue esperando (relevo en cadena). Las tareas programadas y la revisión de cada
-    20 minutos quedan solo de respaldo."""
+    """El bot trabaja solo, siempre, en cadena:
+    1. Si el límite de Claude está agotado, espera a que se renueve.
+    2. Si hay un video a medias, lo termina; si el turno de ahora no tiene video, lo hace; si ya
+       lo tiene, espera al próximo turno.
+    3. Al terminar, deja lanzada la siguiente tarea, que repite lo mismo.
+    Si una espera no cabe en una tarea de GitHub, pasa el relevo a otra. Si una tarea muere de
+    golpe, el vigilante (revisión periódica) relanza la cadena al ver que dejó de latir."""
     global INICIO
     from .claude import LimiteDeSuscripcion
     from . import reanudar
+    cfg = cargar_config()
     arranque = time.monotonic()
     # Lo que dura como máximo la tarea de GitHub (lo fija bot.yml; 175 si es el bot.yml viejo de 180 min)
     tope = float(os.environ.get("MINUTOS_TAREA", "175"))
-    necesita = float(cargar_config()["produccion"].get("tiempo_maximo_min", 170))
-    # Una tarea programada o de relevo que llega mientras hay un video esperando, espera con él
+    necesita = float(cfg["produccion"].get("tiempo_maximo_min", 170))
+    _latido()
     if not _esperar_renovacion(esperar, arranque, tope, necesita):
         return
-    for vuelta in range(4):
+    turno = _esperar_turno(esperar, arranque, tope, necesita, cfg)
+    if turno is None:
+        return
+    for vuelta in range(5):
+        if (time.monotonic() - arranque) / 60 + necesita > tope:
+            _relanzar_produccion()  # no da tiempo a un video entero en esta tarea
+            return
         INICIO = time.monotonic()  # el tiempo para terminar el video cuenta desde ahora
         try:
             producir()
-            return
         except LimiteDeSuscripcion as e:
             cuando = reanudar.guardar_por_limite(str(e))
             hora = cuando.astimezone(timezone(timedelta(hours=-4))).strftime("%I:%M %p").lstrip("0")
-            telegram.aviso_seguro(
-                "Se acabó el límite de uso de Claude a mitad del video. Guardé el avance y a las "
-                f"{hora} (hora de RD) sigo solo desde donde se quedó. Si su horario ya pasó para "
-                "entonces, lo publico en cuanto esté listo.")
-            if vuelta == 3 or not _esperar_renovacion(esperar, arranque, tope, necesita):
+            est = estado()
+            if est.get("avisado_limite") != est.get("reintentar_desde"):  # un solo aviso por límite
+                est["avisado_limite"] = est.get("reintentar_desde")
+                guardar_estado(est)
+                a_medias = reanudar.EN_CURSO.exists()
+                telegram.aviso_seguro(
+                    "Se acabó el límite de uso de Claude"
+                    + (" a mitad del video. Guardé el avance y a las " if a_medias else ". A las ")
+                    + f"{hora} (hora de RD) sigo solo"
+                    + (" desde donde se quedó." if a_medias else " con el video.")
+                    + " Si su horario ya pasó para entonces, lo publico en cuanto esté listo.")
+            if vuelta == 4 or not _esperar_renovacion(esperar, arranque, tope, necesita):
                 return
+            continue
+        e = estado()
+        if e.pop("rehacer_turno", None):  # salió roto y se descartó: se rehace este mismo turno
+            guardar_estado(e)
+            continue
+        e["turno_hecho"] = turno
+        guardar_estado(e)
+        _guardar_avance_en_repo(f"Memoria: video {datetime.now(timezone.utc):%Y-%m-%d}")
+        _relanzar_produccion()  # la siguiente tarea espera al próximo turno
+        return
+    _relanzar_produccion()
 
 
 if __name__ == "__main__":

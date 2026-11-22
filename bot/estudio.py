@@ -52,6 +52,9 @@ escena (como los Reels 3D más virales). Ese mundo ya está hecho en el archivo 
 - Si la escena muestra qué pasa SIN una pieza o cuando algo falla, exagéralo con física de
   dibujo animado (se ladea y se cae, se desborda, se rompe, sale volando) y, si la siguiente
   escena lo necesita, termina con el mundo de nuevo en su estado correcto.
+- Si alguna regla aprendida dice "no repetir decorado" o "cada escena distinta", en este video
+  significa: cambia el ENCUADRE, el momento y lo que pasa, pero el mundo y el protagonista son
+  siempre los mismos.
 - Lo tuyo encima del mundo: flechas de fuerza o de flujo, líneas punteadas de trayectoria,
   etiquetas cortas, medidas, partículas (agua, aire, chispas, tornillos que llueven).
 """

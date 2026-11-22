@@ -206,7 +206,8 @@ export const Conceptos: React.FC<{plan: PlanVideo; oscuro?: boolean; desde?: num
   const tam = largo <= 12 ? 120 : largo <= 20 ? 100 : largo <= 28 ? 84 : 72;
   const tinta = oscuro ? '#FFFFFF' : '#1B1B1F';
   const borde = oscuro ? '#0E0E12' : '#FFFFFF';
-  const resalte = plan.paleta.acentos[2] ?? '#2F6FB5';
+  // Palabra clave: azul sobre fondo claro (legible) y el resalte vivo sobre fondo oscuro
+  const resalte = oscuro ? plan.paleta.acentos[2] ?? '#A3D92B' : '#1F6FD1';
   let negado = false;
   return (
     <div style={{position: 'absolute', left: 36, right: 36, top: 292, textAlign: 'center', lineHeight: 1.02}}>

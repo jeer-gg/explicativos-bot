@@ -174,8 +174,11 @@ def alinear(tokens: list[str], oidas: list[dict]) -> list[tuple[float, float]]:
         antes = max((k for k in conocidos if k < i), default=None)
         despues = min((k for k in conocidos if k > i), default=None)
         if antes is None:
+            # Se reparten entre el comienzo del audio y la primera palabra oída (nunca se apilan en 0)
             fin = tiempos[despues][0]
-            tiempos[i] = (max(0.0, fin - 0.25 * (despues - i)), max(0.0, fin - 0.25 * (despues - i) + 0.22))
+            paso = min(0.3, fin / max(1, despues))
+            ini = fin - paso * (despues - i)
+            tiempos[i] = (ini, ini + paso * 0.9)
         elif despues is None:
             ini = tiempos[antes][1] + 0.25 * (i - antes - 1)
             tiempos[i] = (ini, ini + 0.22)
@@ -248,6 +251,30 @@ def _inicio_tolerante(tokens: list[str], oidas: list[dict]) -> float | None:
 AIRE_INICIAL = 0.18  # silencio limpio antes de la primera palabra (que no se coma la primera sílaba)
 
 
+def inicios_seguros(inicios: list[float], total: float, minimo: float = 1.2) -> list[float]:
+    """Ninguna escena puede quedar con duración cero o casi cero (pasa cuando no se reconoce el
+    principio de la voz o la voz se salta una frase): se separan los comienzos lo justo."""
+    n = len(inicios)
+    if n == 0:
+        return inicios
+    minimo = min(minimo, total / n * 0.6)
+    r = [0.0] + list(inicios[1:])
+    for i in range(1, n):  # hacia delante: cada escena dura al menos el mínimo
+        r[i] = max(r[i], r[i - 1] + minimo)
+    tope = total - minimo
+    for i in range(n - 1, 0, -1):  # hacia atrás: la última también cabe en el audio
+        r[i] = min(r[i], tope if i == n - 1 else r[i + 1] - minimo)
+    return [round(x, 3) for x in r]
+
+
+def _cobertura_inicio(tokens: list[str], oidas: list[dict], n: int = 12) -> float:
+    """Qué parte de las primeras palabras del guion se oye al principio del audio."""
+    primeras = tokens[:n]
+    if not primeras:
+        return 1.0
+    return cobertura(primeras, oidas[: max(len(primeras) * 3, 20)])
+
+
 def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, nombre: str) -> dict:
     carpeta.mkdir(parents=True, exist_ok=True)
     tokens, escena_de = [], []
@@ -278,14 +305,18 @@ def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, 
                 f"adelay={int(AIRE_INICIAL * 1000)}:all=1", "-ar", "24000", "-ac", "1", str(limpio))
         oidas = escuchar_palabras(limpio, cfg, texto)  # se vuelve a escuchar el audio ya recortado
         cob = cobertura(tokens, oidas)
-        print(f"Voz intento {intento + 1}: se oye el {round(cob * 100)} % del guion")
-        if mejor is None or cob > mejor[0]:
-            mejor = (cob, limpio, oidas)
-        if cob >= 0.8:
+        cob_ini = _cobertura_inicio(tokens, oidas)
+        print(f"Voz intento {intento + 1}: se oye el {round(cob * 100)} % del guion "
+              f"(comienzo: {round(cob_ini * 100)} %)")
+        # Si el comienzo no se oye, el corte quedó tarde o se perdió el gancho: vale menos
+        puntaje = cob if cob_ini >= 0.5 else cob * 0.5
+        if mejor is None or puntaje > mejor[0]:
+            mejor = (puntaje, limpio, oidas, cob)
+        if cob >= 0.8 and cob_ini >= 0.5:
             break
     if mejor is None:
         raise RuntimeError("La voz no dijo el guion en ninguno de los intentos")
-    cob_final, limpio, oidas = mejor
+    _, limpio, oidas, cob_final = mejor
     from .autocontrol import ESTADO_VIDEO
     ESTADO_VIDEO["cobertura_voz"] = cob_final
     tiempos = alinear(tokens, oidas)
@@ -312,6 +343,7 @@ def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, 
     for i in range(len(textos)):
         primera = escena_de.index(i)
         inicios.append(0.0 if i == 0 else max(0.0, t_abs[primera][0] - 0.03))
+    inicios = inicios_seguros(inicios, total)
     escenas = []
     for i, ini in enumerate(inicios):
         fin = inicios[i + 1] if i + 1 < len(inicios) else total

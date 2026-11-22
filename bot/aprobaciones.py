@@ -38,10 +38,18 @@ def escuchar(minutos: float):
 
 
 def relanzar_si_toca():
-    """Si un video quedó a medias por el límite de Claude y ya se renovó, se relanza."""
-    from . import reanudar
-    if reanudar.toca_reintentar():
-        print("Se renovó el límite: relanzo la producción")
+    """Vigilante: si la cadena de producción dejó de latir (una tarea murió de golpe o nunca se
+    lanzó la siguiente), la relanza. La tarea nueva decide sola qué hacer (seguir, esperar...)."""
+    from datetime import datetime, timedelta, timezone
+    e = estado()
+    ahora = datetime.now(timezone.utc)
+    latido = e.get("latido")
+    muerta = not latido or ahora - datetime.fromisoformat(latido) > timedelta(minutes=200)
+    ultimo = e.get("vigilante")
+    if muerta and (not ultimo or ahora - datetime.fromisoformat(ultimo) > timedelta(minutes=90)):
+        e["vigilante"] = ahora.isoformat(timespec="seconds")
+        guardar_estado(e)
+        print("La cadena de producción no da señales de vida: la relanzo")
         subprocess.run(["gh", "workflow", "run", "bot.yml", "-f", "tarea=producir"], check=False)
 
 

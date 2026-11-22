@@ -70,6 +70,9 @@ produccion:
   # true = todo el video pasa en UN mundo que evoluciona (el objeto se arma, se llena, falla,
   # se arregla), como los Reels 3D con millones de vistas. false = un escenario por escena.
   mundo_continuo: true
+  # Turnos de producción (hora de RD). El bot trabaja en cadena: hace el video de cada turno y
+  # espera al siguiente. Separados 6 horas para que cada video tenga su propio límite de Claude.
+  horas_produccion: ["03:17", "09:17", "15:17"]
   concurrencia_3d: "50%"
   tiempo_maximo_min: 170          # debe ser menor que timeout-minutes del trabajo producir
   # Dos versiones del gancho (A y B) para que elijas la mejor.
@@ -95,20 +98,22 @@ estilo:
     sombras planas, todo en movimiento suave. Sin emojis. Sin párrafos de texto
     en pantalla. Gráfico, claro y fiel a la realidad.
   descripcion_3d: >
-    Estilo de marca fijo del canal: 3D ilustrado con contornos negros finos de dibujo y
-    sombreado suave de caricatura, en un estudio de fondo neutro gris cálido, luz suave
-    y difusa y sombras suaves. Colores naturales y apagados (madera, metal, plástico, tela
-    reales, poco saturados); el color fuerte se reserva para lo que se resalta (azul de marca,
-    rojo para tachar o advertir). Nada chillón ni muy brillante. El protagonista es un OBJETO
-    cotidiano grande y detallado que llena la pantalla, que se arma, se abre en corte o se
-    compara con números. Los personajes son solo los de la historia que se cuenta. Etiquetas
-    cortas, medidas, flechas. Cámara cercana que gira y se acerca. Sin emojis. Fiel a la realidad.
+    Estilo de marca del canal: 3D ilustrado con contornos negros finos de dibujo y sombreado
+    de caricatura, como los Reels 3D con millones de vistas. Lo que más importa es que se vea
+    HERMOSO y rico: cada fotograma lleno, con un escenario que va con el tema (cielo con nubes y
+    pasto, una azotea o calle de día, un escenario oscuro con foco, o un estudio limpio) y un
+    protagonista grande que contrasta con el fondo (color fuerte y limpio sobre un fondo más
+    calmado). La parte de la que se habla se resalta con un color vivo. Luz clara y bonita,
+    sombras suaves, colores limpios y fieles a la realidad. Objetos fieles a la realidad, sin
+    ojos ni caras. Personajes solo si son parte de la historia. Etiquetas cortas, medidas,
+    flechas de fuerza, líneas punteadas de trayectoria. Cámara cercana que se mueve; un plano
+    abierto solo para ubicar. Sin emojis.
   # Paletas para 3D (fondo oscuro, texto claro; acentos: protagonista, gente, luz, extra).
   # Estilo de marca ÚNICO para todos los videos (no se sortea): así la gente reconoce el canal.
   paletas_3d:  # cielo, texto, [objeto principal, secundario, resalte, extra, suelo]
     # Estudio neutro (fondo gris cálido, suelo greige) y colores apagados; un solo resalte fuerte.
     # Medido en los videos de ejemplo: brillo medio ~0,58, saturación ~0,3, solo ~3 % de píxeles muy saturados.
-    marca: ["#D3CEC6", "#1B1B1F", "#B9573F", "#E9E4DB", "#2F6FB5", "#D4A03C", "#C2BBAF"]
+    marca: ["#D3CEC6", "#1B1B1F", "#D2452F", "#E9E4DB", "#A3D92B", "#E0A526", "#C2BBAF"]
   # Paletas para 2D (fondo, tinta, 4 colores de acento).
   paletas:
     calida:   ["#FFF4E0", "#1E1B2E", "#FF6B35", "#F7B32B", "#2EC4B6", "#E71D36"]
@@ -178,7 +183,8 @@ claude:
   nota_para_publicar: 0
   # Un video que sale roto (escenas vacías, nota del revisor por debajo de esto) no se publica:
   # se descarta y se hace otro para ese horario.
-  nota_para_descartar: 4
+  nota_para_descartar: 3   # solo se descarta lo roto (escenas vacías); con 4.5 o 5 se publica igual
+  descartes_por_dia: 2   # como mucho se rehacen 2 videos descartados por día (cuida el límite de Claude)
   # Si el control final encuentra un error grave (voz que empieza tarde, dato falso, texto tapado),
   # el bot lo arregla solo: rehace la voz o las escenas afectadas, vuelve a revisar y publica.
   intentos_arreglo: 2

@@ -14,25 +14,33 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
         f"Video: «{guion['titulo']}». Estilo buscado: "
         f"{cfg['estilo']['descripcion_3d' if cfg['produccion'].get('motor') == '3d' else 'descripcion'].strip()}\n"
         "De cada escena te muestro dos fotogramas lado a lado (izquierda: al empezar; derecha: más "
-        "adelante), tal como se verán con subtítulos. "
-        "Para cada escena revisa: que la ilustración sea elaborada y atractiva (no simple), "
-        "que se entienda la idea de la voz, que sea fiel a la realidad, que nada importante "
-        "quede tapado por los subtítulos o cortado en los bordes, que no haya texto roto ni "
-        "elementos superpuestos por error, que no haya emojis, que la ilustración llene todo el "
-        "cuadro vertical sin franjas vacías, y que lo importante esté en el centro (se debe "
-        "entender aunque se recorte arriba y abajo al formato 4:5 del feed), que el plano sea cercano "
-        "(el protagonista grande, no un cuarto vacío visto de lejos), que desde el inicio de la "
-        "escena ya se vea una ilustración completa y rica, y que entre los dos fotogramas haya "
-        "un cambio visible (movimiento, acción), que el protagonista y el lugar sean los MISMOS que "
-        "en las demás escenas (mismo objeto, colores y sitio: el video debe parecer un solo mundo "
-        "que cambia) y que la parte de la que habla la voz se vea resaltada o señalada. En la PRIMERA escena exige además un gancho visual "
-        "que detenga el scroll desde el fotograma 0 (es la miniatura)."
+        "adelante), tal como se verán con el texto en pantalla.\n"
+        "LO QUE MÁS PESA ES LA ESTÉTICA: cómo se ve. Referencia de un 9 (Reels 3D con millones de "
+        "vistas): un avión rojo con contornos de dibujo en un cielo azul con nubes, que gana una "
+        "pieza por frase y la pieza nombrada se pinta de verde lima; un corte de una casa con "
+        "tuberías y agua azul intensa sobre fondo oscuro, que se llena y se vacía; paneles "
+        "solares 3D detallados en una azotea soleada, con cables y medidores; figuras grises en "
+        "un escenario oscuro con un foco cálido sobre la figura roja protagonista, con tarjetas "
+        "de datos grandes. Todos: fotograma lleno y bonito, protagonista que contrasta con el "
+        "fondo, buena luz, colores limpios, un solo mundo que va cambiando.\n"
+        "Puntúa así: 1) estética (riqueza, luz, color, contraste del protagonista, cuadro lleno, "
+        "aspecto profesional): es lo que más cuenta; 2) que se entienda la idea de la voz y sea "
+        "fiel a la realidad; 3) que haya movimiento o cambio entre los dos fotogramas; 4) que la "
+        "parte de la que habla la voz se vea resaltada o señalada.\n"
+        "Baja mucho la nota solo por ERRORES REALES: escena vacía o casi vacía, texto cortado, "
+        "tapado o ilegible, elementos que se atraviesan por error, emojis, algo que no se entiende, "
+        "un dato visible que contradice la voz. NO son errores (no bajes por eso): un plano abierto "
+        "para ubicar si el protagonista se distingue, un color fuerte para resaltar, repetir el "
+        "mismo lugar y protagonista entre escenas (es un solo mundo que cambia). Lo importante "
+        "debe quedar en el centro (se recorta al 4:5 del feed). En la PRIMERA escena exige además "
+        "un gancho visual hermoso que detenga el scroll desde el fotograma 0 (es la miniatura)."
     )}]
     from .autocontrol import texto_reglas
     reglas = texto_reglas("escenas", 12)
     if reglas:
-        contenido.append({"type": "text", "text": "Comprueba especialmente estos errores que ya se "
-                          "cometieron antes y baja mucho la nota si se repiten:" + reglas})
+        contenido.append({"type": "text", "text": "Comprueba también estos errores que ya se "
+                          "cometieron antes y baja la nota si se repiten (si alguna regla choca con la "
+                          "referencia de estética de arriba, manda la referencia):" + reglas})
     for f in fotos:
         contenido.append({"type": "text", "text": f"\n{f['nombre']}. Voz: «{f['voz']}». Debía mostrar: {f['visual']}"})
         contenido.append(imagen(f["ruta"]))
@@ -43,9 +51,9 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
     )})
     global ULTIMO_COMENTARIO
     resultado = claude.json(
-        "Eres director de arte y editor de videos explicativos animados virales. Revisas con ojo crítico "
-        "y comparas con los mejores Reels de explicativos 3D (objetos detallados que se arman, contornos "
-        "de dibujo, etiquetas, cámara cercana, ritmo rápido).",
+        "Eres director de arte de videos explicativos 3D virales. Lo que más te importa es que el "
+        "video se vea hermoso y profesional. Eres exigente con la estética y justo: no castigas los "
+        "recursos que usan los Reels ganadores.",
         contenido, max_tokens=3000)
     ULTIMO_COMENTARIO = str(resultado.get("comentario", ""))[:300]
     return resultado

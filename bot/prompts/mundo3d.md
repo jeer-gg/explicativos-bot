@@ -55,7 +55,10 @@ Un archivo TSX que exporta:
 
 ## Riqueza
 - Construido con muchas `Pieza` (contorno de dibujo): entre 30 y 90 piezas en total.
-- Colores reales pero apagados; el color fuerte solo para resaltar o el error.
+- Que se vea HERMOSO: protagonista con un color limpio y fuerte que contraste con el fondo
+  (`acentos[0]` si el objeto no tiene un color propio), lo demás con sus colores reales y buena
+  luz. Completa el lugar para que llene el cuadro (un borde de azotea, una pared, árboles o postes
+  al fondo, la base donde está el objeto), sin poner cielo ni suelo general.
 - Fiel a la realidad: proporciones y funcionamiento correctos, porque el video lo explica.
 - Si el estilo lo pide, el nombre del canal puede ir pintado en el protagonista con `Cartel`
   (como una marca impresa), pequeño y sin tapar nada.

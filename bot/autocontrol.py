@@ -80,10 +80,12 @@ def revision_final(claude, guion: dict, hoja: Path) -> list[dict]:
             f"Video terminado: «{guion['titulo']}». Narración: {voz}\n"
             "Te muestro 8 fotogramas repartidos por todo el video ya editado (con subtítulos, título "
             "de portada y tarjetas de datos), en orden de izquierda a derecha y de arriba abajo.\n"
-            "Busca ERRORES concretos: textos cortados o tapados, subtítulos encima de cosas "
+            "Busca ERRORES concretos: textos cortados o tapados, texto en pantalla encima de cosas "
             "importantes, datos o textos incorrectos o que no coinciden con la narración, objetos "
-            "que no se entienden o no son fieles a la realidad, planos lejanos o vacíos, colores "
-            "chillones, fotogramas vacíos o rotos, cosas que se ven repetidas sin sentido.\n"
+            "que no se entienden o no son fieles a la realidad, fotogramas vacíos o rotos, la misma "
+            "imagen congelada en varios fotogramas seguidos. NO son errores (no los apuntes): un "
+            "plano abierto para ubicar, un color fuerte para resaltar, el mismo lugar y protagonista "
+            "en todo el video (es un solo mundo que cambia), gustos de estilo.\n"
             "Para cada error escribe una REGLA general y concreta que evite que se repita en "
             "cualquier video futuro (no sobre este tema en particular), y a quién va dirigida: "
             "\"escenas\" (quien dibuja), \"guion\" (quien escribe) o \"edicion\" (títulos, "
@@ -137,8 +139,20 @@ def _parecido(a: str, b: str) -> bool:
     return bool(sa and sb) and len(sa & sb) / min(len(sa), len(sb)) >= 0.6
 
 
+# Reglas de gusto que se aprendieron antes y chocan con lo que hace virales a los Reels 3D
+# (color fuerte para resaltar, un solo mundo que se repite, planos abiertos para ubicar): ya no se aplican.
+_RETIRADAS = ("chillón", "chillon", "saturad", "mismo decorado", "mismo encuadre de fondo",
+              "visualmente distinta", "planos consecutivos", "repetir el mismo")
+
+
+def _vigente(regla: dict) -> bool:
+    texto = regla.get("regla", "").lower()
+    return not any(x in texto for x in _RETIRADAS)
+
+
 def texto_reglas(area: str, maximo: int = 8) -> str:
-    reglas = [r for r in _leer(REGLAS, {"reglas": []})["reglas"] if r["area"] in (area, "edicion" if area == "escenas" else area)]
+    reglas = [r for r in _leer(REGLAS, {"reglas": []})["reglas"]
+              if r["area"] in (area, "edicion" if area == "escenas" else area) and _vigente(r)]
     if not reglas:
         return ""
     lineas = [f"- {r['regla']}" + (" (error repetido, máxima prioridad)" if r["veces"] >= 2 else "")

@@ -132,6 +132,7 @@ Devuelve JSON:
    "protagonista": "aspecto exacto del personaje o objeto que guía el video (forma, colores, ropa, rasgos) para dibujarlo igual en todas las escenas",
    "secundarios": "otros personajes u objetos que se repiten, con su aspecto",
    "ambiente": "el único lugar donde pasa todo el video (si es grande, como maqueta en corte)",
+   "escenario": "cielo | exterior | oscuro | estudio (cielo: cosas que vuelan o al aire libre con pasto; exterior: casa, azotea, calle, de día; oscuro: el cuerpo, la mente, personas, sistemas por dentro o vistos en corte; estudio: objetos pequeños de la casa)",
    "partes": "las piezas del protagonista que se agregan, cambian o se señalan, con su aspecto",
    "metafora": "la metáfora visual central que explica el tema"
  }}

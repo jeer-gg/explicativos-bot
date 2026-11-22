@@ -240,18 +240,54 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
   const colorSuelo = plan.paleta.acentos[4] ?? cielo.clone().lerp(new THREE.Color('#ffffff'), 0.07).getStyle();
   const horizonte = cielo.clone().lerp(new THREE.Color('#ffffff'), 0.3).getStyle();
   const oscuro = cielo.clone().multiplyScalar(0.78).getStyle();
+  // Fondo según el escenario del tema
+  const fondoCss =
+    plan.escenario === 'cielo'
+      ? 'linear-gradient(180deg, #3C8DDE 0%, #6FB2EC 38%, #B9DDF7 72%, #D9EEFB 100%)'
+      : plan.escenario === 'exterior'
+        ? 'linear-gradient(180deg, #8FC0E6 0%, #C4DEEF 45%, #EAF1F2 80%, #F1EEE6 100%)'
+        : dia
+          ? `radial-gradient(ellipse 90% 70% at 50% 40%, ${horizonte} 0%, ${plan.paleta.fondo} 55%, ${oscuro} 100%)`
+          : `radial-gradient(ellipse 80% 55% at 50% 42%, #2A2B33 0%, ${plan.paleta.fondo} 62%, #07070A 100%)`;
+  // En el escenario oscuro el foco es de luz cálida (como un escenario de teatro)
+  const colorFoco = plan.escenario === 'oscuro' ? '#FFE0B0' : luz;
+  const derivaNubes = (frame / fps) * 6;
 
   return (
     <AbsoluteFill
       style={{
-        background: dia ? `radial-gradient(ellipse 90% 70% at 50% 40%, ${horizonte} 0%, ${plan.paleta.fondo} 55%, ${oscuro} 100%)` : plan.paleta.fondo,
+        background: fondoCss,
         fontFamily: fuente.fontFamily,
       }}
     >
+      {plan.escenario === 'cielo' ? (
+        <AbsoluteFill style={{pointerEvents: 'none'}}>
+          {[
+            [8, 9, 330, 120],
+            [58, 15, 420, 140],
+            [22, 27, 300, 100],
+            [70, 33, 260, 90],
+          ].map(([x, y, w, h], k) => (
+            <div
+              key={k}
+              style={{
+                position: 'absolute',
+                left: `${x}%`,
+                top: `${y}%`,
+                width: w,
+                height: h,
+                transform: `translateX(${derivaNubes * (k % 2 === 0 ? 1 : -0.7)}px)`,
+                borderRadius: h,
+                background: 'radial-gradient(ellipse at 50% 60%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 45%, rgba(255,255,255,0) 72%)',
+              }}
+            />
+          ))}
+        </AbsoluteFill>
+      ) : null}
       {listo ? (
         <ThreeCanvas width={ANCHO} height={ALTO} shadows gl={{alpha: true, antialias: true}} camera={{fov: 40, near: 0.1, far: 140, position: cam.ojo}}>
           <Camara ojo={cam.ojo} mira={cam.mira} />
-          {dia ? null : <color attach="background" args={[plan.paleta.fondo]} />}
+          {dia || plan.escenario === 'oscuro' ? null : <color attach="background" args={[plan.paleta.fondo]} />}
           <fog attach="fog" args={dia ? [plan.paleta.fondo, 12, 34] : [plan.paleta.fondo, 10, 28]} />
           {dia ? (
             <>
@@ -265,7 +301,7 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
               <hemisphereLight args={['#ffffff', plan.paleta.fondo, 0.35]} />
               <directionalLight position={[cam.mira[0] - 4, 5, cam.mira[2] - 6]} intensity={0.6} color="#cfd8ff" />
               {visibles.map((i) => (
-                <Reflector key={`r${i}`} donde={lugar(plan, i)} color={luz} sombras={i === cam.actual} />
+                <Reflector key={`r${i}`} donde={lugar(plan, i)} color={colorFoco} sombras={i === cam.actual} />
               ))}
             </>
           )}

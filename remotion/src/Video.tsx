@@ -32,6 +32,7 @@ export type PlanVideo = {
   escenas: EscenaPlan[];
   continuo?: boolean; // 3D: todas las escenas en el mismo lugar (un solo mundo que evoluciona)
   estilo_subtitulos?: 'concepto' | 'completo';
+  escenario?: 'cielo' | 'exterior' | 'oscuro' | 'estudio';
 };
 
 export type Grafico =
