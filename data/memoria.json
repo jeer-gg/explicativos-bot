@@ -146,5 +146,29 @@
     "duracion": 67.32,
     "video_fb": "1018251847348982",
     "metricas": {}
+  },
+  {
+    "id": "20261123-0555",
+    "fecha": "2026-11-23",
+    "publicado_en": "2026-11-24T13:00:00+00:00",
+    "programado": true,
+    "titulo": "Por qué los relojes del GPS se adelantan (Einstein) (Parte 3)",
+    "tema": "Por qué los relojes de los satélites se adelantan: relatividad especial y general de Einstein",
+    "tendencia": "Nuevos lanzamientos de celulares y relojes (Honor 500, Xiaomi 18 Pro) previstos para finales de noviembre",
+    "serie": {
+      "titulo": "El GPS y Einstein",
+      "parte": 3,
+      "total": 3
+    },
+    "subtema": "tecnología que usamos sin entender",
+    "estructura": "HISTORIA EN PARTES: una historia real e intrigante detrás de algo cotidiano (un invento por accidente, un error que cambió todo, un misterio con explicación científica) contada en 2 o 3 partes; cada parte responde su propia pregunta y termina con una intriga que lleva a la siguiente",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "comparación imposible con número («va más lento que un tren»)",
+    "gancho": "Dos Einsteins se están peleando por el reloj de tu mapa.",
+    "nota_revisor": 4.3,
+    "duracion": 51.75,
+    "video_fb": "1185073503844830",
+    "metricas": {}
   }
 ]

@@ -3,8 +3,8 @@
     {
       "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
       "area": "voz",
-      "veces": 4,
-      "ultima": "2026-11-23T04:55:28+00:00",
+      "veces": 5,
+      "ultima": "2026-11-23T06:30:17+00:00",
       "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
       "ejemplo": "1 silencio(s) largos dentro de la narración"
     },
