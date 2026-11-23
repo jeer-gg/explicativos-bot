@@ -6,12 +6,14 @@ on:
     paths:
       - "explicativos-bot.zip"
   schedule:
-    # Tres videos al día (hora UTC). En República Dominicana: 3:17 a. m., 9:17 a. m. y 3:17 p. m.
-    # Cada uno se programa en Facebook para el siguiente horario libre: 9:00 a. m., 1:00 p. m. y 8:00 p. m.
-    # Van separados 6 horas para que cada uno tenga su propio límite de 5 horas de Claude.
+    # Turnos de producción (hora UTC). En República Dominicana: 3:17 a. m. y 3:17 p. m. (explicativos),
+    # 9:17 a. m. y 9:17 p. m. (historias). Separados 6 horas: cada video tiene su propio límite de
+    # Claude. El bot trabaja en cadena por su cuenta; estos horarios son solo de respaldo.
     - cron: "17 7 * * *"
     - cron: "17 13 * * *"
     - cron: "17 19 * * *"
+    # 9:17 PM RD (turno de la página de historias)
+    - cron: "17 1 * * *"
     # Revisar los botones de Telegram (cancelar) cada 20 minutos
     - cron: "*/20 * * * *"
     # Vigilante: si la cadena de trabajo del bot se detuvo, la relanza (cada 2 horas)
@@ -93,6 +95,12 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
           META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+          META_PAGE_ID_HISTORIAS: ${{ secrets.META_PAGE_ID_HISTORIAS }}
+          META_PAGE_TOKEN_HISTORIAS: ${{ secrets.META_PAGE_TOKEN_HISTORIAS }}
+          META_PAGE_ID_PSICOLOGIA: ${{ secrets.META_PAGE_ID_PSICOLOGIA }}
+          META_PAGE_TOKEN_PSICOLOGIA: ${{ secrets.META_PAGE_TOKEN_PSICOLOGIA }}
+          META_PAGE_ID_CASA: ${{ secrets.META_PAGE_ID_CASA }}
+          META_PAGE_TOKEN_CASA: ${{ secrets.META_PAGE_TOKEN_CASA }}
           GH_TOKEN: ${{ github.token }}
           MINUTOS_TAREA: "340"
         run: python -m bot.producir
@@ -143,6 +151,12 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
           META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+          META_PAGE_ID_HISTORIAS: ${{ secrets.META_PAGE_ID_HISTORIAS }}
+          META_PAGE_TOKEN_HISTORIAS: ${{ secrets.META_PAGE_TOKEN_HISTORIAS }}
+          META_PAGE_ID_PSICOLOGIA: ${{ secrets.META_PAGE_ID_PSICOLOGIA }}
+          META_PAGE_TOKEN_PSICOLOGIA: ${{ secrets.META_PAGE_TOKEN_PSICOLOGIA }}
+          META_PAGE_ID_CASA: ${{ secrets.META_PAGE_ID_CASA }}
+          META_PAGE_TOKEN_CASA: ${{ secrets.META_PAGE_TOKEN_CASA }}
           GH_TOKEN: ${{ github.token }}
         run: |
           pip install -q requests pyyaml
@@ -174,4 +188,10 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
           META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+          META_PAGE_ID_HISTORIAS: ${{ secrets.META_PAGE_ID_HISTORIAS }}
+          META_PAGE_TOKEN_HISTORIAS: ${{ secrets.META_PAGE_TOKEN_HISTORIAS }}
+          META_PAGE_ID_PSICOLOGIA: ${{ secrets.META_PAGE_ID_PSICOLOGIA }}
+          META_PAGE_TOKEN_PSICOLOGIA: ${{ secrets.META_PAGE_TOKEN_PSICOLOGIA }}
+          META_PAGE_ID_CASA: ${{ secrets.META_PAGE_ID_CASA }}
+          META_PAGE_TOKEN_CASA: ${{ secrets.META_PAGE_TOKEN_CASA }}
         run: python -m bot.diagnostico
