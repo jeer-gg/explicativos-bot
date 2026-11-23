@@ -126,5 +126,25 @@
     "duracion": 55.53,
     "video_fb": "2611873915978648",
     "metricas": {}
+  },
+  {
+    "id": "20261123-0416",
+    "fecha": "2026-11-23",
+    "publicado_en": "2026-11-24T00:00:00+00:00",
+    "programado": true,
+    "titulo": "Por qué se calientan las luces de Navidad viejas",
+    "tema": "Tu foco LED y la fogata son la misma idea: de la llama al LED, cómo evolucionó la luz y por qué los focos viejos quemaban",
+    "tendencia": "Arranca la temporada navideña: luces, adornos y villancicos en todas partes",
+    "serie": null,
+    "subtema": "ciencia de cosas cotidianas",
+    "estructura": "LA MISMA IDEA: cómo un objeto evolucionó desde su versión más antigua hasta la que usas hoy, mostrando que el principio es el mismo",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "error común que casi todos cometen",
+    "gancho": "Tu árbol de Navidad esconde la misma idea que una fogata, y no lo sabías.",
+    "nota_revisor": 4.5,
+    "duracion": 67.32,
+    "video_fb": "1018251847348982",
+    "metricas": {}
   }
 ]

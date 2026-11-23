@@ -3,8 +3,8 @@
     {
       "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
       "area": "voz",
-      "veces": 3,
-      "ultima": "2026-11-23T00:52:03+00:00",
+      "veces": 4,
+      "ultima": "2026-11-23T04:55:28+00:00",
       "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
       "ejemplo": "1 silencio(s) largos dentro de la narración"
     },
@@ -15,6 +15,70 @@
       "ultima": "2026-11-22T19:50:12+00:00",
       "clave": "cortas dicen escritos frases fáciles números pronunciar",
       "ejemplo": "solo se entiende el 50 % del guion en el audio"
+    },
+    {
+      "regla": "Las tarjetas de datos deben mostrar solo la cifra que dice la voz en ese momento, con el texto completo y sin cortes. No deben tapar el objeto principal ni adelantar datos de escenas posteriores.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T04:55:28+00:00",
+      "clave": "adelantar cifra completo cortes datos deben escenas momento mostrar objeto posteriores principal tapar tarjetas texto",
+      "ejemplo": "Fotograma 4: la tarjeta de datos muestra «80 %» para el fluorescente y tiene el texto «calo» cortado (debería decir «calor»). La voz habla del filamento y del 90 %, no del fluorescente. La tarjeta tapa el árbol y el fotograma no enseña el filamento al rojo vivo, solo un mesa vacía."
+    },
+    {
+      "regla": "Las tarjetas de datos deben ser opacas, tener un tamaño legible (texto grande) y mostrar valores reales. No pueden salir vacías, con 0 % ni en estado de animación a medias. Deben quedar fuera de la zona del objeto que se explica.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T04:55:28+00:00",
+      "clave": "animación datos deben estado explica fuera grande legible medias mostrar objeto opacas pueden quedar reales salir tamaño tarjetas tener texto vacías valores",
+      "ejemplo": "Fotograma 7: la tarjeta de datos aparece translúcida, minúscula e ilegible («0 %», «0 %»). Tapa el centro del árbol y no se ve ningún LED ni chip, que es lo que dice la voz."
+    },
+    {
+      "regla": "Cuando la voz nombra un objeto nuevo (como un LED o un chip), la escena debe mostrarlo grande y reconocible en el centro, no solo un fondo con una mesa vacía.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-23T04:55:28+00:00",
+      "clave": "centro cuando escena fondo grande mostrarlo nombra nuevo objeto reconocible vacía",
+      "ejemplo": "Fotograma 7: la escena no muestra el LED ni un chip. Solo se ve el árbol con una mesa vacía, así que la imagen no corresponde a lo que dice la voz."
+    },
+    {
+      "regla": "Los subtítulos y títulos deben quedar completos dentro del encuadre, sin cortes ni duplicados. No debe haber dos textos que digan lo mismo a la vez, ni texto sobre el objeto principal.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T04:55:28+00:00",
+      "clave": "completos cortes deben dentro digan duplicados encuadre haber mismo objeto principal quedar sobre subtítulos texto textos títulos",
+      "ejemplo": "Fotograma 5: el subtítulo «perdiciada» aparece cortado en el borde superior izquierdo y se duplica con el título «ENERGÍA DESPERDICIADA». El texto en pantalla tapa el foco. La escena no muestra que el 90 % salga como calor."
+    },
+    {
+      "regla": "Los objetos deben dibujarse en funcionamiento (encendidos, con la acción que se describe) y con una forma fiel y reconocible. Los soportes y accesorios deben tener sentido.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-23T04:55:28+00:00",
+      "clave": "accesorios acción deben describe dibujarse encendidos forma funcionamiento objetos reconocible sentido soportes tener",
+      "ejemplo": "Fotograma 6: la voz habla de una descarga eléctrica que excita un gas, pero el tubo fluorescente aparece en horizontal sobre unos soportes raros, apagado y sin brillo ni descarga visible. La mesa blanca está en primer plano y el árbol, de fondo, no tiene relación con la acción."
+    },
+    {
+      "regla": "El título de portada debe resumir la frase del gancho y la escena inicial debe mostrar los objetos que ésta nombra. Debe verse el árbol y la fogata, no solo uno de ellos.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-23T04:55:28+00:00",
+      "clave": "ellos escena fogata frase gancho inicial mostrar nombra objetos portada resumir título verse árbol",
+      "ejemplo": "Fotograma 1: el gancho dice que el árbol esconde la misma idea que una fogata, pero la imagen solo muestra el árbol, sin fogata. El título «FOGATA DISFRAZADA» está encima del árbol y no es lo que dice la voz."
+    },
+    {
+      "regla": "Cada fotograma debe mostrar exactamente lo que la voz dice en ese segundo (aquí, el mito), no una escena de otro momento del guion. No deben aparecer objetos sueltos o sin sentido en primer plano.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-23T04:55:28+00:00",
+      "clave": "aparecer deben escena exactamente fotograma guion momento mostrar objetos plano primer segundo sentido sueltos",
+      "ejemplo": "Fotograma 2: la voz dice que muchos piensan que se calientan por tener más potencia, pero la imagen muestra una fogata con madera y el subtítulo «LA FOGATA». No hay nada de potencia ni de luces de Navidad. Dos troncos verdes flotan sueltos en primer plano."
+    },
+    {
+      "regla": "En las escenas de resumen, los objetos deben ser grandes, claramente separados y ordenados, y mostrar de forma legible lo que se resume. No debe haber elementos pequeños y confusos.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-23T04:55:28+00:00",
+      "clave": "claramente confusos deben elementos escenas forma grandes haber legible mostrar objetos ordenados pequeños resume resumen separados",
+      "ejemplo": "Fotograma 8: la voz hace el cierre con fogata, luz y un foco que quemaba. La escena muestra un montón de objetos pequeños sobre un tablón (fogata, vela, foco) con una mesa vacía arriba, y la composición es confusa. Los objetos son diminutos y el foco apenas se distingue."
     },
     {
       "regla": "El texto en pantalla y la escena deben mostrar exactamente lo que dice la voz en ese momento (húmedo vs seco). Toda etiqueta debe quedar completa dentro del encuadre, y no debe haber líneas guía sueltas sin objeto al que apuntar.",
@@ -175,70 +239,6 @@
       "ultima": "2026-11-22T19:50:12+00:00",
       "clave": "abstractos claras conceptos deben escena extra metáforas objeto objetos principal representarse rotuladas solaparse textos visuales",
       "ejemplo": "En el fotograma 8, el título «DOS EFECTOS» y un cohete rojo y otro amarillo con un «?» se apilan sobre el satélite y la Tierra. Los dos cohetes no representan claramente los efectos de Einstein. Quedan tapados el satélite y la parte superior del objeto."
-    },
-    {
-      "regla": "Las tarjetas de datos deben ir en una zona libre, lejos del protagonista y del objeto que explica la escena. Ningún texto debe quedar cortado por el borde del cuadro.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T14:01:08+00:00",
-      "clave": "borde cortado cuadro datos deben escena explica lejos libre ningún objeto protagonista quedar tarjetas texto",
-      "ejemplo": "En el fotograma 2 la tarjeta de datos «20.200 km de altura» tapa la cara y el cuerpo del celular, que es el protagonista. Además, justo a su derecha queda un «20» cortado por el borde."
-    },
-    {
-      "regla": "Los títulos en pantalla deben ubicarse donde no haya objetos de la escena. Los rótulos dentro de la escena deben quedar completos y dentro del encuadre vertical, con margen a los bordes.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T14:01:08+00:00",
-      "clave": "bordes completos deben dentro donde encuadre escena margen objetos pantalla quedar rótulos títulos ubicarse vertical",
-      "ejemplo": "En el fotograma 4 el título «VELOCIDAD DE LA LUZ» se superpone a los satélites y a las líneas punteadas, y «LUZ» queda sobre un satélite, lo que le resta legibilidad. También se ve un texto cortado «tentésim…» en el borde derecho, un rótulo de la escena que sale del cuadro."
-    },
-    {
-      "regla": "Todo texto dentro de la escena debe ser legible a tamaño de celular, o no ponerse. Los objetos clave, como los satélites, deben quedar completos dentro del encuadre.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-22T14:01:08+00:00",
-      "clave": "celular clave completos deben dentro encuadre escena legible objetos ponerse quedar satélites tamaño texto",
-      "ejemplo": "Los carteles pequeños de la escena (en el fotograma 4, el cartel de la casita con «guías / dónde / hora») son ilegibles por su tamaño. Los satélites y el texto «su hora» del fotograma 3 quedan cortados por el borde superior."
-    },
-    {
-      "regla": "Los datos numéricos clave deben mostrarse en una tarjeta grande y despejada, sin objetos de la escena encima ni al lado.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T14:01:08+00:00",
-      "clave": "clave datos deben despejada encima escena grande mostrarse numéricos objetos tarjeta",
-      "ejemplo": "En el fotograma 8 la etiqueta «300 m» queda pequeña, pegada al árbol y al borde de la plataforma, y cuesta leerla. Es el dato clave del cierre y no se destaca."
-    },
-    {
-      "regla": "Verificar que los subtítulos de la narración estén visibles y legibles en toda la duración del video.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T14:01:08+00:00",
-      "clave": "duración estén legibles narración subtítulos verificar video visibles",
-      "ejemplo": "En ninguno de los 8 fotogramas se ven subtítulos de la narración. Solo aparecen títulos sueltos."
-    },
-    {
-      "regla": "Cada cifra en pantalla debe ser idéntica a la narración y a las demás tarjetas del mismo momento. No se permiten dos tarjetas con valores distintos para el mismo dato.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T11:14:07+00:00",
-      "clave": "cifra demás distintos idéntica mismo momento narración pantalla permiten tarjetas valores",
-      "ejemplo": "En el fotograma 5 la tarjeta grande dice «3500 veces más calor», pero la tarjeta amarilla de abajo dice «1,900x». Es un dato contradictorio que no coincide con la narración."
-    },
-    {
-      "regla": "Las etiquetas de temperatura deben mostrar el valor exacto de la narración (por ejemplo «+1 °C»), nunca cero. Ningún texto puede quedar cortado por el borde del encuadre.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T11:14:07+00:00",
-      "clave": "borde cortado deben ejemplo encuadre etiquetas exacto mostrar narración ningún nunca puede quedar temperatura texto valor",
-      "ejemplo": "En el fotograma 3 la etiqueta «+0 °C» dice que el agua no se calienta, pero la narración dice que sube un grado. En el lado de la arena el texto «°C» queda cortado en el borde izquierdo."
-    },
-    {
-      "regla": "Los subtítulos deben mostrar frases completas, con tamaño y color uniformes en todas sus palabras. No se deben partir las frases dejando una palabra suelta o disminuida.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T11:14:07+00:00",
-      "clave": "color completas deben dejando disminuida frases mostrar palabra palabras partir subtítulos suelta tamaño todas uniformes",
-      "ejemplo": "En el fotograma 4 el subtítulo «EL MAR APENAS SE» termina con «SE» pequeño, gris y pegado, como si estuviera cortado. La frase queda incompleta y poco legible."
     }
   ]
 }
