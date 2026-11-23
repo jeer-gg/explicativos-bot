@@ -37,7 +37,12 @@
     "nota_revisor": 5.4,
     "duracion": 41.79,
     "video_fb": "2084558012346480",
-    "metricas": {}
+    "metricas": {
+      "blue_reels_play_count": 5,
+      "fb_reels_total_plays": 6,
+      "post_video_avg_time_watched": 9992,
+      "post_video_followers": 0
+    }
   },
   {
     "id": "20261122-1318",
@@ -61,7 +66,12 @@
     "nota_revisor": 5.2,
     "duracion": 49.61,
     "video_fb": "1441870567589457",
-    "metricas": {}
+    "metricas": {
+      "blue_reels_play_count": 3,
+      "fb_reels_total_plays": 3,
+      "post_video_avg_time_watched": 10265,
+      "post_video_followers": 0
+    }
   },
   {
     "id": "20261122-1918",
@@ -169,6 +179,26 @@
     "nota_revisor": 4.3,
     "duracion": 51.75,
     "video_fb": "1185073503844830",
+    "metricas": {}
+  },
+  {
+    "id": "20261123-1424",
+    "fecha": "2026-11-23",
+    "publicado_en": "2026-11-24T17:00:00+00:00",
+    "programado": true,
+    "titulo": "Tu celular se calienta al grabar: 3 mitos que empeoran todo",
+    "tema": "Tu celular se calienta al grabar video y casi todos hacen lo mismo mal: meterlo al refrigerador, dejarlo con la funda, ponerlo al sol",
+    "tendencia": "Apple y el nuevo iPhone Duo, presentado con humor en TikTok, junto con TikTok Pro y la competencia entre plataformas de videos cortos. Todo esto mantiene la conversación tecnológica.",
+    "serie": null,
+    "subtema": "tecnología que usamos sin entender",
+    "estructura": "MITO TACHADO: lo que casi todos hacen mal ante una situación cotidiana, cada mito se tacha con su razón, y al final lo que de verdad funciona",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "situación cotidiana con giro inesperado",
+    "gancho": "Tres trucos para enfriar tu celular, y los tres fallan.",
+    "nota_revisor": 4.8,
+    "duracion": 54.59,
+    "video_fb": "1465698849022275",
     "metricas": {}
   }
 ]

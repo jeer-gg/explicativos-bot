@@ -1,168 +1,165 @@
 {
-  "fecha": "2026-11-22",
+  "fecha": "2026-11-23",
   "tendencias": [
     {
-      "tendencia": "El Niño 2026-2027 en niveles récord, con alertas de la OMM y emergencias por inundaciones en Perú",
-      "fuente": "https://wmo.int/es/node/39188 ; https://www.meganoticias.cl/mundo/524381-inicio-fenomeno-el-nino-agencia-estadounidense-cientificos-advierten-temperaturas-record-11-06-2026.html",
+      "tendencia": "El 'Súper Niño' 2026-27 domina las noticias del clima en Latinoamérica y Europa. Hay lluvias récord en Chile, sequías y calor en otras regiones, y el Ideam de Colombia lo declaró oficialmente el 8 de octubre.",
+      "fuente": "https://www.unotv.com/ciencia-y-tecnologia/el-super-nino-ya-esta-haciendo-estragos-en-el-mundo-tifones-sequias-y-huracanes/ ; https://www.emol.com/noticias/Tecnologia/2026/11/10/1216703/el-nino-europa-medidas-efectos.html",
       "preguntas": [
         {
-          "pregunta": "¿Por qué el agua tarda tanto en calentarse y tanto en enfriarse?",
-          "angulo": "El agua guarda mucho más calor que el aire o la arena. Por eso unos grados extra en el océano cambian el clima de medio planeta.",
-          "subtema": "ciencia de cosas cotidianas"
+          "pregunta": "¿Por qué el agua del mar tarda tanto en calentarse y en enfriarse?",
+          "angulo": "El agua guarda unas 4 veces más calor que el aire o la tierra por kilo. Por eso unos grados en el Pacífico cambian el clima de continentes enteros.",
+          "subtema": "ciencia de cosas cotidianas (clima)"
         },
         {
-          "pregunta": "¿Por qué sale vapor de una taza de café si no lo vemos salir del líquido?",
-          "angulo": "El vapor de agua es invisible. Lo que vemos son gotitas diminutas que se condensan al enfriarse, igual que las nubes.",
-          "subtema": "ciencia de cosas cotidianas"
+          "pregunta": "¿Por qué se forman las nubes y cómo pesa una nube de lluvia?",
+          "angulo": "Una nube de tormenta puede pesar más de 500 toneladas y aun así flota, porque sus gotas son diminutas y el aire cálido las sostiene.",
+          "subtema": "ciencia de cosas cotidianas (clima)"
         },
         {
-          "pregunta": "¿Por qué el aire se siente más pesado y pegajoso cuando hay humedad?",
-          "angulo": "El aire húmedo en realidad pesa menos que el seco. La sensación viene de que el sudor no se evapora y el cuerpo no se enfría.",
-          "subtema": "ciencia de cosas cotidianas"
+          "pregunta": "¿Por qué el viento sopla de un lado a otro?",
+          "angulo": "El viento es el aire intentando igualar diferencias de presión causadas por zonas más calientes y más frías. Es literalmente aire 'cayendo cuesta abajo'.",
+          "subtema": "ciencia de cosas cotidianas (clima)"
         },
         {
-          "pregunta": "¿Por qué los charcos desaparecen aunque no haga calor?",
-          "angulo": "La evaporación ocurre a cualquier temperatura. Las moléculas más rápidas de la superficie escapan solas, sin necesidad de hervir.",
-          "subtema": "ciencia de cosas cotidianas"
+          "pregunta": "¿Cómo hace un pronóstico del clima para saber qué pasará en 5 días?",
+          "angulo": "Corre simulaciones del aire con cientos de variaciones del mismo día, y si la mayoría coincide, el pronóstico es confiable.",
+          "subtema": "tecnología que usamos sin entender"
         }
       ]
     },
     {
-      "tendencia": "Lluvia de estrellas Leónidas, con máximo en la noche del 17 al 18 de noviembre",
-      "fuente": "https://astronomia.ign.es/es/web/guest/leonidas ; https://starwalk.space/es/news/november-meteor-showers",
+      "tendencia": "Superluna y lluvias de estrellas de fin de noviembre. Pasó el pico de las Leónidas (17-18 nov), quedan las Táuridas hasta diciembre, la luna llena se acerca y las Oriónidas tienen su máximo el 28.",
+      "fuente": "https://www.nacion.com/ciencia/calendario-astronomico-de-noviembre-de-2026/KONSX6MDYNFVBH7ZSXKF5L4ZKY/story/ ; https://astronomia.ign.es/leonidas",
       "preguntas": [
         {
-          "pregunta": "¿Por qué los ojos se acostumbran a la oscuridad y tardan unos 20 minutos en ver bien?",
-          "angulo": "La retina cambia de los conos a los bastones y regenera un pigmento sensible a la luz. Una mirada al celular reinicia buena parte de ese proceso.",
-          "subtema": "cómo funciona el cuerpo por dentro"
-        },
-        {
-          "pregunta": "¿Por qué las estrellas parpadean pero los planetas casi no?",
-          "angulo": "El parpadeo viene de la turbulencia del aire. Una estrella es un punto de luz que se desvía fácil, y un planeta es un pequeño disco que promedia esas desviaciones.",
-          "subtema": "ciencia de cosas cotidianas"
-        },
-        {
-          "pregunta": "¿Por qué una estrella fugaz deja una estela brillante si la mayoría son del tamaño de un grano de arena?",
-          "angulo": "El brillo no viene de la roca ardiendo. Viene del aire que se comprime y se calienta a su paso a unos 70 km/s.",
-          "subtema": "ciencia de cosas cotidianas"
-        },
-        {
-          "pregunta": "¿Por qué al mirar de reojo vemos mejor las cosas tenues en la noche?",
-          "angulo": "El centro de la retina tiene conos, que ven poco con luz débil. Los bastones, muy sensibles, están alrededor.",
-          "subtema": "cómo funciona el cuerpo por dentro"
-        }
-      ]
-    },
-    {
-      "tendencia": "GTA 6 en boca de todos: se confirma que no saldrá en PS4, solo en consolas nuevas",
-      "fuente": "https://heyupnow.com/es-es/blogs/noticias-tecnologicas",
-      "preguntas": [
-        {
-          "pregunta": "¿Por qué una consola nueva puede mostrar mundos enormes sin trabarse y una vieja no?",
-          "angulo": "La GPU dibuja millones de triángulos en paralelo. La memoria y el disco rápido cargan solo lo que ves, no todo el mapa.",
-          "subtema": "tecnología que usamos sin entender"
-        },
-        {
-          "pregunta": "¿Por qué la consola suena como avión cuando juegas?",
-          "angulo": "El procesador convierte electricidad en calor. El ventilador sube de revoluciones para empujar ese calor fuera de la caja.",
-          "subtema": "tecnología que usamos sin entender"
-        },
-        {
-          "pregunta": "¿Por qué cuesta tanto dejar de jugar \"una partida más\"?",
-          "angulo": "Las metas cortas sin un final claro mantienen abierta una tarea pendiente en la cabeza. Es el efecto Zeigarnik.",
+          "pregunta": "¿Por qué la luna se ve gigante cerca del horizonte?",
+          "angulo": "Es una ilusión de percepción: la luna mide lo mismo. Puedes comprobarlo tapándola con una moneda a distancia de brazo.",
           "subtema": "psicología cotidiana"
         },
         {
-          "pregunta": "¿Por qué el control se siente vibrar con distintas texturas?",
-          "angulo": "Dentro hay motores con pesas descentradas. Al girar a distintas velocidades simulan desde un golpe hasta una lluvia fina.",
-          "subtema": "tecnología que usamos sin entender"
-        }
-      ]
-    },
-    {
-      "tendencia": "Acción de Gracias y comidas familiares de fin de año a la vista",
-      "fuente": "https://trends.google.com/trending?hl=es-419",
-      "preguntas": [
-        {
-          "pregunta": "¿Por qué el horno hace que las cosas se doren y la olla no?",
-          "angulo": "El dorado es la reacción de Maillard, que necesita superficies secas y más de unos 140 °C. El agua hirviendo se queda en 100 °C.",
+          "pregunta": "¿Por qué una estrella fugaz es solo un grano de arena?",
+          "angulo": "Un granito de arena entra a unos 70 km/s y brilla porque comprime y calienta el aire a su paso, no porque 'se queme'.",
           "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué la sartén de teflón no pega y por qué se estropea con el metal?",
-          "angulo": "El recubrimiento es un polímero tan resbaloso que casi nada se adhiere a él. Rayarlo lo daña porque es una capa finísima.",
-          "subtema": "ciencia de cosas cotidianas"
-        },
-        {
-          "pregunta": "¿Por qué el papel aluminio tiene un lado brillante y otro opaco?",
-          "angulo": "Se laminan dos hojas juntas al mismo tiempo. Solo las caras que tocan el rodillo salen brillantes, y no cambia nada al cocinar.",
+          "pregunta": "¿Por qué vemos siempre la misma cara de la luna?",
+          "angulo": "La luna rota justo una vez por cada vuelta a la Tierra, así que nos muestra solo una cara. Es un 'bloqueo de marea'.",
           "subtema": "por qué las cosas son como son"
         },
         {
-          "pregunta": "¿Por qué después de una comida larga con la familia da tanto sueño y el tiempo parece pasar volando?",
-          "angulo": "Una charla animada y sin relojes hace que prestemos poca atención al tiempo. El cerebro mide el tiempo según cuánto lo notamos.",
-          "subtema": "psicología cotidiana"
-        }
-      ]
-    },
-    {
-      "tendencia": "Arranca la temporada navideña: luces, adornos y villancicos en todas partes",
-      "fuente": "https://www.que.es/2026/10/30/trends-tiktok-noviembre-2026/",
-      "preguntas": [
-        {
-          "pregunta": "¿Por qué las lucecitas de Navidad se enredan solas en la caja?",
-          "angulo": "Un cable largo sacudido dentro de una caja forma nudos en segundos. Es cuestión de probabilidad y de la longitud del cable.",
-          "subtema": "por qué las cosas son como son"
-        },
-        {
-          "pregunta": "¿Por qué las luces LED casi no se calientan y los focos viejos quemaban?",
-          "angulo": "El foco antiguo desperdiciaba más del 90 % de la energía como calor. Un LED saca luz directamente de un semiconductor.",
-          "subtema": "ciencia de cosas cotidianas"
-        },
-        {
-          "pregunta": "¿Por qué una canción navideña que odiamos se nos queda pegada en la cabeza?",
-          "angulo": "El cerebro repite en bucle las melodías simples y repetitivas. Es un gusano musical, y la exposición constante lo empeora.",
-          "subtema": "psicología cotidiana"
-        },
-        {
-          "pregunta": "¿Por qué huele a Navidad con solo sentir canela o pino?",
-          "angulo": "El olfato se conecta directo con las zonas de memoria y emoción del cerebro, sin pasar por el filtro que usan los demás sentidos.",
+          "pregunta": "¿Por qué cuesta tanto ver estrellas en la ciudad?",
+          "angulo": "La luz de las calles se dispersa en el aire y tapa el brillo débil de las estrellas. Los ojos tardan unos 20-30 minutos en adaptarse a la oscuridad.",
           "subtema": "cómo funciona el cuerpo por dentro"
         }
       ]
     },
     {
-      "tendencia": "Nuevos lanzamientos de celulares y relojes (Honor 500, Xiaomi 18 Pro) previstos para finales de noviembre",
-      "fuente": "https://heyupnow.com/es-es/blogs/noticias-tecnologicas",
+      "tendencia": "Se acerca el Día de Acción de Gracias (26 nov) y la cocina de temporada se vuelve tema de conversación: pavo, horno, puré y tartas.",
+      "fuente": "https://trends.google.com/trending?hl=es-419 (temporada, EE. UU. hispano)",
       "preguntas": [
         {
-          "pregunta": "¿Cómo sabe el celular en qué dirección lo giras para voltear la pantalla?",
-          "angulo": "Un acelerómetro diminuto mide la gravedad con una estructura microscópica que se mueve. Es un chip del tamaño de un grano de arena.",
+          "pregunta": "¿Por qué el horno dora la comida y la olla no?",
+          "angulo": "El dorado es la reacción de Maillard, que arranca sobre los 140 °C. El agua hirviendo se queda en 100 °C y nunca llega ahí.",
+          "subtema": "ciencia de cosas cotidianas (cocina)"
+        },
+        {
+          "pregunta": "¿Por qué el papel aluminio tiene una cara brillante y otra opaca?",
+          "angulo": "Sale de la fábrica laminado en pares, y la cara que toca el rodillo queda brillante. Para cocinar da casi igual cuál uses.",
+          "subtema": "por qué las cosas son como son"
+        },
+        {
+          "pregunta": "¿Por qué el puré se pone pegajoso si lo bates de más?",
+          "angulo": "El batido rompe los gránulos de almidón de la papa y suelta una especie de pegamento.",
+          "subtema": "ciencia de cosas cotidianas (cocina)"
+        },
+        {
+          "pregunta": "¿Por qué la masa de las tartas se vuelve hojaldrada con mantequilla fría?",
+          "angulo": "La mantequilla se derrite en el horno, suelta vapor y deja capas con huecos entre ellas.",
+          "subtema": "ciencia de cosas cotidianas (cocina)"
+        }
+      ]
+    },
+    {
+      "tendencia": "Apple y el nuevo iPhone Duo, presentado con humor en TikTok, junto con TikTok Pro y la competencia entre plataformas de videos cortos. Todo esto mantiene la conversación tecnológica.",
+      "fuente": "https://www.mercadonegro.pe/actualidad/apple-iphone-duo-tiktok/ ; https://wwwhatsnew.com/category/tiktok/",
+      "preguntas": [
+        {
+          "pregunta": "¿Cómo sabe la pantalla táctil dónde la tocas?",
+          "angulo": "Tu dedo conduce un poco de electricidad y altera el campo eléctrico de la pantalla. Por eso no responde con guantes comunes.",
           "subtema": "tecnología que usamos sin entender"
         },
         {
-          "pregunta": "¿Cómo sabe el GPS dónde estás si el celular solo recibe señal?",
-          "angulo": "El celular nunca envía su ubicación. Calcula la posición midiendo cuánto tardan en llegar las señales de varios satélites, con relojes atómicos.",
+          "pregunta": "¿Cómo hace una pantalla para mostrar millones de colores con solo 3?",
+          "angulo": "Cada píxel tiene tres lucecitas (roja, verde y azul) tan pequeñas que tu ojo mezcla su luz.",
           "subtema": "tecnología que usamos sin entender"
         },
         {
-          "pregunta": "¿Por qué la pantalla del celular sabe dónde la tocas con el dedo y no con un guante?",
-          "angulo": "La pantalla capacitiva detecta la mínima carga eléctrica que tu dedo cambia al acercarse. Un guante común la aísla.",
+          "pregunta": "¿Por qué el celular se calienta al grabar video?",
+          "angulo": "El procesador convierte energía en calor y el celular no tiene ventilador. Disipa el calor por el marco y la pantalla.",
           "subtema": "tecnología que usamos sin entender"
         },
         {
-          "pregunta": "¿Por qué el celular se calienta al cargar o al grabar video?",
-          "angulo": "Pasar energía por el circuito y la batería siempre pierde un poco como calor. El procesador al máximo también genera calor.",
+          "pregunta": "¿Por qué cuesta tanto dejar de deslizar videos cortos?",
+          "angulo": "Es el mismo mecanismo de las tragamonedas: la recompensa llega de forma impredecible y el cerebro sigue buscándola.",
+          "subtema": "psicología cotidiana"
+        }
+      ]
+    },
+    {
+      "tendencia": "Fútbol de la semana: el Galatasaray-Barcelona de Champions y la conversación sobre el Balón de Oro 2026 están entre lo más buscado en Google Trends.",
+      "fuente": "https://trends.google.com/trending?hl=es",
+      "preguntas": [
+        {
+          "pregunta": "¿Por qué el balón hace esa curva en un tiro libre?",
+          "angulo": "Es el efecto Magnus: el giro arrastra más aire de un lado y empuja el balón hacia el otro. La curva puede ser de varios metros.",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Por qué el césped de los estadios se ve en franjas claras y oscuras?",
+          "angulo": "No es pintura. Se peina el pasto hacia un lado y otro, y refleja la luz distinto según hacia dónde mira.",
+          "subtema": "por qué las cosas son como son"
+        },
+        {
+          "pregunta": "¿Por qué cuando haces un gol sientes que el tiempo se alarga?",
+          "angulo": "En momentos de emoción el cerebro graba más detalles por segundo, y al recordarlos parece que duraron más.",
+          "subtema": "psicología cotidiana"
+        },
+        {
+          "pregunta": "¿Cómo sabe la tecnología de la línea de gol si el balón entró?",
+          "angulo": "Cámaras o sensores siguen el balón en 3D y avisan al reloj del árbitro en menos de un segundo.",
           "subtema": "tecnología que usamos sin entender"
+        }
+      ]
+    },
+    {
+      "tendencia": "Se acercan el Black Friday y el Cyber Monday, con filas, cajas y pagos de todo tipo. Los ángulos aquí son los objetos y la tecnología que hay detrás, no precios ni ofertas.",
+      "fuente": "https://trends.google.com/trending?hl=es-419 (temporada)",
+      "preguntas": [
+        {
+          "pregunta": "¿Cómo lee una caja registradora el código de barras?",
+          "angulo": "El láser no lee los números, mide cuánta luz rebotan las barras negras y las blancas. Las barras gruesas y finas forman un código.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Cómo paga el celular con solo acercarlo a la terminal?",
+          "angulo": "La terminal emite un campo magnético que da energía al chip. No necesita batería ni contacto para responder.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Por qué la fila de al lado siempre parece avanzar más rápido?",
+          "angulo": "Notamos más la fila que no avanza que la que sí. El cerebro recuerda la frustración y olvida los momentos buenos.",
+          "subtema": "psicología cotidiana"
+        },
+        {
+          "pregunta": "¿Por qué las tiendas huelen a algo y suenan con cierta música?",
+          "angulo": "Los olores llegan directo a la zona de la memoria y las emociones. La música lenta hace que la gente camine más despacio.",
+          "subtema": "psicología cotidiana"
         }
       ]
     }
   ],
   "usadas": [
-    "¿Por qué el agua tarda tanto en calentarse y tanto en enfriarse?",
-    "¿Cómo sabe el GPS dónde estás si el celular solo recibe señal?",
-    "¿Por qué los charcos desaparecen aunque no haga calor?",
-    "¿Por qué las luces LED casi no se calientan y los focos viejos quemaban?"
+    "¿Por qué el celular se calienta al grabar video?"
   ],
-  "clasicos": 1
+  "clasicos": 0
 }

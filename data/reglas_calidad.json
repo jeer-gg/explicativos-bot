@@ -3,8 +3,8 @@
     {
       "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
       "area": "voz",
-      "veces": 5,
-      "ultima": "2026-11-23T06:30:17+00:00",
+      "veces": 6,
+      "ultima": "2026-11-23T15:11:48+00:00",
       "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
       "ejemplo": "1 silencio(s) largos dentro de la narración"
     },
@@ -15,6 +15,62 @@
       "ultima": "2026-11-22T19:50:12+00:00",
       "clave": "cortas dicen escritos frases fáciles números pronunciar",
       "ejemplo": "solo se entiende el 50 % del guion en el audio"
+    },
+    {
+      "regla": "La imagen de cada frase debe mostrar el objeto y la acción que la voz nombra en ese momento. No se adelanta un elemento de una sección posterior, como el refrigerador del mito uno. Para explicar por dónde sale el calor se dibuja el objeto con flechas de calor saliendo por las partes citadas.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-23T15:11:48+00:00",
+      "clave": "acción adelanta calor citadas dibuja dónde elemento explicar flechas frase imagen momento mostrar nombra objeto partes posterior refrigerador saliendo sección",
+      "ejemplo": "Fotograma 3: la voz dice que el celular no tiene ventilador y suelta el calor por el marco, la tapa y la pantalla. La imagen muestra el celular dentro de un refrigerador abierto, que es el mito uno y todavía no toca. No se ve cómo sale el calor por el marco."
+    },
+    {
+      "regla": "El objeto principal de la frase debe ocupar el centro del plano y verse completo. Los subtítulos y rótulos deben reproducir palabras de la narración de ese momento. No se muestra una palabra suelta sin sentido ni se deja el objeto protagonista como decorado cortado.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T15:11:48+00:00",
+      "clave": "centro completo cortado deben decorado frase momento muestra narración objeto ocupar palabra palabras plano principal protagonista reproducir rótulos sentido subtítulos suelta verse",
+      "ejemplo": "Fotograma 4: la voz dice «Mito uno: el refrigerador», pero el refrigerador aparece diminuto, cortado y tapado a la izquierda, con una X roja encima. El celular ocupa el centro sin relación con el frío. El rótulo «APARECE» no corresponde a ninguna frase y no se entiende."
+    },
+    {
+      "regla": "Cada mito o concepto nombrado debe tener su objeto claramente dibujado y visible, en este caso el sol sobre el celular. No se arrastran elementos del mito anterior, como la funda o las tarjetas previas.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-23T15:11:48+00:00",
+      "clave": "anterior arrastran celular claramente concepto dibujado elementos funda nombrado objeto previas sobre tarjetas tener visible",
+      "ejemplo": "Fotograma 6: la voz habla del mito del sol, pero no se ve ningún sol. El celular sigue con la funda morada y las tarjetas de refrigerador y funda. La X roja suelta queda en una esquina. El mito no se entiende visualmente."
+    },
+    {
+      "regla": "Los títulos y rótulos en pantalla deben coincidir con la frase que suena en ese momento, no con una posterior. Los rótulos no deben quedar tapados por objetos ni cortados por el borde.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T15:11:48+00:00",
+      "clave": "borde coincidir cortados deben frase momento objetos pantalla posterior quedar rótulos suena tapados títulos",
+      "ejemplo": "Fotograma 7: la voz dice «sombra, y quitarle la funda», pero el título dice «BAJA EL BRILLO», que se dice después. La sombrilla tapa parte del celular y las etiquetas laterales quedan cortadas o tapadas."
+    },
+    {
+      "regla": "La escena de la solución debe mostrar solo la acción recomendada y limpia, sin los objetos de los mitos ni objetos sobrantes. Cada frase debe llevar su subtítulo.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-23T15:11:48+00:00",
+      "clave": "acción escena frase limpia llevar mitos mostrar objetos recomendada sobrantes solución subtítulo",
+      "ejemplo": "Fotograma 8: la voz dice «déjalo reposar unos minutos». La imagen muestra un sol, un refrigerador, un celular morado pequeño y un tercer aparato. Es confuso y contradice el consejo, porque el sol era el mito. No hay subtítulo ni idea clara de reposo."
+    },
+    {
+      "regla": "Todo texto en pantalla debe quedar completo dentro de la zona segura, con margen respecto a los bordes del encuadre vertical. No se cortan etiquetas.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T15:11:48+00:00",
+      "clave": "bordes completo cortan dentro encuadre etiquetas margen pantalla quedar respecto segura texto vertical",
+      "ejemplo": "Fotogramas 1, 2 y 5: las etiquetas «grabando», «procesador» y «funda» están cortadas por el borde izquierdo de la pantalla."
+    },
+    {
+      "regla": "Las tarjetas de resumen no deben aparecer antes de explicar lo que resumen. Tampoco deben cubrir la parte importante del objeto que se está explicando.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T15:11:48+00:00",
+      "clave": "antes aparecer cubrir deben explicando explicar importante objeto parte resumen tampoco tarjetas",
+      "ejemplo": "Fotograma 5: aparecen las tarjetas «refrigerador», «funda» y «sol directo» con X antes de que se explique el sol. Tapan el cuerpo y la cara del celular y se superponen a las flechas de calor."
     },
     {
       "regla": "Las tarjetas de datos deben mostrar solo la cifra que dice la voz en ese momento, con el texto completo y sin cortes. No deben tapar el objeto principal ni adelantar datos de escenas posteriores.",
@@ -183,62 +239,6 @@
       "ultima": "2026-11-22T23:41:35+00:00",
       "clave": "ajuste ancho caber cortar deben dentro línea palabras pantalla repite seguro siempre subtítulo subtítulos tampoco título",
       "ejemplo": "Fotograma 7: el subtítulo «la recuñac» está cortado por el borde derecho. También se duplica con el título «GRAN RECUÑACIÓN»."
-    },
-    {
-      "regla": "Si la frase habla de una acción, como tocar, la escena debe mostrar esa acción con claridad, por ejemplo un dedo recorriendo el canto. Los textos en pantalla deben corresponder a la frase que suena y no adelantar el cierre.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-22T23:41:35+00:00",
-      "clave": "acción adelantar canto cierre claridad corresponder deben ejemplo escena frase habla mostrar pantalla recorriendo suena textos tocar",
-      "ejemplo": "Fotograma 8: la voz habla de distinguir monedas con el tacto. La imagen es una moneda gigante y lisa, sin mano ni dedos. Además se apilan el título «NO NACIERON COMO ADORNO» y el subtítulo «no son adorno», que dicen casi lo mismo y no corresponden a esa frase."
-    },
-    {
-      "regla": "Si el mismo texto de narración dura más de unos 5 s, o hay varios fotogramas seguidos casi iguales, cada plano debe cambiar de objeto, ángulo o acción. Nunca se debe repetir una imagen estática más de 4 s.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-22T19:50:12+00:00",
-      "clave": "acción cambiar estática fotogramas iguales imagen mismo narración nunca objeto plano repetir seguidos texto varios ángulo",
-      "ejemplo": "Los fotogramas 1 a 5 (segundos 0 a 24) muestran casi la misma escena: satélite GPS con un cubo naranja, Tierra y mapa. La voz dice «Mandan al espacio un reloj a propósito mal puesto» y ahí no se ve ningún reloj. Los fotogramas 2, 3 y 4 son casi idénticos, y el 4 solo cambia el color de los paneles. Parece una imagen congelada durante unos 24 s."
-    },
-    {
-      "regla": "Cada frase del guion debe durar lo justo (3 a 5 s) y tener su propia escena. Hay que revisar que el tiempo de cada frase coincida con el de su plano, para que ninguna se estire sobre varios planos.",
-      "area": "guion",
-      "veces": 1,
-      "ultima": "2026-11-22T19:50:12+00:00",
-      "clave": "coincida durar escena estire frase guion justo ninguna plano planos propia revisar sobre tener tiempo varios",
-      "ejemplo": "La narración dice «Mandan al espacio un reloj a propósito mal puesto» en cinco fotogramas seguidos, hasta el segundo 24. La frase del gancho dura demasiado y no avanza la historia. El sincronizado entre voz y fotogramas parece roto, porque los fotogramas 6 a 8 ya muestran contenido posterior."
-    },
-    {
-      "regla": "Las tarjetas de datos deben mostrar la cifra exacta de la narración (por ejemplo 38, no 4), caber sin cortarse y no tapar el objeto principal. Los rótulos deben coincidir con lo que dice la voz en ese instante.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T19:50:12+00:00",
-      "clave": "caber cifra coincidir cortarse datos deben ejemplo exacta instante mostrar narración objeto principal rótulos tapar tarjetas",
-      "ejemplo": "La tarjeta del fotograma 6 dice «4 millonésimas de segu», con el texto cortado. Además el dato es incorrecto: la narración dice treinta y ocho millonésimas. La tarjeta tapa parte del reloj y la Tierra. El rótulo «SE ADELANTA» aparece mientras la voz dice «Por eso cada satélite lleva relojes atómicos a bordo», que es otra cosa."
-    },
-    {
-      "regla": "Los rótulos y etiquetas deben quedar completos dentro del encuadre, sin cortarse en los bordes. No deben cruzar ni tapar el objeto principal y deben corresponder a la frase que suena.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T19:50:12+00:00",
-      "clave": "bordes completos corresponder cortarse cruzar deben dentro encuadre etiquetas frase objeto principal quedar rótulos suena tapar",
-      "ejemplo": "En el fotograma 5, los rótulos «MAL», «reloj» y «sito» (cortado en el borde izquierdo) con líneas negras se superponen al satélite y a la Tierra. Están cortados, desordenados y tapan el objeto. El texto de la voz del momento no es «MAL reloj»."
-    },
-    {
-      "regla": "El rótulo en pantalla debe reflejar la frase que suena en ese momento y no adelantar ideas posteriores. Hay que ilustrar el concepto que se narra (por ejemplo, el error que se acumula).",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T19:50:12+00:00",
-      "clave": "acumula adelantar concepto ejemplo error frase ideas ilustrar momento narra pantalla posteriores reflejar rótulo suena",
-      "ejemplo": "El fotograma 7 dice «QUEDA EN HORA» mientras la voz dice «Y eso se acumula, día tras día. Tu GPS sería inservible». El rótulo anticipa la solución y no coincide con la frase. Tampoco se ve la acumulación del error."
-    },
-    {
-      "regla": "Los conceptos abstractos deben representarse con metáforas visuales claras y rotuladas. Los textos y objetos extra no deben solaparse con el objeto principal de la escena.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-22T19:50:12+00:00",
-      "clave": "abstractos claras conceptos deben escena extra metáforas objeto objetos principal representarse rotuladas solaparse textos visuales",
-      "ejemplo": "En el fotograma 8, el título «DOS EFECTOS» y un cohete rojo y otro amarillo con un «?» se apilan sobre el satélite y la Tierra. Los dos cohetes no representan claramente los efectos de Einstein. Quedan tapados el satélite y la parte superior del objeto."
     }
   ]
 }
