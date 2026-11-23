@@ -86,5 +86,25 @@
     "duracion": 48.54,
     "video_fb": "1818150039488841",
     "metricas": {}
+  },
+  {
+    "id": "20261122-2316",
+    "fecha": "2026-11-23",
+    "publicado_en": "2026-11-23T13:00:00+00:00",
+    "programado": true,
+    "titulo": "Las ranuras de las monedas no son adorno",
+    "tema": "Las ranuras del borde de una moneda no son adorno: nacieron para frenar a los que raspaban el metal",
+    "tendencia": "",
+    "serie": null,
+    "subtema": "por qué las cosas son como son (diseños, costumbres, objetos)",
+    "estructura": "NO ESTÁ DE ADORNO: un detalle de un objeto cotidiano que parece decoración pero cumple una función clave; se muestra el objeto, se quita el detalle, se ve qué pasaría sin él y se explica por qué está ahí",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "te mintieron («Te mintieron: casi nadie se fija en ti»)",
+    "gancho": "Cuidado: hace siglos, alguien le robaba plata a monedas como esta.",
+    "nota_revisor": 6.2,
+    "duracion": 46.32,
+    "video_fb": "1930279041677184",
+    "metricas": {}
   }
 ]

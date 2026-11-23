@@ -11,10 +11,66 @@
     {
       "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
       "area": "voz",
-      "veces": 1,
-      "ultima": "2026-11-22T19:50:12+00:00",
+      "veces": 2,
+      "ultima": "2026-11-22T23:41:35+00:00",
       "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
       "ejemplo": "1 silencio(s) largos dentro de la narración"
+    },
+    {
+      "regla": "No mostrar a la vez un título o tarjeta y un subtítulo con las mismas palabras. Si el título ya resume la frase, se oculta el subtítulo o se usa otro texto.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T23:41:35+00:00",
+      "clave": "frase mismas mostrar oculta palabras resume subtítulo tarjeta texto título",
+      "ejemplo": "Fotograma 1: el título de portada «ROBANDO PLATA» y el subtítulo «robando plata» dicen lo mismo y se apilan en la parte superior. Queda redundante y tapa la escena."
+    },
+    {
+      "regla": "Cada escena debe mostrar solo el estado que la voz describe en ese momento. Si la frase presenta el objeto intacto, se dibuja intacto y sin la acción siguiente.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-22T23:41:35+00:00",
+      "clave": "acción describe dibuja escena estado frase intacto momento mostrar objeto presenta siguiente",
+      "ejemplo": "Fotograma 2: la voz dice que el canto de la moneda es liso. La imagen ya muestra una mano rascando la moneda con un cincel, y no se ve un borde liso y limpio."
+    },
+    {
+      "regla": "Los títulos y tarjetas deben aparecer en el momento en que la voz dice ese concepto, no antes. La escena debe ilustrar la frase que suena, por ejemplo una balanza o una moneda más ligera, y no la siguiente.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T23:41:35+00:00",
+      "clave": "antes aparecer balanza concepto deben ejemplo escena frase ilustrar ligera momento moneda siguiente suena tarjetas títulos",
+      "ejemplo": "Fotograma 5: la voz dice que cada moneda pesaba un poco menos. La imagen es una prensa marcando el borde, con el título «MARCAR EL BORDE», que corresponde a la frase siguiente. El texto y la imagen van adelantados respecto a la voz."
+    },
+    {
+      "regla": "Mantener sincronizadas las escenas con la narración. No mostrar al personaje o dato de la frase siguiente, y dibujar la acción exacta de la frase actual, por ejemplo ranuras que se borran al raspar.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-22T23:41:35+00:00",
+      "clave": "acción actual borran dibujar ejemplo escenas exacta frase mantener mostrar narración personaje ranuras raspar siguiente sincronizadas",
+      "ejemplo": "Fotograma 6: la voz dice que si raspas, las rayas se borran y la trampa se nota. La imagen muestra a Newton, la tarjeta «1699» y una moneda verde, sin ranuras ni raspado. Esa escena corresponde a la frase de Newton, que llega después."
+    },
+    {
+      "regla": "Las tarjetas de datos deben mostrar una frase completa y legible, y su cifra debe aparecer en la narración o coincidir con ella. Si no cabe el texto, se acorta o se agranda la tarjeta.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T23:41:35+00:00",
+      "clave": "acorta agranda aparecer cifra coincidir completa datos deben frase legible mostrar narración tarjeta tarjetas texto",
+      "ejemplo": "Fotograma 6: la tarjeta «1699 año en que dirige la» está cortada y le falta el final de la frase. La voz tampoco menciona ese año."
+    },
+    {
+      "regla": "Los subtítulos deben caber siempre dentro del ancho seguro de la pantalla, con ajuste de línea y sin cortar palabras. Tampoco se repite en el subtítulo lo que ya dice el título.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-22T23:41:35+00:00",
+      "clave": "ajuste ancho caber cortar deben dentro línea palabras pantalla repite seguro siempre subtítulo subtítulos tampoco título",
+      "ejemplo": "Fotograma 7: el subtítulo «la recuñac» está cortado por el borde derecho. También se duplica con el título «GRAN RECUÑACIÓN»."
+    },
+    {
+      "regla": "Si la frase habla de una acción, como tocar, la escena debe mostrar esa acción con claridad, por ejemplo un dedo recorriendo el canto. Los textos en pantalla deben corresponder a la frase que suena y no adelantar el cierre.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-22T23:41:35+00:00",
+      "clave": "acción adelantar canto cierre claridad corresponder deben ejemplo escena frase habla mostrar pantalla recorriendo suena textos tocar",
+      "ejemplo": "Fotograma 8: la voz habla de distinguir monedas con el tacto. La imagen es una moneda gigante y lisa, sin mano ni dedos. Además se apilan el título «NO NACIERON COMO ADORNO» y el subtítulo «no son adorno», que dicen casi lo mismo y no corresponden a esa frase."
     },
     {
       "regla": "Si el mismo texto de narración dura más de unos 5 s, o hay varios fotogramas seguidos casi iguales, cada plano debe cambiar de objeto, ángulo o acción. Nunca se debe repetir una imagen estática más de 4 s.",
@@ -183,62 +239,6 @@
       "ultima": "2026-11-21T21:45:40+00:00",
       "clave": "clave color contraste deben fondo legible mismo palabra palabras puede resaltada resaltar seguir siendo sobre subtítulo tamaño tener todas",
       "ejemplo": "Los subtítulos mezclan tamaños y colores sin criterio («CON» y «CUATRO» aparecen pequeños y grises, mientras que «SETENTA» va en azul). Parecen palabras apagadas o a medio mostrar."
-    },
-    {
-      "regla": "Todo texto de la escena y toda tarjeta deben quedar completos dentro del encuadre vertical, con un margen de seguridad en los bordes. Si un objeto con texto no cabe, se reencuadra o se acorta el texto.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-21T21:45:40+00:00",
-      "clave": "acorta bordes completos deben dentro encuadre escena margen objeto quedar reencuadra seguridad tarjeta texto vertical",
-      "ejemplo": "En los fotogramas 6, 7 y 8 las tarjetas y carteles aparecen cortados por el borde («verduras», «solo pollo cru», «¿Y»). Parte del texto se sale del encuadre."
-    },
-    {
-      "regla": "Un mismo objeto debe conservar color y forma en todo el video. No se pintan objetos en colores que no tienen (azul para algo crudo) y los símbolos como la X no deben ocultar el objeto principal.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-21T21:45:40+00:00",
-      "clave": "color colores conservar crudo deben forma mismo objeto objetos ocultar pintan principal símbolos tienen video",
-      "ejemplo": "En el fotograma 8 el pollo es azul, tiene forma de zapato o pez y lleva una X roja encima. No se entiende qué es y no corresponde con el pollo rosado de los otros planos. Además, el «¿Y» del final queda cortado por el borde."
-    },
-    {
-      "regla": "Encuadra cerca del objeto protagonista y deja poco suelo o pared vacíos. Los textos de carteles que importen deben leerse a tamaño de móvil, o no mostrarse.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-21T21:45:40+00:00",
-      "clave": "carteles cerca deben encuadra importen leerse mostrarse móvil objeto pared protagonista suelo tamaño textos vacíos",
-      "ejemplo": "Los planos son lejanos y vacíos: más de un tercio del encuadre es suelo gris o pared vacía. Los objetos importantes (pollo, tabla, termómetro) quedan pequeños y mal centrados. El cartel de «4 MITOS» es diminuto e ilegible."
-    },
-    {
-      "regla": "Los elementos gráficos de apoyo, como líneas divisorias, deben tener una función clara y estar rotulados o ser evidentes. Si no aportan, se eliminan.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-21T21:45:40+00:00",
-      "clave": "aportan apoyo clara deben divisorias elementos eliminan estar evidentes función gráficos líneas rotulados tener",
-      "ejemplo": "En el fotograma 4 una línea roja discontinua vertical cruza la escena sin explicar qué es. Tampoco se entiende la separación entre las dos tablas. El mensaje de «tabla separada» no queda claro."
-    },
-    {
-      "regla": "Cada idea de la narración debe tener una escena visualmente distinta y reconocible. Evita repetir el mismo encuadre de fondo en planos consecutivos.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-21T21:45:40+00:00",
-      "clave": "consecutivos distinta encuadre escena evita fondo mismo narración planos reconocible repetir tener visualmente",
-      "ejemplo": "Las escenas de los mitos (agua, limón, vinagre, agua caliente) no se ven en los fotogramas. Se repite el mismo fondo de cocina con pocos cambios entre planos, y apenas se distingue qué ocurre en cada uno."
-    },
-    {
-      "regla": "El primer fotograma debe mostrar el objeto principal del tema, bien visible y centrado. No se deja un fondo vacío con solo texto.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-21T15:49:23+00:00",
-      "clave": "centrado fondo fotograma mostrar objeto primer principal texto vacío visible",
-      "ejemplo": "El fotograma del gancho es un fondo beige casi vacío. Solo se ve el título, sin ninguna pelota ni objeto que explique el tema en los primeros segundos."
-    },
-    {
-      "regla": "Los subtítulos ocupan una franja fija, y ningún elemento de la escena ni ninguna etiqueta se coloca en esa franja. Las etiquetas deben quedar dentro del margen seguro, lejos de los bordes.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-21T15:49:23+00:00",
-      "clave": "bordes coloca deben dentro elemento escena etiqueta etiquetas franja lejos margen ninguna ningún ocupan quedar seguro subtítulos",
-      "ejemplo": "Los subtítulos y los textos de la escena se pisan. En el fotograma 2 la palabra «costuras» queda pegada al borde superior y cerca del subtítulo. En el fotograma 3 el subtítulo «IMPORTA» tapa la parte alta de la escena con las flechas de aire."
     }
   ]
 }
