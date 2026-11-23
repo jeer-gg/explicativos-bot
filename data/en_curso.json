@@ -1,0 +1,284 @@
+{
+  "inicio": "2026-11-23T16:08:43+00:00",
+  "escenas": {
+    "Mundo": "// Mundo compartido: «Qué significa de verdad el 60% de lluvia».\n// Una maqueta de paisaje en corte (mar, playa, ciudad, calle) bajo un cielo gris, con un celular rojo grande a la derecha.\n// paso 0: maqueta, cielo gris, celular con 60%. La persona sostiene la canasta de picnic.\n// paso 1: la canasta está en el suelo y un sol asoma detrás de la nube.\n// paso 2: aparece la línea del camino del dato, con todos los tramos apagados.\n// paso 3: el globo sonda sube y se enciende el tramo 1.\n// paso 4: el satélite escanea las nubes y el mar ya se ve iluminado. Se enciende el tramo 2.\n// paso 5: aparece la estación meteorológica en la calle. Se enciende el tramo 3.\n// paso 6: aparece la supercomputadora al final de la línea, el cielo se divide en cubos y se enciende el tramo 4.\n// paso 7: además de lo anterior, hay una pila de números sueltos y la supercomputadora vuelve a estar encendida.\n// paso 8: el cielo queda libre (la escena dibuja las dos simulaciones).\n// paso 9: los mini cielos del ensamble aparecen en fila, mezclados.\n// paso 10: casi todos los mini cielos llueven y se ven verdes. El medidor de confianza está alto.\n// paso 11: no hay mini cielos. El camino está entero encendido y el 60% está partido en dos.\n// paso 12: el 60% vuelve a estar entero, con la zona sombreada del mapa y el medidor en 80.\n// paso 13: el reloj tachado y las dos nubes con lluvias de distinta duración. (El paraguas lo agrega la escena 13.)\nimport React from 'react';\nimport * as THREE from 'three';\nimport {Pieza, Linea, Cartel, Flecha, Brillo, ConoDeLuz, Muneco, Paleta} from '../lib3d';\n\nexport const PARTES = [\n  'camino', 'celular', 'persona', 'canasta', 'sol', 'globo', 'satelite', 'haz', 'mar', 'estacion',\n  'supercomputadora', 'cubos', 'numeros', 'minicielos', 'medidor', 'zona', 'reloj', 'nubeslluvia', 'paraguas',\n] as const;\n\nexport type ParteProps = {paleta: Paleta; resaltado?: boolean; frame?: number};\nexport type MundoProps = {paso: number; frame: number; fps: number; paleta: Paleta; ocultar?: string[]; resaltar?: string[]};\n\nconst TINTA = '#1B1B1F';\nconst SUELO_Y = 0.16;\nconst col = (p: Paleta, r: boolean | undefined, c: string) => (r ? p.acentos[2] : c);\n\n// ---------- Ayudas de estado por paso ----------\nexport const tramosEncendidos = (paso: number) =>\n  paso >= 11 ? 5 : paso >= 6 ? 4 : paso >= 5 ? 3 : paso >= 4 ? 2 : paso >= 3 ? 1 : 0;\nexport const marVisible = (paso: number) => paso >= 4;\nexport const confianza = (paso: number) => (paso >= 12 ? 0.8 : paso >= 10 ? 0.9 : 0.2);\nexport const minicieloLluvioso = (i: number, paso: number) => (paso >= 10 ? i !== 5 : [0, 2, 3, 6].includes(i));\n\n// Puntos del camino del dato (suelo → globo → satélite → estación → supercomputadora → celular)\nexport const PUNTOS_CAMINO: [number, number, number][] = [\n  [-1.02, 0.19, 0.4], [-0.62, 0.19, 0.4], [-0.18, 0.19, 0.4], [0.25, 0.19, 0.4], [0.38, 0.19, 0.0], [0.7, 0.19, 0.12],\n];\nexport const POS_CELULAR: [number, number, number] = [0.85, SUELO_Y, 0.08];\nexport const POS_SUPER: [number, number, number] = [0.38, SUELO_Y, -0.18];\n\n// Geometrías de aristas para piezas transparentes (sin contorno opaco)\nconst aristasCubo = new THREE.EdgesGeometry(new THREE.BoxGeometry(0.18, 0.18, 0.18));\nconst aristasCielo = new THREE.EdgesGeometry(new THREE.BoxGeometry(0.13, 0.17, 0.13));\nconst Aristas: React.FC<{g: THREE.BufferGeometry; color?: string}> = ({g, color = TINTA}) => (\n  <lineSegments geometry={g}>\n    <lineBasicMaterial color={color} />\n  </lineSegments>\n);\n\nconst Nube: React.FC<{posicion: [number, number, number]; escala?: number; color?: string}> = ({posicion, escala = 1, color = '#9EA3A8'}) => (\n  <group position={posicion} scale={escala}>\n    <Pieza forma=\"esfera\" medidas={[0.13]} color={color} posicion={[0, 0, 0]} escala={[1, 0.8, 0.9]} />\n    <Pieza forma=\"esfera\" medidas={[0.1]} color={color} posicion={[-0.14, -0.03, 0.02]} escala={[1, 0.8, 0.9]} />\n    <Pieza forma=\"esfera\" medidas={[0.1]} color={color} posicion={[0.15, -0.03, 0]} escala={[1, 0.8, 0.9]} />\n    <Pieza forma=\"esfera\" medidas={[0.08]} color={color} posicion={[0.05, 0.08, -0.03]} />\n  </group>\n);\n\n// ---------- Partes ----------\nexport const Mar: React.FC<ParteProps & {visible?: boolean}> = ({paleta, resaltado, frame = 0, visible = true}) => {\n  const agua = col(paleta, resaltado, visible ? '#3A8FD0' : '#2B3445');\n  const ola = Math.sin(frame / 18) * 0.004;\n  return (\n    <group position={[-0.85, 0, -0.25]}>\n      <Pieza forma=\"caja\" medidas={[0.6, 0.12, 0.5]} color={agua} posicion={[0, 0.07 + ola, 0]} />\n      {visible ? (\n        <group position={[0.05, 0.14 + ola, 0.02]} rotation={[0, Math.sin(frame / 40) * 0.1, Math.sin(frame / 15) * 0.05]}>\n          <Pieza forma=\"caja\" medidas={[0.14, 0.03, 0.05]} color=\"#F2EFE8\" />\n          <Pieza forma=\"caja\" medidas={[0.04, 0.04, 0.035]} color=\"#D2452F\" posicion={[-0.02, 0.035, 0]} />\n        </group>\n      ) : (\n        <Cartel texto=\"?\" posicion={[0, 0.3, 0]} alto={0.2} fondo=\"transparent\" colorTexto=\"#FFFFFF\" borde={TINTA} />\n      )}\n    </group>\n  );\n};\n\nexport const Celular: React.FC<ParteProps & {dividido?: boolean}> = ({paleta, resaltado, frame = 0, dividido = false}) => {\n  const cuerpo = col(paleta, resaltado, paleta.acentos[0]);\n  const pulso = 1 + Math.sin(frame / 20) * 0.015;\n  return (\n    <group position={POS_CELULAR} rotation={[0, -0.4, 0]}>\n      <group position={[0, 0.46, 0]} rotation={[-0.08, 0, 0]}>\n        <Pieza forma=\"caja\" medidas={[0.44, 0.86, 0.06]} color={cuerpo} />\n        <Pieza forma=\"caja\" medidas={[0.38, 0.74, 0.01]} color=\"#9ED8F5\" posicion={[0, 0.01, 0.032]} contorno={false} />\n        <Pieza forma=\"capsula\" medidas={[0.012, 0.06]} color={TINTA} posicion={[0, 0.405, 0.034]} rotacion={[0, 0, Math.PI / 2]} contorno={false} />\n        <group position={[0, 0.18, 0.045]} scale={pulso}>\n          <Pieza forma=\"esfera\" medidas={[0.07]} color=\"#FFFFFF\" escala={[1, 0.8, 0.3]} />\n          <Pieza forma=\"esfera\" medidas={[0.05]} color=\"#FFFFFF\" posicion={[-0.08, -0.02, 0]} escala={[1, 0.8, 0.3]} />\n          <Pieza forma=\"esfera\" medidas={[0.05]} color=\"#FFFFFF\" posicion={[0.08, -0.02, 0]} escala={[1, 0.8, 0.3]} />\n        </group>\n        {dividido ? (\n          <>\n            <Cartel texto=\"6\" posicion={[-0.09, -0.08, 0.05]} alto={0.2} fondo=\"transparent\" colorTexto=\"#FFFFFF\" borde={paleta.acentos[2]} rotacion={[0.0001, 0, 0]} />\n            <Cartel texto=\"0%\" posicion={[0.09, -0.11, 0.05]} alto={0.2} fondo=\"transparent\" colorTexto=\"#FFFFFF\" borde={paleta.acentos[2]} rotacion={[0.0001, 0, 0]} />\n            <Cartel texto=\"?\" posicion={[-0.1, -0.27, 0.05]} alto={0.1} fondo=\"transparent\" colorTexto=\"#FFFFFF\" borde={TINTA} rotacion={[0.0001, 0, 0]} />\n            <Cartel texto=\"?\" posicion={[0.1, -0.27, 0.05]} alto={0.1} fondo=\"transparent\" colorTexto=\"#FFFFFF\" borde={TINTA} rotacion={[0.0001, 0, 0]} />\n          </>\n        ) : (\n          <Cartel texto=\"60%\" posicion={[0, -0.1, 0.05]} alto={0.22} fondo=\"transparent\" colorTexto=\"#FFFFFF\" borde=\"#2E6FA8\" rotacion={[0.0001, 0, 0]} />\n        )}\n        <Cartel texto=\"SÚPER NIÑO\" posicion={[0, -0.395, 0.035]} alto={0.035} fondo=\"transparent\" colorTexto=\"#FFFFFF\" rotacion={[0.0001, 0, 0]} />\n      </group>\n      {/* soporte trasero */}\n      <Pieza forma=\"caja\" medidas={[0.16, 0.4, 0.03]} color=\"#3A3A40\" posicion={[0, 0.2, -0.12]} rotacion={[0.45, 0, 0]} />\n      <Pieza forma=\"caja\" medidas={[0.3, 0.03, 0.2]} color=\"#3A3A40\" posicion={[0, 0.015, -0.04]} />\n    </group>\n  );\n};\n\nexport const Camino: React.FC<ParteProps & {encendidos?: number}> = ({paleta, resaltado, frame = 0, encendidos = 0}) => {\n  const luz = paleta.acentos[2];\n  return (\n    <group>\n      {PUNTOS_CAMINO.slice(0, -1).map((p, i) => {\n        const on = i < encendidos || resaltado;\n        return <Linea key={i} desde={p} hasta={PUNTOS_CAMINO[i + 1]} grosor={on ? 0.014 : 0.01} color={on ? luz : '#5E5B57'} brillo={on} />;\n      })}\n      {PUNTOS_CAMINO.map((p, i) => (\n        <Pieza key={`n${i}`} forma=\"esfera\" medidas={[0.022]} color={i <= encendidos ? luz : '#5E5B57'} posicion={p}\n          brillo={i <= encendidos && encendidos > 0 ? luz : undefined} intensidad-brillo={0} escala={1 + (i <= encendidos && encendidos > 0 ? Math.sin(frame / 8 + i) * 0.15 : 0)} />\n      ))}\n    </group>\n  );\n};\n\nexport const Persona: React.FC<ParteProps> = ({paleta, resaltado, frame}) => (\n  <Muneco color={col(paleta, resaltado, '#3C6FB4')} posicion={[0.5, SUELO_Y, 0.34]} rotacion={1.0} altura={0.3} conCara={false} brazoDer={0.5} frame={frame} />\n);\n\nexport const Canasta: React.FC<ParteProps & {caida?: boolean}> = ({paleta, resaltado, caida = false}) => {\n  const mimbre = col(paleta, resaltado, '#C98B4F');\n  return (\n    <group position={caida ? [0.44, SUELO_Y + 0.025, 0.46] : [0.47, SUELO_Y + 0.11, 0.42]} rotation={caida ? [0.2, 0.6, 1.4] : [0, 0.6, 0]}>\n      <Pieza forma=\"caja\" medidas={[0.08, 0.05, 0.055]} color={mimbre} />\n      <Pieza forma=\"toro\" medidas={[0.032, 0.005, Math.PI]} color=\"#9C6535\" posicion={[0, 0.025, 0]} />\n      <Pieza forma=\"caja\" medidas={[0.082, 0.012, 0.057]} color=\"#D2452F\" posicion={[0, 0.02, 0]} contorno={false} />\n    </group>\n  );\n};\n\nexport const Sol: React.FC<ParteProps> = ({paleta, resaltado, frame = 0}) => (\n  <group position={[0.45, 1.62, -0.45]} rotation={[0, 0, frame * 0.01]}>\n    <Pieza forma=\"esfera\" medidas={[0.14]} color={col(paleta, resaltado, '#F6C744')} brillo=\"#F6B42C\" />\n    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (\n      <Pieza key={i} forma=\"cono\" medidas={[0.025, 0.07]} color=\"#F6C744\" contorno={false}\n        posicion={[Math.cos((i * Math.PI) / 4) * 0.19, Math.sin((i * Math.PI) / 4) * 0.19, 0]} rotacion={[0, 0, (i * Math.PI) / 4 - Math.PI / 2]} />\n    ))}\n  </group>\n);\n\nexport const Globo: React.FC<ParteProps> = ({paleta, resaltado, frame = 0}) => {\n  const y = 1.12 + Math.sin(frame / 25) * 0.03;\n  return (\n    <group position={[-0.78, y, 0.22]} rotation={[0, 0, Math.sin(frame / 30) * 0.05]}>\n      <Pieza forma=\"esfera\" medidas={[0.11]} color={col(paleta, resaltado, '#F7F4EE')} escala={[1, 1.12, 1]} />\n      <Pieza forma=\"cono\" medidas={[0.03, 0.04]} color=\"#E9E4DB\" posicion={[0, -0.13, 0]} rotacion={[Math.PI, 0, 0]} />\n      <Linea desde={[0, -0.15, 0]} hasta={[0, -0.3, 0]} grosor={0.003} color={TINTA} />\n      <Pieza forma=\"caja\" medidas={[0.06, 0.05, 0.05]} color=\"#E0A526\" posicion={[0, -0.33, 0]} />\n      <Pieza forma=\"cilindro\" medidas={[0.004, 0.004, 0.05]} color=\"#5E5B57\" posicion={[0.02, -0.38, 0]} contorno={false} />\n    </group>\n  );\n};\n\nexport const Satelite: React.FC<ParteProps> = ({paleta, resaltado, frame = 0}) => (\n  <group position={[-0.82, 1.8, -0.25]} rotation={[0.3, frame * 0.004, 0.15]}>\n    <Pieza forma=\"caja\" medidas={[0.12, 0.1, 0.1]} color={col(paleta, resaltado, '#C8CCD2')} metal={0.6} />\n    {[-1, 1].map((l) => (\n      <group key={l}>\n        <Linea desde={[0.06 * l, 0, 0]} hasta={[0.1 * l, 0, 0]} grosor={0.006} color=\"#8A8F96\" />\n        <Pieza forma=\"caja\" medidas={[0.2, 0.005, 0.09]} color=\"#2F5FB8\" posicion={[0.2 * l, 0, 0]} />\n      </group>\n    ))}\n    <Pieza forma=\"cilindro\" medidas={[0.04, 0.015, 0.03]} color=\"#E9E4DB\" posicion={[0, -0.065, 0]} />\n  </group>\n);\n\nexport const Haz: React.FC<ParteProps> = ({paleta, resaltado, frame = 0}) => (\n  <group>\n    <ConoDeLuz posicion={[-0.85, 0.14, -0.25]} altura={1.6} radio={0.32} color={col(paleta, resaltado, '#A3D9FF')} opacidad={0.12} />\n    <group position={[-0.85, 1.05, -0.25]} rotation={[-Math.PI / 2, 0, frame * 0.02]}>\n      <Pieza forma=\"toro\" medidas={[0.16, 0.035, Math.PI * 1.6]} color=\"#F2F2F2\" />\n      <Pieza forma=\"toro\" medidas={[0.08, 0.03, Math.PI * 1.5]} color=\"#F2F2F2\" rotacion={[0, 0, 2]} />\n    </group>\n  </group>\n);\n\nexport const Estacion: React.FC<ParteProps> = ({paleta, resaltado, frame = 0}) => {\n  const blanco = col(paleta, resaltado, '#F2EFE8');\n  return (\n    <group position={[-0.2, SUELO_Y, 0.27]}>\n      <Pieza forma=\"cilindro\" medidas={[0.008, 0.01, 0.42]} color=\"#8A8F96\" posicion={[0, 0.21, 0]} />\n      <Pieza forma=\"caja\" medidas={[0.07, 0.07, 0.05]} color={blanco} posicion={[0, 0.2, 0.02]} />\n      <group position={[0, 0.43, 0]} rotation={[0, frame * 0.3, 0]}>\n        {[0, 1, 2].map((i) => {\n          const a = (i * Math.PI * 2) / 3;\n          return (\n            <group key={i}>\n              <Linea desde={[0, 0, 0]} hasta={[Math.cos(a) * 0.06, 0, Math.sin(a) * 0.06]} grosor={0.003} color={TINTA} />\n              <Pieza forma=\"media_esfera\" medidas={[0.018]} color={blanco} posicion={[Math.cos(a) * 0.06, 0, Math.sin(a) * 0.06]} rotacion={[0, -a, Math.PI / 2]} />\n            </group>\n          );\n        })}\n      </group>\n      {/* pluviómetro transparente con agua */}\n      <group position={[0.1, 0, 0.02]}>\n        <Pieza forma=\"cilindro\" medidas={[0.025, 0.025, 0.04]} color=\"#3A8FD0\" posicion={[0, 0.03, 0]} contorno={false} />\n        <Pieza forma=\"cilindro\" medidas={[0.03, 0.03, 0.14]} color=\"#DDF1FF\" opacidad={0.35} posicion={[0, 0.07, 0]} contorno={false} />\n        <Pieza forma=\"toro\" medidas={[0.03, 0.004]} color={TINTA} posicion={[0, 0.14, 0]} rotacion={[Math.PI / 2, 0, 0]} contorno={false} />\n      </group>\n    </group>\n  );\n};\n\nexport const Supercomputadora: React.FC<ParteProps & {encendida?: boolean}> = ({paleta, resaltado, frame = 0, encendida = true}) => (\n  <group position={POS_SUPER} rotation={[0, -0.2, 0]}>\n    <Pieza forma=\"caja\" medidas={[0.3, 0.56, 0.24]} color={col(paleta, resaltado, '#202127')} posicion={[0, 0.28, 0]} />\n    <Pieza forma=\"caja\" medidas={[0.32, 0.03, 0.26]} color=\"#3A3A40\" posicion={[0, 0.575, 0]} />\n    {[0, 1, 2, 3, 4, 5].map((r) =>\n      [0, 1, 2].map((c) => {\n        const on = encendida && (Math.floor(frame / 6) + r + c) % 3 !== 0;\n        return (\n          <Pieza key={`${r}-${c}`} forma=\"caja\" medidas={[0.06, 0.015, 0.01]} color={on ? '#5CC8FF' : '#2C3440'} contorno={false}\n            brillo={on ? '#3FB4FF' : undefined} posicion={[-0.08 + c * 0.08, 0.1 + r * 0.075, 0.122]} />\n        );\n      }),\n    )}\n    {encendida ? <Brillo posicion={[0, 0.3, 0.2]} color=\"#5CC8FF\" radio={0.001} luz={0.6} /> : null}\n  </group>\n);\n\nexport const Cubos: React.FC<ParteProps & {gris?: boolean}> = ({paleta, resaltado, frame = 0, gris = false}) => {\n  const items: React.ReactNode[] = [];\n  for (let i = 0; i < 5; i++)\n    for (let j = 0; j < 2; j++)\n      for (let k = 0; k < 2; k++) {\n        const p: [number, number, number] = [-0.75 + i * 0.2, 0.85 + j * 0.2, -0.15 + k * 0.2];\n        const a = Math.sin(frame / 30 + i * 1.3 + j * 2.1 + k) * 1.2;\n        items.push(\n          <group key={`${i}${j}${k}`} position={p}>\n            <mesh>\n              <boxGeometry args={[0.18, 0.18, 0.18]} />\n              <meshBasicMaterial color={gris ? '#9A9A9A' : col(paleta, resaltado, '#BFE6FF')} transparent opacity={0.12} depthWrite={false} />\n            </mesh>\n            <Aristas g={aristasCubo} color={gris ? '#6E6E6E' : '#3E7FB8'} />\n            {gris ? null : <Flecha desde={[-Math.cos(a) * 0.05, 0, -Math.sin(a) * 0.05]} hasta={[Math.cos(a) * 0.05, 0, Math.sin(a) * 0.05]} color={paleta.acentos[3]} grosor={0.007} />}\n          </group>,\n        );\n      }\n  return <group>{items}</group>;\n};\n\nexport const Numeros: React.FC<ParteProps> = ({paleta, resaltado}) => {\n  const n = ['7', '23', '0.4', '98', '5', '12', '61', '3'];\n  return (\n    <group position={[0.05, SUELO_Y, 0.15]}>\n      {n.map((t, i) => (\n        <Cartel key={i} texto={t} posicion={[((i * 37) % 7) * 0.035 - 0.1, 0.04 + Math.floor(i / 3) * 0.05, ((i * 13) % 5) * 0.02]} alto={0.07}\n          fondo=\"transparent\" colorTexto={col(paleta, resaltado, '#F7F4EE')} borde={TINTA} />\n      ))}\n    </group>\n  );\n};\n\nexport const MiniCielos: React.FC<ParteProps & {paso?: number}> = ({paleta, resaltado, frame = 0, paso = 9}) => (\n  <group>\n    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {\n      const lluvia = minicieloLluvioso(i, paso);\n      const verde = paso >= 10 && lluvia;\n      const x = -0.75 + i * 0.16;\n      return (\n        <group key={i} position={[x, 1.25 + Math.sin(frame / 20 + i) * 0.01, 0.2]}>\n          <mesh>\n            <boxGeometry args={[0.13, 0.17, 0.13]} />\n            <meshBasicMaterial color={verde ? paleta.acentos[2] : col(paleta, resaltado, lluvia ? '#AFC6D8' : '#CFEAFF')} transparent opacity={verde ? 0.3 : 0.2} depthWrite={false} />\n          </mesh>\n          <Aristas g={aristasCielo} color={verde ? '#5E8A12' : '#4A6C88'} />\n          {lluvia ? (\n            <>\n              <Pieza forma=\"esfera\" medidas={[0.04]} color=\"#8E959C\" posicion={[0, 0.04, 0]} escala={[1.4, 0.8, 1]} />\n              {[-0.025, 0, 0.025].map((dx, d) => (\n                <Pieza key={d} forma=\"capsula\" medidas={[0.005, 0.015]} color=\"#3A8FD0\" contorno={false} posicion={[dx, -0.02 - ((frame + d * 7) % 15) * 0.003, 0]} />\n              ))}\n            </>\n          ) : (\n            <Pieza forma=\"esfera\" medidas={[0.03]} color=\"#F6C744\" brillo=\"#F6B42C\" posicion={[0, 0.02, 0]} />\n          )}\n        </group>\n      );\n    })}\n  </group>\n);\n\nexport const Medidor: React.FC<ParteProps & {valor?: number}> = ({paleta, resaltado, valor = 0.8}) => {\n  const ang = Math.PI * (1 - valor);\n  return (\n    <group position={[0.4, 1.12, 0.3]} rotation={[0, -0.3, 0]}>\n      <Pieza forma=\"cilindro\" medidas={[0.17, 0.17, 0.02]} color=\"#F7F4EE\" rotacion={[Math.PI / 2, 0, 0]} />\n      <Pieza forma=\"toro\" medidas={[0.13, 0.018, Math.PI * 0.5]} color=\"#D2452F\" posicion={[0, 0, 0.012]} rotacion={[0, 0, Math.PI / 2]} contorno={false} />\n      <Pieza forma=\"toro\" medidas={[0.13, 0.018, Math.PI * 0.5]} color={col(paleta, resaltado, paleta.acentos[2])} posicion={[0, 0, 0.012]} contorno={false} />\n      <Linea desde={[0, 0, 0.025]} hasta={[Math.cos(ang) * 0.12, Math.sin(ang) * 0.12, 0.025]} grosor={0.007} color={TINTA} />\n      <Pieza forma=\"esfera\" medidas={[0.015]} color={TINTA} posicion={[0, 0, 0.025]} contorno={false} />\n      <Cartel texto={`${Math.round(valor * 100)}%`} posicion={[0, -0.07, 0.03]} alto={0.07} fondo=\"transparent\" colorTexto={TINTA} rotacion={[0.0001, 0, 0]} />\n    </group>\n  );\n};\n\nexport const Zona: React.FC<ParteProps> = ({paleta, resaltado}) => (\n  <group position={[-0.3, 1.25, 0.1]} rotation={[1.1, 0, 0]}>\n    <Pieza forma=\"caja\" medidas={[0.6, 0.02, 0.44]} color=\"#E9E4DB\" />\n    {[-0.2, -0.05, 0.1, 0.22].map((x, i) => (\n      <Pieza key={i} forma=\"caja\" medidas={[0.08, 0.03, 0.08]} color=\"#C2BBAF\" posicion={[x, 0.02, (i % 2) * 0.15 - 0.08]} contorno={false} />\n    ))}\n    <mesh position={[-0.075, 0.04, 0]}>\n      <boxGeometry args={[0.45, 0.005, 0.44]} />\n      <meshBasicMaterial color={col(paleta, resaltado, '#3A8FD0')} transparent opacity={0.45} depthWrite={false} />\n    </mesh>\n    <Cartel texto=\"3/4\" posicion={[-0.075, 0.06, 0]} alto={0.09} fondo=\"transparent\" colorTexto=\"#FFFFFF\" borde={TINTA} />\n  </group>\n);\n\nexport const Reloj: React.FC<ParteProps> = ({paleta, resaltado, frame = 0}) => (\n  <group position={[0.15, 1.5, 0.25]} rotation={[0, -0.2, 0]}>\n    <Pieza forma=\"cilindro\" medidas={[0.12, 0.12, 0.03]} color=\"#F7F4EE\" rotacion={[Math.PI / 2, 0, 0]} />\n    <Pieza forma=\"toro\" medidas={[0.12, 0.012]} color={col(paleta, resaltado, '#3A3A40')} />\n    <Linea desde={[0, 0, 0.02]} hasta={[0, 0.08, 0.02]} grosor={0.006} color={TINTA} />\n    <Linea desde={[0, 0, 0.02]} hasta={[Math.cos(-frame * 0.05) * 0.06, Math.sin(-frame * 0.05) * 0.06, 0.02]} grosor={0.005} color={TINTA} />\n    {[0.8, -0.8].map((r, i) => (\n      <Pieza key={i} forma=\"caja\" medidas={[0.3, 0.03, 0.02]} color=\"#E0302A\" posicion={[0, 0, 0.04]} rotacion={[0, 0, r]} />\n    ))}\n  </group>\n);\n\nexport const NubesLluvia: React.FC<ParteProps> = ({paleta, resaltado, frame = 0}) => (\n  <group>\n    {[{x: -0.75, n: 2, largo: false}, {x: -0.3, n: 6, largo: true}].map((c, k) => (\n      <group key={k} position={[c.x, 1.3, 0.25]}>\n        <Nube posicion={[0, 0, 0]} escala={0.7} color={col(paleta, resaltado, '#8E959C')} />\n        {Array.from({length: c.n}).map((_, d) => (\n          <Pieza key={d} forma=\"capsula\" medidas={[0.006, 0.025]} color=\"#3A8FD0\" contorno={false}\n            posicion={[(d - (c.n - 1) / 2) * 0.035, -0.12 - ((frame + d * 9) % 20) * (c.largo ? 0.03 : 0.012), 0]} />\n        ))}\n        <Cartel texto={c.largo ? 'toda la tarde' : '10 min'} posicion={[0, 0.17, 0]} alto={0.07} fondo=\"transparent\" colorTexto=\"#FFFFFF\" borde={TINTA} />\n      </group>\n    ))}\n  </group>\n);\n\nexport const Paraguas: React.FC<ParteProps> = ({paleta, resaltado}) => (\n  <group position={[POS_CELULAR[0], 1.25, POS_CELULAR[2]]}>\n    <Pieza forma=\"media_esfera\" medidas={[0.32]} color={col(paleta, resaltado, paleta.acentos[3])} escala={[1, 0.45, 1]} />\n    <Pieza forma=\"cilindro\" medidas={[0.008, 0.008, 0.2]} color=\"#3A3A40\" posicion={[0, -0.05, 0]} />\n    <Pieza forma=\"esfera\" medidas={[0.015]} color={TINTA} posicion={[0, 0.15, 0]} contorno={false} />\n  </group>\n);\n\n// ---------- Escenario fijo ----------\nconst Maqueta: React.FC<{frame: number}> = ({frame}) => {\n  const edificios: [number, number, number, number, string][] = [\n    [-0.45, -0.3, 0.13, 0.34, '#E9DCC4'], [-0.28, -0.32, 0.12, 0.5, '#B9C7D3'], [-0.12, -0.3, 0.13, 0.4, '#D98C6A'],\n    [0.04, -0.34, 0.11, 0.56, '#E9E4DB'], [-0.4, -0.05, 0.11, 0.22, '#C9B79C'], [-0.2, -0.04, 0.12, 0.28, '#F0D9A8'], [0.0, -0.06, 0.1, 0.2, '#A9B8A0'],\n  ];\n  return (\n    <group>\n      {/* base en corte: roca, tierra, pasto, playa */}\n      <Pieza forma=\"caja\" medidas={[2.3, 0.05, 1.0]} color=\"#7A6A5C\" posicion={[0, 0.025, 0]} />\n      <Pieza forma=\"caja\" medidas={[1.7, 0.08, 1.0]} color=\"#9C6B43\" posicion={[0.3, 0.09, 0]} />\n      <Pieza forma=\"caja\" medidas={[0.6, 0.08, 0.5]} color=\"#9C6B43\" posicion={[-0.85, 0.09, 0.25]} />\n      <Pieza forma=\"caja\" medidas={[1.7, 0.03, 1.0]} color=\"#7FB04A\" posicion={[0.3, 0.145, 0]} />\n      <Pieza forma=\"caja\" medidas={[0.6, 0.03, 0.5]} color=\"#E6CF98\" posicion={[-0.85, 0.145, 0.25]} />\n      {/* calle */}\n      <Pieza forma=\"caja\" medidas={[1.1, 0.008, 0.14]} color=\"#6B6B70\" posicion={[0.0, 0.164, 0.22]} />\n      {[-0.4, -0.2, 0.0, 0.2, 0.4].map((x) => (\n        <Pieza key={x} forma=\"caja\" medidas={[0.07, 0.003, 0.012]} color=\"#F2EFE8\" posicion={[x, 0.17, 0.22]} contorno={false} />\n      ))}\n      {/* ciudad */}\n      {edificios.map(([x, z, a, h, c], i) => (\n        <group key={i} position={[x, SUELO_Y, z]}>\n          <Pieza forma=\"caja\" medidas={[a, h, a]} color={c} posicion={[0, h / 2, 0]} />\n          <Pieza forma=\"caja\" medidas={[a * 0.6, 0.006, 0.004]} color=\"#5A7EA0\" posicion={[0, h * 0.7, a / 2 + 0.003]} contorno={false} />\n          <Pieza forma=\"caja\" medidas={[a * 0.6, 0.006, 0.004]} color=\"#5A7EA0\" posicion={[0, h * 0.4, a / 2 + 0.003]} contorno={false} />\n        </group>\n      ))}\n      {/* árboles */}\n      {[[0.62, -0.38], [0.95, -0.3], [0.75, -0.2], [-0.5, 0.12]].map(([x, z], i) => (\n        <group key={`a${i}`} position={[x, SUELO_Y, z]}>\n          <Pieza forma=\"cilindro\" medidas={[0.015, 0.02, 0.1]} color=\"#7A5332\" posicion={[0, 0.05, 0]} />\n          <Pieza forma=\"cono\" medidas={[0.07, 0.18]} color={i % 2 ? '#4E8F3A' : '#5FA045'} posicion={[0, 0.18 + Math.sin(frame / 40 + i) * 0.003, 0]} />\n        </group>\n      ))}\n      {/* faro junto al mar */}\n      <Pieza forma=\"cilindro\" medidas={[0.025, 0.035, 0.2]} color=\"#F2EFE8\" posicion={[-0.6, 0.26, 0.05]} />\n      <Pieza forma=\"cilindro\" medidas={[0.036, 0.036, 0.04]} color=\"#D2452F\" posicion={[-0.6, 0.24, 0.05]} contorno={false} />\n      <Pieza forma=\"cono\" medidas={[0.035, 0.05]} color=\"#D2452F\" posicion={[-0.6, 0.385, 0.05]} />\n      {/* cielo gris */}\n      <Nube posicion={[-0.25 + Math.sin(frame / 90) * 0.03, 1.55, -0.3]} escala={1.3} />\n      <Nube posicion={[0.3 + Math.sin(frame / 80) * 0.03, 1.5, -0.3]} escala={1.1} color=\"#B1B5B9\" />\n    </group>\n  );\n};\n\n// ---------- Mundo ----------\nexport const Mundo: React.FC<MundoProps> = ({paso, frame, paleta, ocultar = [], resaltar = []}) => {\n  const ver = (n: string) => !ocultar.includes(n);\n  const r = (n: string) => resaltar.includes(n);\n  const hay = (desde: number) => paso >= desde;\n  const entre = (a: number, b: number) => paso >= a && paso <= b;\n  const comun = {paleta, frame};\n  return (\n    <group>\n      <Maqueta frame={frame} />\n      {ver('mar') ? <Mar {...comun} resaltado={r('mar')} visible={marVisible(paso)} /> : null}\n      {ver('celular') ? <Celular {...comun} resaltado={r('celular')} dividido={paso === 11} /> : null}\n      {ver('persona') ? <Persona {...comun} resaltado={r('persona')} /> : null}\n      {ver('canasta') ? <Canasta {...comun} resaltado={r('canasta')} caida={hay(1)} /> : null}\n      {hay(1) && ver('sol') ? <Sol {...comun} resaltado={r('sol')} /> : null}\n      {hay(2) && ver('camino') ? <Camino {...comun} resaltado={r('camino')} encendidos={tramosEncendidos(paso)} /> : null}\n      {hay(3) && ver('globo') ? <Globo {...comun} resaltado={r('globo')} /> : null}\n      {hay(4) && ver('satelite') ? <Satelite {...comun} resaltado={r('satelite')} /> : null}\n      {hay(4) && ver('haz') ? <Haz {...comun} resaltado={r('haz')} /> : null}\n      {hay(5) && ver('estacion') ? <Estacion {...comun} resaltado={r('estacion')} /> : null}\n      {hay(6) && ver('supercomputadora') ? <Supercomputadora {...comun} resaltado={r('supercomputadora')} encendida /> : null}\n      {entre(6, 7) && ver('cubos') ? <Cubos {...comun} resaltado={r('cubos')} /> : null}\n      {paso === 7 && ver('numeros') ? <Numeros {...comun} resaltado={r('numeros')} /> : null}\n      {entre(9, 10) && ver('minicielos') ? <MiniCielos {...comun} resaltado={r('minicielos')} paso={paso} /> : null}\n      {entre(10, 12) && ver('medidor') ? <Medidor {...comun} resaltado={r('medidor')} valor={confianza(paso)} /> : null}\n      {paso === 12 && ver('zona') ? <Zona {...comun} resaltado={r('zona')} /> : null}\n      {hay(13) && ver('reloj') ? <Reloj {...comun} resaltado={r('reloj')} /> : null}\n      {hay(13) && ver('nubeslluvia') ? <NubesLluvia {...comun} resaltado={r('nubeslluvia')} /> : null}\n      {hay(14) && ver('paraguas') ? <Paraguas {...comun} resaltado={r('paraguas')} /> : null}\n    </group>\n  );\n};\n"
+  },
+  "tema": {
+    "tema": "Si tu app dice '60% de lluvia', NO pienses que lloverá el 60% del día: el camino de un pronóstico, del globo sonda a tu celular",
+    "angulo": "Se sigue el recorrido en un solo mundo en corte: globos sonda, satélites y estaciones recogen datos; una supercomputadora simula el aire; se corren cientos de variaciones del mismo día; si la mayoría coincide, el pronóstico es confiable; la app lo convierte en un porcentaje. Cada tramo tiene su pieza con nombre y lo que pasaría sin ella. Cierre: el porcentaje mezcla la confianza con la zona cubierta, no las horas de lluvia.",
+    "subtema": "tecnología que usamos sin entender",
+    "tendencia": "El 'Súper Niño' 2026-27 domina las noticias del clima en Latinoamérica y Europa. Hay lluvias récord en Chile, sequías y calor en otras regiones, y el Ideam de Colombia lo declaró oficialmente el 8 de octubre.",
+    "pregunta_origen": "¿Cómo hace un pronóstico del clima para saber qué pasará en 5 días?",
+    "por_que": "Encaja de forma natural en SIGUE EL CAMINO: es un sistema de principio a fin con piezas claras que se ven bien en animación. La advertencia directa sobre el '60% de lluvia' corrige un error que casi todos cometen, y por eso la gente querrá enviárselo a alguien. Los datos (globos sonda, simulaciones con variaciones, probabilidad de precipitación) son verificables. Esta semana el clima está en las noticias por el Súper Niño. No toca salud ni dinero. No repite temas usados: el mar, los charcos y el GPS son otros asuntos. Los videos de clima y números tuvieron más retención (24%) que los de historia en partes (21%), así que conviene un video corto, visual y de una sola idea."
+  },
+  "estilo": {
+    "tendencia": true,
+    "paleta": "marca",
+    "colores": {
+      "fondo": "#D3CEC6",
+      "tinta": "#1B1B1F",
+      "acentos": [
+        "#D2452F",
+        "#E9E4DB",
+        "#A3D92B",
+        "#E0A526",
+        "#C2BBAF"
+      ]
+    },
+    "tipo_gancho": "advertencia directa («si te pasa X, NO hagas Y»)",
+    "estructura": "SIGUE EL CAMINO: se recorre un sistema cotidiano de principio a fin en un solo mundo en corte (el agua desde la calle hasta tu llave, la luz desde el poste hasta el foco); cada tramo agrega una pieza con su nombre y lo que pasaría sin ella"
+  },
+  "guion": {
+    "titulo": "Qué significa de verdad el 60% de lluvia",
+    "descripcion": "Sigue el camino de un pronóstico, del globo sonda a tu celular, y descubre qué mide en realidad ese porcentaje. Spoiler: no son horas de lluvia.",
+    "portada": "¿CANCELASTE POR NADA?",
+    "pregunta_comentarios": "¿Cuántas veces cancelaste planes por un porcentaje de lluvia?",
+    "hashtags": [
+      "#pronosticodeltiempo",
+      "#probabilidaddelluvia",
+      "#SuperNiño",
+      "#meteorologia",
+      "#clima"
+    ],
+    "escenas": [
+      {
+        "voz": "Cancelaste tu plan por un sesenta por ciento. Quizá fue un error.",
+        "visual": "Fotograma 0: una persona de la maqueta con maleta de picnic mira un celular gigante con '60%' mientras el cielo gris está en realidad medio despejado. En el primer segundo la persona rompe el plan: la canasta cae y la comida rueda por la ciudad mientras un sol asoma tras la nube.",
+        "rotulo": "PLAN CANCELADO",
+        "palabra_clave": "Error",
+        "concepto": "UN SESENTA POR CIENTO",
+        "mundo": "Maqueta del paisaje en corte con ciudad, cielo gris y el celular con 60% a la derecha.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "El Ideam de Colombia confirmó el fenómeno de El Niño el 8 de octubre de 2026, con intensidad entre fuerte y muy fuerte.",
+            "fuente": "https://www.portafolio.co/economia/gobierno/ideam-confirma-oficialmente-presencia-del-fenomeno-de-el-nino-en-colombia-con-intensidad-entre-fuerte-y-muy-fuerte-504147"
+          }
+        ]
+      },
+      {
+        "voz": "Te muestro de dónde sale. El truco, al final.",
+        "visual": "Una línea luminosa recorre la maqueta de izquierda a derecha, desde el suelo hasta el celular, y marca el camino que seguirá el dato. Los tramos se iluminan uno por uno.",
+        "rotulo": "EL CAMINO",
+        "palabra_clave": "sale",
+        "concepto": "DE DÓNDE SALE",
+        "mundo": "La maqueta tiene una línea de camino que va del suelo al celular, con tramos apagados.",
+        "grafico": null,
+        "datos": []
+      },
+      {
+        "voz": "Primero, el globo sonda sube midiendo temperatura, humedad y viento. Sin él, sabrías mucho menos del aire en altura.",
+        "visual": "Un globo blanco con una cajita de sensores colgando sube desde el suelo de la maqueta. Alrededor suben pequeñas flechas de temperatura, humedad y viento. Luego el globo desaparece y el cielo de arriba queda cubierto de signos de interrogación.",
+        "rotulo": "GLOBO SONDA",
+        "palabra_clave": "globo",
+        "concepto": "EL GLOBO SONDA",
+        "mundo": "Maqueta con el globo sonda subiendo y sus datos en el primer tramo de la línea.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Los globos sonda (radiosondas) miden temperatura, humedad y viento en la atmósfera.",
+            "fuente": "https://www.weather.gov/upperair/factsheet"
+          }
+        ]
+      },
+      {
+        "voz": "El satélite vigila las nubes desde arriba. Sin él, gran parte del océano sería un punto ciego.",
+        "visual": "Arriba de la maqueta, un satélite plateado con paneles azules lanza un haz sobre un remolino de nubes. Un mar de la maqueta pasa de oscuro, con un signo de interrogación, a visible y detallado cuando el satélite lo escanea.",
+        "rotulo": "SATÉLITE",
+        "palabra_clave": "satélite",
+        "concepto": "EL SATÉLITE",
+        "mundo": "Maqueta con globo, satélite escaneando nubes y mar iluminado.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Los satélites meteorológicos observan nubes y océanos desde el espacio.",
+            "fuente": "https://www.noaa.gov/education/resource-collections/weather-atmosphere/weather-forecasting"
+          }
+        ]
+      },
+      {
+        "voz": "La estación meteorológica mide lluvia y viento en el suelo. Sin ella, no hay con qué comparar.",
+        "visual": "En la calle de la maqueta aparece una estación con un anemómetro que gira y un pluviómetro transparente que se llena de gotas. Una flecha lleva sus datos a la línea de camino.",
+        "rotulo": "ESTACIÓN",
+        "palabra_clave": "estación",
+        "concepto": "LA ESTACIÓN",
+        "mundo": "Maqueta con globo, satélite y estación en tierra, los tres enviando datos por la línea.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Las estaciones meteorológicas registran lluvia y viento en superficie.",
+            "fuente": "https://www.noaa.gov/education/resource-collections/weather-atmosphere/weather-forecasting"
+          }
+        ]
+      },
+      {
+        "voz": "Todo entra a una supercomputadora, que divide el aire en millones de cubos y calcula su movimiento.",
+        "visual": "Al final de la línea aparece una supercomputadora, un gabinete negro con luces azules. El cielo de la maqueta se divide en cubitos transparentes y cada cubo muestra una pequeña flecha de viento que cambia.",
+        "rotulo": "SUPERCOMPUTADORA",
+        "palabra_clave": "supercomputadora",
+        "concepto": "LA SUPERCOMPUTADORA",
+        "mundo": "Maqueta con la supercomputadora al final de la línea y el cielo dividido en cubos.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Los modelos numéricos dividen la atmósfera en una malla de celdas y calculan su evolución.",
+            "fuente": "https://www.ecmwf.int/en/about/media-centre/focus/2023/fact-sheet-numerical-weather-prediction"
+          }
+        ]
+      },
+      {
+        "voz": "Sin ella, solo tendrías números sueltos.",
+        "visual": "La supercomputadora se apaga. Los cubos del cielo se vuelven grises y de ellos caen números desordenados que se amontonan en el suelo de la maqueta.",
+        "rotulo": "SIN ELLA",
+        "palabra_clave": "sueltos",
+        "concepto": "NÚMEROS SUELTOS",
+        "mundo": "Supercomputadora apagada con una pila de números sueltos como ejemplo de lo que pasa sin ella; luego se enciende de nuevo.",
+        "grafico": null,
+        "datos": []
+      },
+      {
+        "voz": "Pero el aire es caótico: un cambio mínimo puede cambiar todo el día.",
+        "visual": "Sobre la maqueta, dos simulaciones idénticas del cielo conviven una al lado de la otra. En una se agrega una brizna de viento minúscula y su nube se desvía hasta convertirse en una tormenta distinta.",
+        "rotulo": "CAOS",
+        "palabra_clave": "caótico",
+        "concepto": "EL AIRE ES CAÓTICO",
+        "mundo": "Cielo de la maqueta con dos versiones del mismo día que empiezan igual y terminan distintas.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Pequeñas diferencias en las condiciones iniciales pueden crecer y cambiar mucho el pronóstico; por eso se usan pronósticos por conjuntos.",
+            "fuente": "https://www.ecmwf.int/en/about/media-centre/focus/2017/fact-sheet-ensemble-weather-forecasting"
+          }
+        ]
+      },
+      {
+        "voz": "Por eso corren decenas de versiones del mismo día: un ensamble.",
+        "visual": "La supercomputadora proyecta decenas de pequeños cielos idénticos en fila, cada uno con una variación mínima. Algunos muestran lluvia y otros no, y el rótulo 'ENSAMBLE' aparece sobre ellos.",
+        "rotulo": "ENSAMBLE",
+        "palabra_clave": "decenas",
+        "concepto": "UN ENSAMBLE",
+        "mundo": "Supercomputadora proyectando decenas de mini cielos con variaciones del mismo día.",
+        "grafico": {
+          "tipo": "contador",
+          "valor": 51,
+          "etiqueta": "versiones del mismo día"
+        },
+        "datos": [
+          {
+            "afirmacion": "El ensamble del ECMWF corre 51 miembros: un control más 50 perturbados.",
+            "fuente": "https://confluence.ecmwf.int/display/TIGGE/ECMWF+model+description"
+          }
+        ]
+      },
+      {
+        "voz": "Si casi todas ven lluvia, el pronóstico es más confiable.",
+        "visual": "De los mini cielos, casi todos se llenan de nubes con gotas y se iluminan de verde, y solo uno queda soleado y gris. Un medidor de confianza sube.",
+        "rotulo": "CONFIABLE",
+        "palabra_clave": "confiable",
+        "concepto": "ES CONFIABLE",
+        "mundo": "Mini cielos con la mayoría lluviosos y un medidor de confianza alto.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Cuando los miembros del ensamble coinciden, la confianza del pronóstico es mayor.",
+            "fuente": "https://www.ecmwf.int/en/about/media-centre/focus/2017/fact-sheet-ensemble-weather-forecasting"
+          }
+        ]
+      },
+      {
+        "voz": "La app lo vuelve porcentaje. Y mezcla dos cosas.",
+        "visual": "Los mini cielos se comprimen en una cinta que llega al celular. En la pantalla aparece '60%' partido en dos mitades brillantes con signos de interrogación.",
+        "rotulo": "DOS COSAS",
+        "palabra_clave": "mezcla",
+        "concepto": "MEZCLA DOS COSAS",
+        "mundo": "El celular recibe el dato y su 60% se divide en dos piezas.",
+        "grafico": null,
+        "datos": []
+      },
+      {
+        "voz": "Confianza por zona cubierta: ochenta por ciento por tres cuartos de la zona, da sesenta.",
+        "visual": "Sobre la maqueta, un mapa de la ciudad muestra una zona sombreada que cubre tres cuartas partes. A un lado, un medidor de confianza marca ochenta. Ambos se multiplican y el resultado cae en el celular como 60%.",
+        "rotulo": "CONFIANZA × ZONA",
+        "palabra_clave": "zona",
+        "concepto": "CONFIANZA POR ZONA",
+        "mundo": "Celular con 60% conectado a un medidor de confianza y a la zona sombreada del mapa.",
+        "grafico": {
+          "tipo": "barras",
+          "items": [
+            {
+              "etiqueta": "confianza",
+              "valor": 80,
+              "unidad": "%"
+            },
+            {
+              "etiqueta": "zona cubierta",
+              "valor": 75,
+              "unidad": "%"
+            },
+            {
+              "etiqueta": "resultado",
+              "valor": 60,
+              "unidad": "%"
+            }
+          ]
+        },
+        "datos": [
+          {
+            "afirmacion": "La probabilidad de precipitación es la confianza de que llueva por la fracción del área que sería cubierta (PoP = C × A).",
+            "fuente": "https://www.weather.gov/tsa/pqpf_explaination"
+          }
+        ]
+      },
+      {
+        "voz": "No son horas de lluvia. Puede ser diez minutos o toda la tarde.",
+        "visual": "El reloj de la escena inicial vuelve a aparecer y la X roja lo tacha. Dos nubes: una suelta una llovizna breve y otra llueve mucho tiempo, ambas con el mismo 60%.",
+        "rotulo": "NO SON HORAS",
+        "palabra_clave": "horas",
+        "concepto": "NO SON HORAS",
+        "mundo": "Celular con 60%, reloj tachado y dos nubes con duraciones distintas de lluvia.",
+        "grafico": {
+          "tipo": "mitos",
+          "items": [
+            "60% del día",
+            "60% de horas"
+          ]
+        },
+        "datos": [
+          {
+            "afirmacion": "La probabilidad de precipitación no indica cuánto lloverá ni por cuánto tiempo.",
+            "fuente": "https://site.extension.uga.edu/climate/archive/post/probability-of-precipitation-graphic/"
+          }
+        ]
+      },
+      {
+        "voz": "¿Y tú cuántos planes cancelaste por ese número? Recuerda, Súper Niño o no:",
+        "visual": "El celular, con su 60%, queda al centro de la maqueta completa. Un paraguas pequeño se abre sobre el celular mientras la línea de camino brilla entera y se reinicia.",
+        "rotulo": "",
+        "palabra_clave": "planes",
+        "concepto": "CUÁNTOS PLANES",
+        "mundo": "Maqueta completa con la línea encendida y el celular con 60% bajo un paraguas pequeño, lista para reiniciarse.",
+        "grafico": null,
+        "datos": []
+      }
+    ],
+    "direccion_arte": {
+      "protagonista": "Un celular grande de pantalla azul claro con una nube y el '60%' en blanco, al final de la línea del camino del dato.",
+      "secundarios": "Globo sonda blanco con cajita de sensores; satélite plateado con paneles azules; estación meteorológica con anemómetro y pluviómetro; supercomputadora negra con luces azules; mini cielos en fila.",
+      "ambiente": "Una maqueta de paisaje en corte, tipo diorama 3D, con ciudad pequeña, suelo, mar y cielo gris. Una línea luminosa cruza todo el escenario de izquierda a derecha, hasta el celular.",
+      "escenario": "cielo",
+      "partes": "La línea de camino con tramos que se iluminan; cubos transparentes en el cielo; mini cielos del ensamble; medidor de confianza; zona sombreada del mapa; reloj tachado.",
+      "metafora": "Un río de datos que viaja desde el suelo hasta tu celular; en el camino, cada pieza transforma el dato hasta que se vuelve un solo porcentaje."
+    },
+    "verificacion": {
+      "cambios": [
+        "Escena 1: 'Error.' pasa a 'Quizá fue un error.' Cancelar con 60% puede ser razonable, así que afirmarlo sin matiz era exagerado. La portada ahora lleva interrogantes.",
+        "Escena 3 (globo sonda): 'Sin él, no sabes cómo está el aire arriba' pasa a 'sabrías mucho menos del aire en altura'. Aviones y satélites también aportan datos de altura.",
+        "Escena 4 (satélite): 'el océano sería un punto ciego' pasa a 'gran parte del océano'. Boyas y barcos también miden el océano.",
+        "Escena 8 (caos): 'cambia todo el día' pasa a 'puede cambiar todo el día'. No toda diferencia mínima altera el pronóstico.",
+        "Escena 10: 'es confiable' pasa a 'es más confiable'. La coincidencia del ensamble aumenta la confianza, pero no la garantiza.",
+        "Confirmé sin cambios: el Ideam declaró El Niño el 8 de octubre de 2026, con intensidad entre fuerte y muy fuerte. El ensamble del ECMWF tiene 51 miembros (1 control y 50 perturbados). La fórmula PoP = C × A y que no mide duración son correctas, aunque no comprobé esas dos fuentes con búsqueda propia."
+      ],
+      "confianza": "alta"
+    }
+  }
+}
