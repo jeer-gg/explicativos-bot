@@ -1,6 +1,14 @@
 {
   "reglas": [
     {
+      "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
+      "area": "voz",
+      "veces": 3,
+      "ultima": "2026-11-23T00:52:03+00:00",
+      "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
+      "ejemplo": "1 silencio(s) largos dentro de la narración"
+    },
+    {
       "regla": "Frases cortas y fáciles de pronunciar; números escritos como se dicen.",
       "area": "voz",
       "veces": 3,
@@ -9,12 +17,60 @@
       "ejemplo": "solo se entiende el 50 % del guion en el audio"
     },
     {
-      "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
-      "area": "voz",
-      "veces": 2,
-      "ultima": "2026-11-22T23:41:35+00:00",
-      "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
-      "ejemplo": "1 silencio(s) largos dentro de la narración"
+      "regla": "El texto en pantalla y la escena deben mostrar exactamente lo que dice la voz en ese momento (húmedo vs seco). Toda etiqueta debe quedar completa dentro del encuadre, y no debe haber líneas guía sueltas sin objeto al que apuntar.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T00:52:03+00:00",
+      "clave": "apuntar completa deben dentro encuadre escena etiqueta exactamente haber húmedo líneas momento mostrar objeto pantalla quedar sueltas texto",
+      "ejemplo": "En el fotograma 7 la voz habla de un día húmedo con mucho vapor, pero la pantalla dice «DÍA SECO» y muestra flechas de viento. Además la palabra «seco» de una etiqueta queda cortada en el borde izquierdo, y hay una línea negra suelta que no señala nada."
+    },
+    {
+      "regla": "Cada concepto narrado debe tener su propia imagen que lo muestre (por ejemplo, burbujas subiendo dentro del agua). Los títulos deben ser frases completas y coherentes con la narración del momento, nunca una palabra suelta.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-23T00:52:03+00:00",
+      "clave": "burbujas coherentes completas concepto deben dentro ejemplo frases imagen momento muestre narración narrado nunca palabra propia subiendo suelta tener títulos",
+      "ejemplo": "En el fotograma 6 la voz explica que hervir es escapar desde dentro en burbujas. El título solo dice «DÍA» (texto incompleto o de otra escena) y la imagen muestra un charco desvaído sin burbujas ni hervor."
+    },
+    {
+      "regla": "Las tarjetas y rótulos deben caber enteros dentro del cuadro, con margen a los bordes. Las cifras con su unidad deben quedar completas y sin repetir el mismo texto en varios sitios a la vez.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T00:52:03+00:00",
+      "clave": "bordes caber cifras completas cuadro deben dentro enteros margen mismo quedar repetir rótulos sitios tarjetas texto unidad varios",
+      "ejemplo": "En el fotograma 4 la tarjeta de datos se corta: dice «1000 m/s o» y el texto «las más r…» se sale por el borde derecho. La barra roja queda a medio rotular, y «las más veloces» aparece repetido en el título y en la tarjeta."
+    },
+    {
+      "regla": "Los títulos y subtítulos deben ir sincronizados con la frase que se narra en ese segundo, no con la frase anterior o la siguiente. Una noticia o dato externo debe ilustrarse con una imagen que lo represente.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T00:52:03+00:00",
+      "clave": "anterior deben externo frase ilustrarse imagen narra noticia represente segundo siguiente sincronizados subtítulos títulos",
+      "ejemplo": "En el fotograma 2 la voz habla de la emergencia por lluvias en Perú, pero la pantalla muestra «NO HIERVE» con una flecha verde y una olla tachada. El título no corresponde con la frase que se oye en ese momento."
+    },
+    {
+      "regla": "Los títulos grandes no deben cubrir el objeto principal de la escena. Deben colocarse en una zona despejada y ajustarse a la acción que se narra.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T00:52:03+00:00",
+      "clave": "acción ajustarse colocarse cubrir deben despejada escena grandes narra objeto principal títulos",
+      "ejemplo": "En el fotograma 5 el título «SE ENFRÍA» tapa parte de la molécula naranja y del rayo verde que escapan. La voz dice que la molécula se escapa por la superficie, y lo del enfriamiento viene en la frase siguiente."
+    },
+    {
+      "regla": "Las etiquetas con línea guía deben señalar un objeto concreto y no repetir lo que ya dice el título. Los títulos deben quedar legibles sobre un fondo limpio, sin solaparse con elementos animados.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-23T00:52:03+00:00",
+      "clave": "animados concreto deben elementos etiquetas fondo legibles limpio línea objeto quedar repetir señalar sobre solaparse título títulos",
+      "ejemplo": "En el fotograma 8 la palabra «vuelve» y una línea negra vertical flotan sin señalar nada claro. El título «VOLVERÁ COMO LLUVIA» se mezcla con las gotas y las nubes oscuras."
+    },
+    {
+      "regla": "El gancho debe mostrar claramente el objeto central de la frase (aquí un charco bajo el sol), con una escala reconocible. No hay que sustituirlo por un objeto distinto.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-23T00:52:03+00:00",
+      "clave": "central charco claramente distinto escala frase gancho mostrar objeto reconocible sustituirlo",
+      "ejemplo": "En el fotograma 1 la voz dice que el sol no se bebe los charcos, pero no hay sol ni charco que se entienda. Se ve una piscina grande con una cara y un charco azul diminuto abajo a la izquierda."
     },
     {
       "regla": "No mostrar a la vez un título o tarjeta y un subtítulo con las mismas palabras. Si el título ya resume la frase, se oculta el subtítulo o se usa otro texto.",
@@ -183,62 +239,6 @@
       "ultima": "2026-11-22T11:14:07+00:00",
       "clave": "color completas deben dejando disminuida frases mostrar palabra palabras partir subtítulos suelta tamaño todas uniformes",
       "ejemplo": "En el fotograma 4 el subtítulo «EL MAR APENAS SE» termina con «SE» pequeño, gris y pegado, como si estuviera cortado. La frase queda incompleta y poco legible."
-    },
-    {
-      "regla": "No dejar rótulos de la escena cortados por el borde superior. Los objetos de una comparación deben mostrar claramente qué representa cada lado, con etiquetas legibles, y el título no debe tapar elementos clave.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-22T11:14:07+00:00",
-      "clave": "borde claramente clave comparación cortados deben dejar elementos escena etiquetas legibles mostrar objetos representa rótulos superior tapar título",
-      "ejemplo": "En el fotograma 8 aparece un texto cortado arriba («osfera») y una línea negra suelta. Además, el título «TRES METROS DE MAR» tapa parte de la escena. La balanza con el bloque amarillo y el vaso no explica con claridad la comparación entre el océano y la atmósfera."
-    },
-    {
-      "regla": "El objeto protagonista de la idea (por ejemplo un pie o la arena caliente) debe ser reconocible a primera vista. Los elementos importantes no deben cortarse por el borde del encuadre.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-22T11:14:07+00:00",
-      "clave": "arena borde caliente cortarse deben ejemplo elementos encuadre importantes objeto primera protagonista reconocible vista",
-      "ejemplo": "En el fotograma 2 el sol y los rayos quedan cortados arriba. La figura beige junto a la sombrilla no se reconoce (¿pie, persona?) y no se ve que la arena queme."
-    },
-    {
-      "regla": "En las comparaciones de dos materiales, ambos deben aparecer enteros, del mismo tamaño y con etiquetas legibles. Los objetos auxiliares no deben tapar la escena ni quedar cortados.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-22T11:14:07+00:00",
-      "clave": "ambos aparecer auxiliares comparaciones cortados deben enteros escena etiquetas legibles materiales mismo objetos quedar tamaño tapar",
-      "ejemplo": "En el fotograma 3 un cubo verde grande y un termómetro tapan parte del agua y la arena. Las etiquetas «1 g agua» son diminutas y no hay etiqueta clara para la arena. En el fotograma 5 el cubo de «1 cm³ agua» queda cortado abajo y no se ve el cubo de aire que se compara."
-    },
-    {
-      "regla": "Las etiquetas de lugar deben tener un tamaño legible en pantalla vertical. Los mapas o esquemas deben incluir referencias reconocibles, como los continentes.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-22T11:14:07+00:00",
-      "clave": "continentes deben esquemas etiquetas incluir legible lugar mapas pantalla reconocibles referencias tamaño tener vertical",
-      "ejemplo": "En el fotograma 7 el texto «PACÍFICO» es diminuto e ilegible. El mapa es solo un óvalo naranja con flechas, sin continentes, y no se entiende qué muestra."
-    },
-    {
-      "regla": "Los subtítulos no pueden superponerse entre sí ni tapar tarjetas de datos. Cada línea debe terminar de salir antes de que entre la siguiente, y la zona de subtítulos debe estar separada de la zona de tarjetas.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-21T21:45:40+00:00",
-      "clave": "antes datos entre estar línea pueden salir separada siguiente subtítulos superponerse tapar tarjetas terminar",
-      "ejemplo": "En el fotograma 7 el subtítulo se solapa con la palabra «centro»: «GRADOS» y «centro» se pisan y quedan ilegibles. Además, el subtítulo tapa parte de la tarjeta de datos."
-    },
-    {
-      "regla": "Los rótulos y etiquetas de la escena deben colocarse fuera de la franja de subtítulos y no solaparse con ellos. Las líneas de unión no deben cruzar texto.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-21T21:45:40+00:00",
-      "clave": "colocarse cruzar deben ellos escena etiquetas franja fuera líneas rótulos solaparse subtítulos texto unión",
-      "ejemplo": "En el fotograma 5 el rótulo «20 segundos» está pegado al subtítulo «LAVA TUS MANOS» y se cruza con la línea del reloj. El resultado es confuso y los textos se pisan."
-    },
-    {
-      "regla": "Todas las palabras de un subtítulo deben tener el mismo tamaño y el mismo contraste. Solo se puede resaltar con color una palabra clave, y la resaltada debe seguir siendo legible sobre el fondo.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-21T21:45:40+00:00",
-      "clave": "clave color contraste deben fondo legible mismo palabra palabras puede resaltada resaltar seguir siendo sobre subtítulo tamaño tener todas",
-      "ejemplo": "Los subtítulos mezclan tamaños y colores sin criterio («CON» y «CUATRO» aparecen pequeños y grises, mientras que «SETENTA» va en azul). Parecen palabras apagadas o a medio mostrar."
     }
   ]
 }

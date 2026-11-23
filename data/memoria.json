@@ -106,5 +106,25 @@
     "duracion": 46.32,
     "video_fb": "1930279041677184",
     "metricas": {}
+  },
+  {
+    "id": "20261123-0016",
+    "fecha": "2026-11-23",
+    "publicado_en": "2026-11-23T17:00:00+00:00",
+    "programado": true,
+    "titulo": "¿Por qué los charcos desaparecen sin hervir?",
+    "tema": "¿Por qué los charcos desaparecen aunque no haga calor? Los números de las moléculas que se escapan solas",
+    "tendencia": "El Niño 2026-2027 en niveles récord, con alertas de la OMM y emergencias por inundaciones en Perú",
+    "serie": null,
+    "subtema": "ciencia de cosas cotidianas",
+    "estructura": "CON NÚMEROS: una comparación con números grandes en pantalla (barras que crecen, contadores, medidas) que cambia cómo ves algo cotidiano",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "pregunta que todos se han hecho",
+    "gancho": "Te mintieron: el sol no se bebe los charcos, solo ayuda.",
+    "nota_revisor": 5.4,
+    "duracion": 55.53,
+    "video_fb": "2611873915978648",
+    "metricas": {}
   }
 ]
