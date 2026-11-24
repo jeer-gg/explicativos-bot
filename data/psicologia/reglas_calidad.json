@@ -1,0 +1,60 @@
+{
+  "reglas": [
+    {
+      "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
+      "area": "voz",
+      "veces": 1,
+      "ultima": "2026-11-24T12:06:03+00:00",
+      "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
+      "ejemplo": "6 silencio(s) largos dentro de la narración"
+    },
+    {
+      "regla": "Cada subtítulo y cada tarjeta de datos debe aparecer solo durante la frase que los dice, con el tiempo sacado del audio. Nunca deben adelantarse a la narración. El texto debe tener contraste suficiente y no ir sobre elementos de la escena.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T12:06:03+00:00",
+      "clave": "adelantarse aparecer audio contraste datos deben durante elementos escena frase narración nunca sacado sobre subtítulo suficiente tarjeta tener texto tiempo",
+      "ejemplo": "Los subtítulos van adelantados respecto a la voz. En el fotograma 2 la voz dice 'Vas por una taza… y nada' y el subtítulo dice 'NO ES MALA MEMORIA', que se dice después. La tarjeta 'MALA MEMORIA' con una X también anticipa la frase siguiente. En el fotograma 2 se lee mal además: 'MEMORIA' está en rojo oscuro sobre el fondo marrón y queda tapado por la puerta."
+    },
+    {
+      "regla": "La tarjeta de datos debe mostrar lo que la voz dice en ese momento (aquí, el nombre del efecto) y no un dato de la frase siguiente. Las tarjetas no deben tapar el objeto principal de la escena.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T12:06:03+00:00",
+      "clave": "datos deben efecto escena frase momento mostrar nombre objeto principal siguiente tapar tarjeta tarjetas",
+      "ejemplo": "En el fotograma 3 la voz dice 'Tiene nombre: el efecto de la puerta', pero la pantalla muestra 'RADVANSKY DOS MIL SEIS', una tarjeta '2006 año del estudio' y una placa 'Radvansky 2006'. El dato llega antes que la voz y no aparece el nombre 'efecto de la puerta', que es lo que se está diciendo. La tarjeta grande tapa la puerta, que es el objeto principal."
+    },
+    {
+      "regla": "Los subtítulos deben mostrar la frase completa que se está diciendo, sin cortarla. Se tienen que cambiar al ritmo de la voz y no pueden superponerse a rótulos de la escena.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T12:06:03+00:00",
+      "clave": "cambiar completa cortarla deben diciendo escena frase mostrar pueden ritmo rótulos subtítulos superponerse tienen",
+      "ejemplo": "En el fotograma 7 el subtítulo 'VUELVE A LA' está cortado y no coincide con la voz, que dice 'El pensamiento de antes queda archivado en el episodio de atrás'. 'Vuelve a la sala' se dice en el fotograma 8. Además, el subtítulo se solapa con la etiqueta 'Radvansky 2006' del fondo."
+    },
+    {
+      "regla": "Los rótulos del escenario deben ser legibles y mostrarse solo cuando la narración los menciona. No deben quedar cortados por el borde ni solaparse con los subtítulos. Hay que dejar libre la zona del subtítulo.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T12:06:03+00:00",
+      "clave": "borde cortados cuando deben dejar escenario legibles libre menciona mostrarse narración quedar rótulos solaparse subtítulo subtítulos",
+      "ejemplo": "En los fotogramas 4, 5, 6 y 7 la etiqueta 'Radvansky' y la placa 'EFECTO PUERTA' se quedan fijas en la escena, cortadas por el borde superior, y chocan con los subtítulos (en el fotograma 6 'CORTA EN' se monta sobre ellas). Ensucian la imagen y no aportan nada en esos momentos."
+    },
+    {
+      "regla": "Si la voz nombra un objeto o una acción, el objeto debe verse completo y bien encuadrado en ese momento, con el personaje haciendo esa acción. No hay que dejarlo cortado por el borde ni mostrarlo después de que la voz lo diga.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T12:06:03+00:00",
+      "clave": "acción borde completo cortado dejarlo después encuadrado haciendo momento mostrarlo nombra objeto personaje verse",
+      "ejemplo": "En el fotograma 4 la voz habla de personas que llevan un objeto de un lado a otro, pero el personaje está parado con la mano en la cabeza y no hay objeto a la vista. El objeto (una caja con un cubo) solo aparece en el fotograma 5, y allí está cortado por el borde izquierdo."
+    },
+    {
+      "regla": "Todas las frases de la narración deben llevar subtítulo en pantalla. Los planos deben mostrar con claridad la idea que se explica, como una comparación entre dos situaciones, con el protagonista completo y de tamaño legible.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T12:06:03+00:00",
+      "clave": "claridad comparación completo deben entre explica frases legible llevar mostrar narración pantalla planos protagonista situaciones subtítulo tamaño todas",
+      "ejemplo": "El fotograma 5 no tiene subtítulo y está mal encuadrado. El personaje y la caja quedan cortados a la izquierda, y no se ve la comparación entre cruzar una puerta y caminar dentro de una sala que dice la voz. El fotograma 8 tampoco tiene subtítulo, y el personaje sale muy pequeño."
+    }
+  ]
+}
