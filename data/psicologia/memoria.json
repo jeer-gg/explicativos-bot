@@ -18,5 +18,25 @@
     "duracion": 52.09,
     "video_fb": "1470398191866085",
     "metricas": {}
+  },
+  {
+    "id": "20261124-2116",
+    "fecha": "2026-11-24",
+    "publicado_en": "2026-11-25T18:00:00+00:00",
+    "programado": true,
+    "titulo": "Por qué una canción se te pega todo el día",
+    "tema": "Por qué una canción se te queda pegada todo el día (y por qué casi siempre es el pedazo que ni te gusta)",
+    "tendencia": "",
+    "serie": null,
+    "subtema": "trucos de la memoria del día a día",
+    "estructura": "POR QUÉ LO HACEMOS: un comportamiento curioso de todos los días explicado desde su origen hasta hoy, con lo que se sabe y lo que todavía no",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "pregunta que todos se han hecho («¿Por qué una canción se te pega todo el día?»)",
+    "gancho": "¿Por qué a veces justo la parte que ni te gusta no se calla?",
+    "nota_revisor": 3.6,
+    "duracion": 55.33,
+    "video_fb": "1143192825132948",
+    "metricas": {}
   }
 ]

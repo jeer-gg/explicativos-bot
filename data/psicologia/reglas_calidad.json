@@ -3,10 +3,66 @@
     {
       "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
       "area": "voz",
-      "veces": 1,
-      "ultima": "2026-11-24T12:06:03+00:00",
+      "veces": 2,
+      "ultima": "2026-11-24T21:48:30+00:00",
       "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
       "ejemplo": "6 silencio(s) largos dentro de la narración"
+    },
+    {
+      "regla": "Cada subtítulo o tarjeta debe aparecer solo mientras la voz dice esa misma frase o dato, usando las marcas de tiempo reales de la narración. Nunca debe adelantarse ni quedar desfasado.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T21:48:30+00:00",
+      "clave": "adelantarse aparecer desfasado frase marcas mientras misma narración nunca quedar reales subtítulo tarjeta tiempo usando",
+      "ejemplo": "Los textos en pantalla no coinciden con la voz. En el fotograma 3 la voz dice «gusano del oído» y el subtítulo dice «UN BUCLE CORTO», que se dice después. En el fotograma 5 aparece la tarjeta «2015», que la voz dice hasta el 6. En el fotograma 6 la voz habla de Beaman y del chicle, pero el texto dice «VOZ INTERNA». Los subtítulos y tarjetas van adelantados respecto a la narración."
+    },
+    {
+      "regla": "Cuando la voz nombra un objeto o una acción clave, el fotograma debe mostrar ese objeto o acción de forma grande y reconocible. No se sustituye por un símbolo abstracto como un engranaje.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T21:48:30+00:00",
+      "clave": "abstracto acción clave cuando engranaje forma fotograma grande mostrar nombra objeto reconocible sustituye símbolo",
+      "ejemplo": "En ningún fotograma aparece un chicle ni alguien masticando, que es la solución central del video. En los fotogramas 6 y 8 la voz dice «masticar chicle» y «prueba con un chicle», pero se ve un engranaje dorado y dos personajes parados junto a la cabeza. El espectador no ve de qué se habla."
+    },
+    {
+      "regla": "La imagen debe mostrar la acción que describe la voz (quién hace qué y dónde). No se deja un plano genérico del mismo decorado con personajes inmóviles.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T21:48:30+00:00",
+      "clave": "acción decorado describe dónde genérico imagen inmóviles mismo mostrar personajes plano quién",
+      "ejemplo": "En el fotograma 2 la voz dice «Estás lavando platos y tu cabeza tararea sola», pero solo se ve una cabeza gigante con un casete y notas. No se ve a nadie lavando platos. En el fotograma 5 la voz habla de apartar la canción a la fuerza y se ven dos personajes parados sin ninguna acción que lo represente."
+    },
+    {
+      "regla": "Todo texto, tarjeta o elemento importante debe caber entero dentro de la zona segura del cuadro, con márgenes a todos los lados. Nada debe quedar cortado por el borde.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T21:48:30+00:00",
+      "clave": "borde caber cortado cuadro dentro elemento entero importante lados márgenes quedar segura tarjeta texto todos",
+      "ejemplo": "En el fotograma 3 se ve un texto cortado «buc» en el borde superior derecho. En el fotograma 5 la tarjeta «2015» queda recortada contra el borde superior. En los fotogramas 1 y 5 la cabeza y el decorado también quedan cortados por el borde."
+    },
+    {
+      "regla": "Coloca los subtítulos en una franja libre del encuadre, sin cubrir el objeto o personaje que la voz está explicando. La escena debe dejar ese espacio vacío.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T21:48:30+00:00",
+      "clave": "coloca cubrir dejar encuadre escena espacio explicando franja libre objeto personaje subtítulos vacío",
+      "ejemplo": "Los subtítulos grandes tapan elementos de la escena. «UN BUCLE CORTO» cubre el lavaplatos y la cabeza (fotograma 3). «NO PELEES» tapa la parte superior de la cabeza y el casete (fotograma 8). «MENOS CANCIONES» pisa los estantes y las notas (fotograma 7)."
+    },
+    {
+      "regla": "Las etiquetas y tarjetas deben tener un tamaño mínimo legible en móvil y buen contraste. El texto debe repetir fielmente el dato de la narración, sin cambiarlo ni exagerarlo.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T21:48:30+00:00",
+      "clave": "cambiarlo contraste deben etiquetas exagerarlo fielmente legible mínimo móvil narración repetir tamaño tarjetas tener texto",
+      "ejemplo": "Las etiquetas pequeñas son ilegibles en pantalla de móvil: «voz interna» en el fotograma 6 y «menos notas» en el 7 están muy pequeñas sobre fondo oscuro. Además, «MENOS CANCIONES» no coincide con lo que dice la voz, que es «menos pensamientos musicales no deseados», y exagera el dato del estudio."
+    },
+    {
+      "regla": "Cambia el encuadre, el foco o la acción en cada idea nueva del guion. Mantén el mismo mundo, pero con iluminación suficiente para distinguir los objetos.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T21:48:30+00:00",
+      "clave": "acción cambia distinguir encuadre guion iluminación mantén mismo mundo nueva objetos suficiente",
+      "ejemplo": "En todo el video se repite el mismo plano oscuro: cocina, cabeza con casete y los mismos personajes parados. La imagen casi no cambia entre fotogramas y la escena es muy oscura. Eso hace que el ritmo decaiga y que se pierdan los detalles."
     },
     {
       "regla": "Cada subtítulo y cada tarjeta de datos debe aparecer solo durante la frase que los dice, con el tiempo sacado del audio. Nunca deben adelantarse a la narración. El texto debe tener contraste suficiente y no ir sobre elementos de la escena.",
