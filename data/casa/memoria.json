@@ -18,5 +18,25 @@
     "duracion": 59.79,
     "video_fb": "2279916835892971",
     "metricas": {}
+  },
+  {
+    "id": "20261124-1526",
+    "fecha": "2026-11-24",
+    "publicado_en": "2026-11-25T14:00:00+00:00",
+    "programado": true,
+    "titulo": "Tu llave gotea y apretarla más la empeora",
+    "tema": "Por qué la llave del lavamanos gotea aunque la cierres fuerte y cómo se arregla con una pieza de goma de 5 minutos",
+    "tendencia": "",
+    "serie": null,
+    "subtema": "plomería por dentro (llaves que gotean)",
+    "estructura": "EL PROBLEMA POR DENTRO: un problema común de la casa; se abre en corte para ver por qué pasa, y luego el arreglo paso a paso hasta el antes y después",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "el problema inesperado («Parecía una gotera normal… hasta que abrimos la pared»)",
+    "gancho": "Cuanto más aprietas esa llave, más desgastas por dentro la pieza que sella.",
+    "nota_revisor": 4.3,
+    "duracion": 61.32,
+    "video_fb": "1142213685274235",
+    "metricas": {}
   }
 ]

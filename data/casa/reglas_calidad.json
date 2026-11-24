@@ -3,10 +3,74 @@
     {
       "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
       "area": "voz",
-      "veces": 1,
-      "ultima": "2026-11-24T05:55:19+00:00",
+      "veces": 2,
+      "ultima": "2026-11-24T15:50:35+00:00",
       "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
       "ejemplo": "8 silencio(s) largos dentro de la narración"
+    },
+    {
+      "regla": "Toda etiqueta o tarjeta de texto debe caber entera dentro del encuadre, con margen a los bordes. Los subtítulos y los elementos gráficos no deben tapar el objeto principal de la escena, y menos en el gancho.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T15:50:35+00:00",
+      "clave": "bordes caber deben dentro elementos encuadre entera escena etiqueta gancho gráficos margen menos objeto principal subtítulos tapar tarjeta texto",
+      "ejemplo": "En el fotograma 1, la etiqueta «pieza que se…» queda cortada por el borde derecho. El subtítulo «POR DENTRO» tapa la llave y el vástago, que son el objeto principal del gancho. Una mano de dibujos animados tapa además la parte superior de la llave."
+    },
+    {
+      "regla": "Cada fotograma debe mostrar la acción que dice la voz en ese momento. Una escena de «cerrar con fuerza» debe enseñar la mano apretando la llave. Las tarjetas y los subtítulos deben repetir lo que se está diciendo y no adelantar conceptos de otra frase.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T15:50:35+00:00",
+      "clave": "acción adelantar apretando cerrar conceptos deben diciendo enseñar escena fotograma frase fuerza llave momento mostrar repetir subtítulos tarjetas",
+      "ejemplo": "En el fotograma 2, la voz dice «cierras fuerte, y la gota sigue». La imagen muestra un zoom en círculo con una pieza azul y la etiqueta «vástago», y no la acción de cerrar la llave con fuerza. El subtítulo «LA ZAPATA» tampoco coincide con lo que dice la voz. La llave se ve de forma transparente y confusa."
+    },
+    {
+      "regla": "Cuando la voz explique una pieza pequeña o un daño interno, la escena debe acercarse con un primer plano o un corte, de modo que la pieza y su deformación se vean con claridad. No debe quedar como un detalle diminuto dentro de un plano general.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T15:50:35+00:00",
+      "clave": "acercarse claridad corte cuando deformación dentro detalle diminuto escena explique general interno pequeña pieza plano primer quedar",
+      "ejemplo": "En el fotograma 3, la voz habla de la goma aplastada y del asiento rayado. La imagen muestra la llave entera con una gota y una pieza semitransparente diminuta. No se ve la zapata aplastada ni el borde del asiento."
+    },
+    {
+      "regla": "El mensaje principal de cada frase debe verse en la imagen, por ejemplo con un detalle ampliado del hueco y del agua que pasa. Una mano o un objeto suelto que no tiene relación con la frase confunde al que mira.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T15:50:35+00:00",
+      "clave": "ampliado confunde detalle ejemplo frase hueco imagen mensaje objeto principal relación suelto tiene verse",
+      "ejemplo": "En el fotograma 4, la voz dice «queda un huequito, y el agua se cuela». La imagen muestra el mueble con una mano pequeña y un cubo al lado, y los dibujos de las tuberías no explican el huequito. Casi no hay texto ni tarjeta que acompañe el mensaje clave."
+    },
+    {
+      "regla": "Los pasos de un tutorial deben ir en el mismo orden que la voz. Cada fotograma debe mostrar la acción de ese paso, y ningún elemento, como una mano, debe quedar cortado por el borde del encuadre.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T15:50:35+00:00",
+      "clave": "acción borde cortado deben elemento encuadre fotograma mismo mostrar ningún orden pasos quedar tutorial",
+      "ejemplo": "En el fotograma 5, la voz dice «cierra las llaves de paso de abajo y abre la llave para vaciarla». La imagen muestra el vástago suelto en el aire, sin ninguna acción de cerrar las llaves de paso. Hay una mano cortada en el borde superior."
+    },
+    {
+      "regla": "El texto en pantalla debe corresponder al paso que se está narrando y no debe repetirse dos veces en el mismo fotograma. Hay que evitar que el título y la etiqueta se pisen entre sí o con el objeto.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T15:50:35+00:00",
+      "clave": "corresponder entre etiqueta evitar fotograma mismo narrando objeto pantalla pisen repetirse texto título veces",
+      "ejemplo": "En el fotograma 6, la voz dice «saca el vástago… la zapata aplastada». La imagen muestra «ZAPATA NUEVA» y el texto «zapata nueva» repetido dos veces, y se adelanta el paso siguiente. La zapata aplastada no se ve. El rótulo en pantalla se duplica y se superpone con el título."
+    },
+    {
+      "regla": "El subtítulo y la imagen deben seguir el orden de la narración. Un paso posterior no debe aparecer antes de que la voz lo diga. Las etiquetas partidas en varias piezas deben leerse como una sola frase.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T15:50:35+00:00",
+      "clave": "antes aparecer deben etiquetas frase imagen leerse narración orden partidas piezas posterior seguir subtítulo varias",
+      "ejemplo": "En el fotograma 7, la voz dice «cámbiala por una igual, con su tornillito… rectificador». La imagen muestra una llave con manija azul y el texto «SIN» y «fuerza», con una mano cortada. Eso corresponde al paso de armar y cerrar sin fuerza, no al cambio de la zapata. La etiqueta «fuerza» queda separada de la palabra «SIN»."
+    },
+    {
+      "regla": "El final debe pagar lo prometido con un antes y un después visibles, por ejemplo con la gota de antes y la llave seca de ahora. Si la narración pide una acción, como guardar el video, la pantalla debe mostrarla.",
+      "area": "guion",
+      "veces": 1,
+      "ultima": "2026-11-24T15:50:35+00:00",
+      "clave": "acción ahora antes después ejemplo final guardar llave mostrarla narración pagar pantalla prometido video visibles",
+      "ejemplo": "En el fotograma 8, el cierre dice «ahora nada» y la imagen muestra el lavabo con la llave seca, pero no se ve ninguna comparación con el «antes, gota tras gota». No hay tampoco una llamada final a guardar el video, que es lo que se pide en la narración."
     },
     {
       "regla": "Cada plano debe mostrar el objeto y la acción exactos que nombra la voz en ese segundo (por ejemplo, la pieza vieja que se retira, no la nueva ya instalada). Los subtítulos de palabras clave deben salir de la frase que se oye en ese momento, nunca de un paso posterior.",
