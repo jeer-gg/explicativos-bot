@@ -1,0 +1,76 @@
+{
+  "reglas": [
+    {
+      "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
+      "area": "voz",
+      "veces": 1,
+      "ultima": "2026-11-24T05:55:19+00:00",
+      "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
+      "ejemplo": "8 silencio(s) largos dentro de la narración"
+    },
+    {
+      "regla": "Cada plano debe mostrar el objeto y la acción exactos que nombra la voz en ese segundo (por ejemplo, la pieza vieja que se retira, no la nueva ya instalada). Los subtítulos de palabras clave deben salir de la frase que se oye en ese momento, nunca de un paso posterior.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T05:55:19+00:00",
+      "clave": "acción clave deben ejemplo exactos frase instalada momento mostrar nombra nueva nunca objeto palabras pieza plano posterior retira salir segundo subtítulos vieja",
+      "ejemplo": "El fotograma 7 muestra la aleta nueva (verde) ya puesta y el subtítulo «CON HOLGURA», que corresponde al paso de después. La voz dice que se suelta la aleta vieja de sus ganchitos y se desconecta la cadena. No hay ninguna mano ni acción de soltar."
+    },
+    {
+      "regla": "El subtítulo destacado debe sincronizarse con la frase hablada en pantalla, no adelantarse a la siguiente. Si la voz habla del resultado de una prueba, la imagen debe mostrar ese resultado claramente, por ejemplo el colorante visible en la taza.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T05:55:19+00:00",
+      "clave": "adelantarse claramente colorante destacado ejemplo frase habla hablada imagen mostrar pantalla prueba resultado siguiente sincronizarse subtítulo visible",
+      "ejemplo": "El fotograma 6 lleva el subtítulo «CIERRA LA LLAVE», pero la voz dice «¿Color en la taza? Esa es la fuga…». La imagen no deja claro el resultado de la prueba: la taza casi no tiene color, mientras la voz habla de color en la taza. La etiqueta «la t…» está cortada."
+    },
+    {
+      "regla": "Mantén los textos y tarjetas dentro de la zona segura, sin que se corten en los bordes. Encuadra el objeto protagonista completo y centrado, y no lo tapes con marcadores ni con texto.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T05:55:19+00:00",
+      "clave": "bordes centrado completo corten dentro encuadra mantén marcadores objeto protagonista segura tapes tarjetas texto textos",
+      "ejemplo": "En el fotograma 1, el gancho tiene texto cortado por el borde superior («cambia esto» a medias) y el tanque, que es el objeto clave, está recortado en la esquina. El círculo amarillo con una estrella tapa la pieza importante, la aleta. Además el título de portada se repite con el subtítulo «CAMBIA ESTO»."
+    },
+    {
+      "regla": "Las tarjetas de datos deben caber enteras en pantalla y ser legibles. Antes de exportar, comprueba que ningún texto toque ni cruce los bordes.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T05:55:19+00:00",
+      "clave": "antes bordes caber comprueba cruce datos deben enteras exportar legibles ningún pantalla tarjetas texto toque",
+      "ejemplo": "En el fotograma 2, la tarjeta de datos aparece cortada por el borde izquierdo y solo se lee «oma». Una mano gigante señala sin apuntar con claridad al fondo del tanque."
+    },
+    {
+      "regla": "Encuadra la parte que explica la voz (aquí, la pieza que falla y el punto de fuga) en un tamaño legible. No dejes el plano dominado por objetos secundarios.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T05:55:19+00:00",
+      "clave": "dejes dominado encuadra explica falla legible objetos parte pieza plano punto secundarios tamaño",
+      "ejemplo": "El fotograma 3 encuadra el inodoro enorme en primer plano, y el tanque con la aleta deformada queda diminuto y cortado arriba a la izquierda. No se ve cómo la aleta deformada deja pasar el agua, que es lo que dice la voz."
+    },
+    {
+      "regla": "No uses elementos sueltos y sin sentido, como manos flotantes sin acción. Muestra con claridad el mecanismo que describe la voz (flotador bajando, válvula abriéndose) y mantén el subtítulo en pantalla.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T05:55:19+00:00",
+      "clave": "abriéndose acción bajando claridad describe elementos flotador flotantes manos mantén mecanismo muestra pantalla sentido subtítulo sueltos válvula",
+      "ejemplo": "En el fotograma 4 hay una mano con manga naranja flotando sin cuerpo en la parte superior. El tanque es pequeño y está cortado, y el flotador que cae y la válvula que se abre no se distinguen. Tampoco hay subtítulo visible."
+    },
+    {
+      "regla": "Representa cada fase de una prueba por separado (antes, durante, resultado) con claridad visual. Las tarjetas no deben quedar cortadas.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T05:55:19+00:00",
+      "clave": "antes claridad cortadas deben durante prueba quedar representa resultado separado tarjetas visual",
+      "ejemplo": "En el fotograma 5, el tanque y la taza ya aparecen muy azules. La voz acaba de decir que se echa el colorante y hay que esperar, así que no se entiende si la imagen muestra el inicio o el resultado de la prueba. La tarjeta «la t…» está cortada."
+    },
+    {
+      "regla": "El plano final debe mostrar con claridad el resultado prometido (tanque lleno, sin fugas) con colores naturales. No uses teñidos que cubran toda la escena ni tapen los objetos.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T05:55:19+00:00",
+      "clave": "claridad colores cubran escena final fugas lleno mostrar naturales objetos plano prometido resultado tanque tapen teñidos",
+      "ejemplo": "El fotograma 8 tiene todo el cuarto, la pared y la taza teñidos de un azul saturado, lo que parece un filtro roto. Esto oculta el detalle y no muestra el tanque llenándose una vez ni el silencio. El tanque queda cortado arriba."
+    }
+  ]
+}

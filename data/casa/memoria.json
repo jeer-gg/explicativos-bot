@@ -1,0 +1,22 @@
+[
+  {
+    "id": "20261124-0526",
+    "fecha": "2026-11-24",
+    "publicado_en": "2026-11-24T14:00:00+00:00",
+    "programado": true,
+    "titulo": "Tu inodoro se rellena solo: la causa real",
+    "tema": "El inodoro que se queda sonando o rellenándose solo después de bajarlo: la culpa es la aleta de goma del tanque que ya no sella, y se cambia en 5 minutos",
+    "tendencia": "",
+    "serie": null,
+    "subtema": "plomería por dentro (inodoro)",
+    "estructura": "LO INESPERADO: un problema que parece pequeño, se abre por dentro y aparece la causa real que nadie esperaba, el arreglo paso a paso y el antes y después",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "error común («Casi todos limpian esto al revés»)",
+    "gancho": "Si tu inodoro suena solo, no cambies el inodoro: cambia esto.",
+    "nota_revisor": 5.7,
+    "duracion": 59.79,
+    "video_fb": "2279916835892971",
+    "metricas": {}
+  }
+]
