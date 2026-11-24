@@ -134,7 +134,12 @@ def _vecinas(guion: dict, indice: int) -> str:
     """Lo de antes y lo de después, para que la escena continúe la anterior y prepare la siguiente."""
     escenas = guion["escenas"]
     texto = ""
-    if indice > 0:
+    if indice > 0 and escenas[indice].get("corte"):
+        texto += (f"\nESTA ESCENA EMPIEZA CON UN CORTE (cambio de plano): antes se vio "
+                  f"{escenas[indice - 1].get('visual', '')}, pero tu escena NO tiene que continuar esa imagen. "
+                  "Muestra el nuevo plano (otro lugar, otra escala, un detalle o un recuerdo) con la misma "
+                  "paleta, el mismo estilo y el mismo protagonista, armado y claro desde el primer fotograma.")
+    elif indice > 0:
         texto += f"\nJusto antes se vio: {escenas[indice - 1].get('visual', '')} (continúa desde ahí: mismos objetos, mismo lugar)."
     if indice < len(escenas) - 1:
         texto += f"\nJusto después se verá: {escenas[indice + 1].get('visual', '')} (deja todo listo para eso)."
@@ -147,6 +152,10 @@ def _paso_mundo(guion: dict, indice: int) -> str:
     escenas = guion["escenas"]
     antes = escenas[indice - 1].get("mundo", "") if indice > 0 else "el estado inicial del mundo"
     despues = escenas[indice].get("mundo", "")
+    if indice > 0 and escenas[indice].get("corte"):
+        return (f"\nPASO = {indice}. Esta escena es un CORTE: si muestra otro lugar u otra escala, no uses "
+                f"<Mundo> (dibuja el nuevo plano tú mismo); si es un detalle del mismo mundo, usa "
+                f"<Mundo paso={{{indice}}} ... /> con la cámara muy cerca. Al volver, el mundo sigue así: {despues}")
     return (f"\nPASO = {indice} (usa <Mundo paso={{{indice}}} ... />)."
             f"\nAl empezar, el mundo está así: {antes}"
             f"\nAl terminar tu escena debe quedar así (igual que <Mundo paso={{{indice + 1}}} />): {despues}")

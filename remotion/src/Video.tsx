@@ -18,6 +18,7 @@ export type EscenaPlan = {
   clave?: number | null; // segundo (dentro de la escena) de la palabra clave
   clave_palabra?: string;
   camara?: string;
+  corte?: boolean; // la escena empieza con un cambio de plano (corte seco con un destello)
   grafico?: Grafico | null;
   concepto?: string; // frase de 1 a 4 palabras que se dice en la voz y aparece grande arriba
 };

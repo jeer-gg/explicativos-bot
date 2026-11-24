@@ -42,8 +42,9 @@ SERIE NUEVA: este video es la PARTE 1 de una historia en 2 o 3 partes.
 
 REGLAS_MUNDO_EXPLICATIVO = """- UN SOLO MUNDO QUE EVOLUCIONA (así son los Reels 3D con millones de vistas): todo el video pasa
   en el mismo lugar con el mismo protagonista (un objeto, una máquina, un sistema), y cada
-  escena le cambia UNA cosa: se agrega una pieza, se llena, se abre, falla, se arregla. Nada de
-  saltar a otro lugar u otro objeto. En cada escena escribe en "mundo" cómo queda al terminarla.
+  escena le cambia UNA cosa: se agrega una pieza, se llena, se abre, falla, se arregla. No saltes
+  a otro lugar u otro objeto sin motivo; si el tema lo pide, usa un corte ("corte": true) y vuelve
+  luego al mundo. En cada escena escribe en "mundo" cómo queda al terminarla.
   · Empieza muchas veces por la versión más simple o rota del objeto («ya tienes un avión: una
     tabla y un palo») y cada frase le agrega la pieza que resuelve el siguiente problema.
   · Muestra qué pasa SIN la pieza (se cae, se desborda, no sube, se rompe) justo antes de
@@ -75,7 +76,8 @@ REGLAS_MUNDO_HISTORIA = """- HECHOS REALES: la historia pasó de verdad (fechas,
   tensión («la puerta se abre… y no hay nadie»), sin exagerar lo que pasó.
 - UN SOLO ESCENARIO QUE EVOLUCIONA: toda la historia pasa en un escenario de teatro en miniatura
   (el lugar que va con ESTA historia: un barco, un laboratorio, un pueblo, el espacio), con luz de
-  cine y un foco cálido sobre el protagonista, donde la escena va cambiando: entran y salen figuras, aparece
+  cine y un foco cálido sobre el protagonista, donde la escena va cambiando (si la historia salta de
+  lugar o de época, usa un corte con "corte": true): entran y salen figuras, aparece
   el objeto clave, cambia la luz. En cada escena escribe en "mundo" cómo queda el escenario al
   terminarla (quién está, qué objeto hay, qué cambió).
 """
@@ -195,7 +197,14 @@ Formato ganador: {estilo['estructura']}
   una X roja), {{"tipo": "contador", "valor": 1839, "etiqueta": "año"}}. Usa solo datos verificados.
 {"- Incluye la versión B del gancho: otra primera escena con un tipo de gancho distinto." if p.get("ab_gancho") else ""}
 - Define una dirección de arte común: el mismo protagonista y el mismo mundo visual en todas
-  las escenas, para que el video se sienta como un solo plano continuo.
+  las escenas.
+- Plano continuo o cortes: por defecto el video es UN solo plano continuo (la cámara se mueve
+  dentro del mismo mundo). Pero si el tema lo pide, marca "corte": true en la escena que empieza
+  con un cambio de plano: otro lugar (de la cocina al interior de la pared), otra escala (del
+  objeto a lo microscópico), un antes y después, un recuerdo o flashback, una comparación lado a
+  lado o un detalle de cerca. Nunca en la primera escena, como mucho 3 cortes por video, y solo
+  cuando el cambio ayude a entender o a sorprender (no por adornar). Si no hace falta, todo en
+  "corte": false.
 
 Devuelve JSON:
 {{
@@ -207,7 +216,7 @@ Devuelve JSON:
  "escenas": [
    {{"voz": "texto narrado", "visual": "descripción detallada de la ilustración y su animación",
      "rotulo": "0 a 3 palabras o vacío", "palabra_clave": "palabra de la voz donde ocurre el momento visual principal",
-     "concepto": "1 a 4 palabras dichas tal cual en la voz", "mundo": "cómo queda el mundo al terminar esta escena (qué piezas hay, en qué estado)",
+     "concepto": "1 a 4 palabras dichas tal cual en la voz", "mundo": "cómo queda el mundo al terminar esta escena (qué piezas hay, en qué estado)", "corte": false,
      "grafico": null,
      "datos": [{{"afirmacion": "...", "fuente": "url o referencia"}}]}}
  ],
