@@ -108,7 +108,10 @@ def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
                         "clave_palabra": fuente.get("palabra_clave", "") or "",
                         "camara": estudio.encuadre(len(escenas)),
                         "grafico": grafico_valido(fuente.get("grafico")),
-                        "concepto": (fuente.get("concepto") or "").strip()[:40]})
+                        "concepto": (fuente.get("concepto") or "").strip()[:40],
+                        # Cambio de plano al empezar la escena (nunca en la primera; como mucho 3)
+                        "corte": bool(fuente.get("corte")) and len(escenas) > 0
+                                 and sum(1 for e in escenas if e.get("corte")) < 3})
     return {
         "motor": cfg["produccion"].get("motor", "2d"),
         "audio": tiempos_variante["audio"],

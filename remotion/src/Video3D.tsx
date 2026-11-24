@@ -42,9 +42,12 @@ const calcularCamara = (frame: number, fps: number, plan: PlanVideo) => {
   const T = Math.round(0.6 * fps);
   const inicios = plan.escenas.map((e) => Math.round(e.inicio * fps));
   let actual = 0;
-  for (let i = 0; i < inicios.length; i++) if (frame >= inicios[i] - Math.round(T * 0.45)) actual = i;
-  const llegada = inicios[actual] - Math.round(T * 0.45);
-  const p = actual === 0 ? 1 : interpolate(frame, [llegada, llegada + T], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: SUAVE});
+  // Con corte, la escena cambia de golpe en su primer fotograma; sin corte, la cámara viaja suave.
+  const adelanto = (i: number) => (plan.escenas[i].corte ? 0 : Math.round(T * 0.45));
+  for (let i = 0; i < inicios.length; i++) if (frame >= inicios[i] - adelanto(i)) actual = i;
+  const llegada = inicios[actual] - adelanto(actual);
+  const corte = actual > 0 && !!plan.escenas[actual].corte;
+  const p = actual === 0 || corte ? 1 : interpolate(frame, [llegada, llegada + T], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: SUAVE});
   const local = Math.max(0, frame - inicios[actual]);
   const dur = Math.max(1, Math.round(plan.escenas[actual].duracion * fps));
   const avance = Math.min(1, local / dur);
@@ -55,6 +58,8 @@ const calcularCamara = (frame: number, fps: number, plan: PlanVideo) => {
     const f = local - Math.round(clave * fps);
     if (f >= 0 && f <= 16) cerca -= Math.sin((f / 16) * Math.PI) * 0.1;
   }
+  // Tras un corte, un pequeño empujón de cámara para que el cambio se sienta intencional.
+  if (corte) cerca *= interpolate(local, [0, 10], [0.86, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
   // Arranque con golpe: el video empieza muy cerca y se abre de golpe en el primer medio segundo.
   if (actual === 0) cerca *= interpolate(local, [0, 14], [0.62, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
   const giro = (avance - 0.5) * 0.3;
@@ -69,7 +74,7 @@ const calcularCamara = (frame: number, fps: number, plan: PlanVideo) => {
   const offMira = mezclar(previo.mira, este.mira, p);
   const ojo = sumar(base, sumar(offOjo, [0, viaje * 0.8, viaje * 1.2]));
   const mira = sumar(base, offMira);
-  return {ojo, mira, actual, inicios};
+  return {ojo, mira, actual, inicios, corte, local};
 };
 
 const Camara: React.FC<{ojo: V3; mira: V3}> = ({ojo, mira}) => {
@@ -364,6 +369,11 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
           {plan.subtitulos && !conceptos ? <Subtitulos plan={plan} cine desde={plan.portada ? DURACION_PORTADA : 0} /> : null}
         </>
       )}
+
+      {cam.corte && cam.local < 6 ? (
+        // Destello corto en el corte de plano (claro de día, oscuro de noche)
+        <AbsoluteFill style={{background: dia ? '#FFFFFF' : '#000000', opacity: interpolate(cam.local, [0, 6], [0.55, 0], {extrapolateRight: 'clamp'})}} />
+      ) : null}
 
       <Audio src={staticFile(plan.audio)} />
       {plan.musica ? <Audio src={staticFile(`musica/${plan.musica}`)} volume={0.07} loop /> : null}
