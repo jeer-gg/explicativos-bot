@@ -38,5 +38,25 @@
     "duracion": 61.32,
     "video_fb": "1142213685274235",
     "metricas": {}
+  },
+  {
+    "id": "20261124-2026",
+    "fecha": "2026-11-24",
+    "publicado_en": "2026-11-26T14:00:00+00:00",
+    "programado": true,
+    "titulo": "Por qué se tapa otra vez y cómo destaparlo bien",
+    "tema": "Por qué tu desagüe se tapa otra vez si le echas destapacaños líquido y cómo se destapa de verdad con una sopapa bien usada",
+    "tendencia": "",
+    "serie": null,
+    "subtema": "plomería por dentro (desagües tapados)",
+    "estructura": "NO HAGAS ESTO: lo que casi todos hacen mal con algo de la casa, por qué lo empeora (se ve por dentro) y lo que sí funciona",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "el truco del maestro («Los plomeros no te dicen este truco»)",
+    "gancho": "Un frasco entero de químico, y el tapón se burla de ti.",
+    "nota_revisor": 5.0,
+    "duracion": 55.56,
+    "video_fb": "1175964521786094",
+    "metricas": {}
   }
 ]

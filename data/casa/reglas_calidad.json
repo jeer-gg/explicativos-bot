@@ -9,6 +9,46 @@
       "ejemplo": "8 silencio(s) largos dentro de la narración"
     },
     {
+      "regla": "Frases cortas y fáciles de pronunciar; números escritos como se dicen.",
+      "area": "voz",
+      "veces": 1,
+      "ultima": "2026-11-24T20:55:58+00:00",
+      "clave": "cortas dicen escritos frases fáciles números pronunciar",
+      "ejemplo": "solo se entiende el 31 % del guion en el audio"
+    },
+    {
+      "regla": "Cambia el plano o la acción visual al menos cada 4-5 segundos. Cada frase de la narración necesita su propia imagen. Ninguna escena puede quedarse con el mismo encuadre y la misma acción durante varios segundos seguidos.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T20:55:58+00:00",
+      "clave": "acción cambia durante encuadre escena frase imagen menos misma mismo narración necesita ninguna plano propia puede quedarse seguidos segundos varios visual",
+      "ejemplo": "Los fotogramas 1 a 5 (casi 27 s) muestran la misma imagen casi congelada: la botella verde inclinada sobre el lavabo. La cámara y la acción apenas cambian. El ritmo decae, y la explicación del líquido que solo abre un huequito no se ve."
+    },
+    {
+      "regla": "El título, la tarjeta y la escena de cada momento deben corresponder a lo que dice la voz en ese instante. No muestres elementos de un paso posterior antes de que se narre. Las tarjetas no deben tapar el objeto principal.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T20:55:58+00:00",
+      "clave": "antes corresponder deben elementos escena instante momento muestres narre objeto posterior principal tapar tarjeta tarjetas título",
+      "ejemplo": "En el fotograma 6 la voz dice que el resto del tapón sigue pegado a la tubería. La pantalla muestra una sopapa dentro del lavabo, un título «AGUA ARRIBA» y una tarjeta «en seco» con otra sopapa. Esos elementos corresponden a los pasos de uso de la sopapa, no a la frase que se oye. Además, la tarjeta tapa parte de la escena."
+    },
+    {
+      "regla": "Cuando la voz describe una acción (despegar, bombear, tapar), la imagen debe mostrar al objeto haciendo esa acción sobre la parte correcta. Los textos en pantalla deben repetir o resumir la narración sin cambiar su sentido. No cortes objetos clave por el borde del encuadre.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T20:55:58+00:00",
+      "clave": "acción bombear borde cambiar clave correcta cortes cuando deben describe despegar encuadre haciendo imagen mostrar narración objeto objetos pantalla parte repetir resumir sentido sobre tapar textos",
+      "ejemplo": "En el fotograma 7 la voz habla de despegar la ventosa de golpe. La imagen muestra un corte de la tubería en U con el título «SALE COMPLETO». La sopapa aparece tirada a un lado y cortada por el borde izquierdo, sin estar sobre el desagüe, así que no se ve la acción de despegar. «Sale completo» tampoco coincide con la frase narrada."
+    },
+    {
+      "regla": "Una advertencia de seguridad debe ilustrarse con una imagen clara del riesgo, por ejemplo un icono de prohibido o una salpicadura. Los adornos gráficos y los textos deben quedar completos dentro del encuadre seguro.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T20:55:58+00:00",
+      "clave": "adornos advertencia clara completos deben dentro ejemplo encuadre gráficos icono ilustrarse imagen prohibido quedar riesgo salpicadura seguridad seguro textos",
+      "ejemplo": "En el fotograma 8 la voz advierte que no se use la sopapa si ya se echó químico, porque puede salpicar. La pantalla solo muestra una sopapa de pie y el título «GUÁRDALO». No hay señal visual de la advertencia, ni de la salpicadura ni del químico. La estrella amarilla de la derecha queda cortada por el borde."
+    },
+    {
       "regla": "Toda etiqueta o tarjeta de texto debe caber entera dentro del encuadre, con margen a los bordes. Los subtítulos y los elementos gráficos no deben tapar el objeto principal de la escena, y menos en el gancho.",
       "area": "edicion",
       "veces": 1,
