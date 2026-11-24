@@ -1,0 +1,278 @@
+{
+  "inicio": "2026-11-24T22:23:22+00:00",
+  "escenas": {},
+  "tema": {
+    "tema": "Cómo hace un aire acondicionado para sacar el calor de tu cuarto sin crear frío",
+    "angulo": "Vista en corte: el aire acondicionado no fabrica frío, mueve el calor de adentro hacia afuera con un gas que se comprime y se expande. Por cada unidad de electricidad que gasta, mueve unas 3 o más unidades de calor. Por eso el aparato de afuera suelta aire caliente.",
+    "subtema": "ciencia de cosas cotidianas",
+    "tendencia": "Récord de calor y mensajes de emergencia climática; verano en el sur y invierno en el norte",
+    "pregunta_origen": "¿Cómo hace un aire acondicionado para sacar el calor de una habitación?",
+    "gancho": "Tu aire acondicionado mueve tres veces más calor del que gasta.",
+    "tono_visual": "mecanismo",
+    "puntos": {
+      "curiosidad": 5,
+      "emocion": 4,
+      "compartir": 4,
+      "utilidad": 4,
+      "universal": 5,
+      "visual": 5,
+      "verificable": 5
+    },
+    "por_que": "Es un objeto que casi todo el público usa o sufre en el verano del sur. El corte muestra el gas, el compresor y las flechas de calor. La cifra de 3 veces sale del rendimiento (COP) típico y se puede confirmar. Rompe la idea de que 'hace frío', y eso da asombro y ganas de compartirlo. No toca salud ni dinero.",
+    "puntaje_viral": 70.0
+  },
+  "estilo": {
+    "tendencia": true,
+    "paleta": "marca",
+    "colores": {
+      "fondo": "#D3CEC6",
+      "tinta": "#1B1B1F",
+      "acentos": [
+        "#D2452F",
+        "#E9E4DB",
+        "#A3D92B",
+        "#E0A526",
+        "#C2BBAF"
+      ]
+    },
+    "tipo_gancho": "comparación imposible con número («va más lento que un tren»)",
+    "estructura": "POR DENTRO: vista en corte de algo cotidiano para ver lo que pasa adentro (aire, agua, fuerzas, calor) con flechas que lo muestran"
+  },
+  "guion": {
+    "titulo": "Tu aire acondicionado no fabrica frío",
+    "descripcion": "Mira por dentro un aire acondicionado y descubre cómo saca el calor de tu cuarto con un gas que se comprime y se expande.",
+    "portada": "CAMIÓN DE MUDANZAS EN TU AIRE",
+    "pregunta_comentarios": "¿Sabías que el aparato de afuera suelta el calor de tu cuarto? Cuéntanos qué sientes cuando pasas junto a él.",
+    "hashtags": [
+      "#AireAcondicionado",
+      "#CómoFunciona",
+      "#Refrigerante",
+      "#CalorExtremo",
+      "#CienciaCotidiana"
+    ],
+    "escenas": [
+      {
+        "voz": "Hay un camión de mudanzas escondido dentro de tu aire.",
+        "visual": "Fotograma 0: la rejilla del aire de pared se abre de golpe y un camión de mudanzas diminuto sale a toda velocidad por el tubo de cobre transparente. Va cargado de cajas que se tambalean y de bolitas rojas con carita asustada. En el primer segundo derrapa en la curva y las cajas casi se caen, en el cuarto en corte con la unidad exterior al otro lado del muro.",
+        "rotulo": "CAMIÓN DE MUDANZAS",
+        "palabra_clave": "mudanzas",
+        "concepto": "CAMIÓN DE MUDANZAS",
+        "mundo": "Cuarto caluroso en corte, con el aire acondicionado interior en la pared y la unidad exterior al otro lado del muro.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Un aire acondicionado puede tener un coeficiente de rendimiento (COP) mayor que uno, es decir, mueve más calor del que consume en electricidad.",
+            "fuente": "https://en.wikipedia.org/wiki/Coefficient_of_performance"
+          }
+        ]
+      },
+      {
+        "voz": "Pero ojo: no fabrica nada de frío.",
+        "visual": "El aire acondicionado sopla aire azul. Un tachón rojo aparece sobre una nube de frío que sale de él y la nube se deshace.",
+        "rotulo": "",
+        "palabra_clave": "nada",
+        "concepto": "NO FABRICA FRÍO",
+        "mundo": "El mismo cuarto en corte; la idea de que el frío se fabrica queda tachada.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Un aire acondicionado mueve calor de un lugar a otro, no genera frío; funciona como una bomba de calor.",
+            "fuente": "https://en.wikipedia.org/wiki/Heat_pump"
+          }
+        ]
+      },
+      {
+        "voz": "Lo que hace es sacar el calor de tu cuarto, como una mudanza.",
+        "visual": "Pequeñas bolitas rojas de calor salen del aire del cuarto cargadas en cajas de mudanza hacia un tubo que cruza la pared.",
+        "rotulo": "MUDANZA DE CALOR",
+        "palabra_clave": "mudanza",
+        "concepto": "UNA MUDANZA DE CALOR",
+        "mundo": "El cuarto con un tubo de cobre visible que conecta la unidad interior con la exterior, atravesando el muro.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "El aire acondicionado transfiere calor del interior al exterior mediante un ciclo de refrigeración.",
+            "fuente": "https://en.wikipedia.org/wiki/Heat_pump"
+          }
+        ]
+      },
+      {
+        "voz": "Para eso usa un gas especial: el refrigerante.",
+        "visual": "Zoom al tubo de cobre, que se vuelve transparente. Dentro corre un gas azul brillante en un circuito cerrado.",
+        "rotulo": "REFRIGERANTE",
+        "palabra_clave": "refrigerante",
+        "concepto": "EL REFRIGERANTE",
+        "mundo": "El circuito de tubos con el refrigerante circulando entre la unidad interior y la exterior.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Los equipos usan un fluido refrigerante que circula en circuito cerrado cambiando de estado entre líquido y gas.",
+            "fuente": "https://en.wikipedia.org/wiki/Heat_pump"
+          }
+        ]
+      },
+      {
+        "voz": "Adentro, en el evaporador, el gas está más frío que tu cuarto. Así que absorbe tu calor.",
+        "visual": "Corte de la unidad interior: un radiador de aletas con la etiqueta. Las bolitas rojas del aire se pegan al gas azul, que se tiñe de naranja.",
+        "rotulo": "EVAPORADOR",
+        "palabra_clave": "evaporador",
+        "concepto": "EL EVAPORADOR",
+        "mundo": "Unidad interior en corte con el evaporador señalado; el gas sale naranja, cargado de calor.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "En el evaporador el refrigerante absorbe calor del aire interior al evaporarse.",
+            "fuente": "https://en.wikipedia.org/wiki/Heat_pump"
+          }
+        ]
+      },
+      {
+        "voz": "Pero ese gas no está lo bastante caliente para soltar su calor afuera.",
+        "visual": "La unidad exterior, con un termómetro que marca un día cálido. El gas naranja llega y las bolitas rojas intentan salir pero rebotan contra el aire de afuera.",
+        "rotulo": "NO ALCANZA",
+        "palabra_clave": "bastante",
+        "concepto": "NO ALCANZA",
+        "mundo": "El gas naranja llega a la unidad exterior pero no puede soltar su calor.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "El calor fluye naturalmente de lo caliente a lo frío, por lo que el refrigerante debe estar más caliente que el aire exterior para liberar calor.",
+            "fuente": "https://en.wikipedia.org/wiki/Heat_pump"
+          }
+        ]
+      },
+      {
+        "voz": "Entonces entra el compresor. Aprieta el gas y lo pone calentísimo.",
+        "visual": "Corte de la unidad exterior: un cilindro compresor con un pistón que aprieta el gas. El gas pasa de naranja a rojo intenso con vibración.",
+        "rotulo": "COMPRESOR",
+        "palabra_clave": "compresor",
+        "concepto": "EL COMPRESOR",
+        "mundo": "Unidad exterior en corte con el compresor señalado; el gas sale rojo y a alta presión.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Al comprimir un gas aumenta su temperatura; el compresor eleva la presión y la temperatura del refrigerante.",
+            "fuente": "https://en.wikipedia.org/wiki/Heat_pump"
+          }
+        ]
+      },
+      {
+        "voz": "Ahora sí está más caliente que la calle, y en el condensador suelta tu calor afuera.",
+        "visual": "El gas rojo recorre el condensador de aletas y las bolitas rojas salen volando hacia el exterior con un ventilador que las sopla. El gas se vuelve naranja claro.",
+        "rotulo": "CONDENSADOR",
+        "palabra_clave": "condensador",
+        "concepto": "EL CONDENSADOR",
+        "mundo": "El condensador en la unidad exterior suelta calor al aire de la calle; el gas sale menos caliente.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "En el condensador el refrigerante cede calor al aire exterior.",
+            "fuente": "https://en.wikipedia.org/wiki/Heat_pump"
+          }
+        ]
+      },
+      {
+        "voz": "Pero eso no es lo más loco. Falta la válvula de expansión: el gas pasa y se enfría de golpe.",
+        "visual": "El tubo se estrecha en una pequeña válvula. El gas la atraviesa, se expande como una nube y cambia de naranja claro a azul con escarcha.",
+        "rotulo": "EXPANSIÓN",
+        "palabra_clave": "válvula",
+        "concepto": "SE EXPANDE",
+        "mundo": "El circuito completo con la válvula de expansión señalada; el gas sale azul y muy frío.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Al expandirse a través de una válvula, el refrigerante baja su presión y su temperatura.",
+            "fuente": "https://en.wikipedia.org/wiki/Heat_pump"
+          }
+        ]
+      },
+      {
+        "voz": "Vuelve al cuarto más frío que tu aire, listo para cargar más calor. Y así, en círculo.",
+        "visual": "Cámara sigue al gas azul que regresa a la unidad interior. Una flecha circular recorre todo el circuito mientras las bolitas rojas se suben otra vez.",
+        "rotulo": "EN CÍRCULO",
+        "palabra_clave": "círculo",
+        "concepto": "UN CICLO SIN FIN",
+        "mundo": "El ciclo completo funcionando: evaporador, compresor, condensador y válvula conectados por flechas.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "El ciclo de refrigeración por compresión de vapor es un ciclo cerrado continuo.",
+            "fuente": "https://en.wikipedia.org/wiki/Heat_pump"
+          }
+        ]
+      },
+      {
+        "voz": "Casi toda la electricidad la gasta el compresor. Por cada unidad que gasta, mueve unas tres o más de calor.",
+        "visual": "Un cable eléctrico entra al compresor con una sola flecha amarilla. Del sistema salen tres flechas rojas de calor grandes hacia afuera.",
+        "rotulo": "1 ENTRA, 3 SALEN",
+        "palabra_clave": "tres",
+        "concepto": "UNA GASTA, TRES MUEVE",
+        "mundo": "El ciclo con una flecha amarilla de electricidad entrando y tres flechas rojas de calor saliendo.",
+        "grafico": {
+          "tipo": "barras",
+          "items": [
+            {
+              "etiqueta": "electricidad",
+              "valor": 1,
+              "unidad": "unidad"
+            },
+            {
+              "etiqueta": "calor movido",
+              "valor": 3,
+              "unidad": "unidades"
+            }
+          ]
+        },
+        "datos": [
+          {
+            "afirmacion": "Los aires acondicionados y bombas de calor tienen un coeficiente de rendimiento (COP) superior a uno, típicamente alrededor de tres o más. El compresor es el mayor consumidor; los ventiladores también consumen algo.",
+            "fuente": "https://en.wikipedia.org/wiki/Coefficient_of_performance"
+          }
+        ]
+      },
+      {
+        "voz": "Por eso el aparato de afuera suelta aire caliente: es tu calor, mudado.",
+        "visual": "Plano exterior de la casa en corte: la unidad exterior sopla una corriente roja ondulante mientras adentro el cuarto se ve azul y fresco.",
+        "rotulo": "AIRE CALIENTE AFUERA",
+        "palabra_clave": "afuera",
+        "concepto": "AFUERA SALE CALOR",
+        "mundo": "Cuarto fresco por dentro; unidad exterior soplando aire caliente por fuera.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "La unidad exterior de un aire acondicionado expulsa calor al ambiente.",
+            "fuente": "https://en.wikipedia.org/wiki/Heat_pump"
+          }
+        ]
+      },
+      {
+        "voz": "Tu aire no hace frío, hace mudanzas. ¿Y adónde se lleva tanto calor?",
+        "visual": "Plano amplio: todas las flechas rojas salen de la unidad exterior hacia la calle, y el termómetro de la pared vuelve a subir ligeramente, igual que al inicio.",
+        "rotulo": "¿ADÓNDE VA?",
+        "palabra_clave": "mudanzas",
+        "concepto": "HACE MUDANZAS",
+        "mundo": "El mismo cuarto del inicio, con el calor acumulándose afuera, listo para repetir el ciclo.",
+        "grafico": null,
+        "datos": []
+      }
+    ],
+    "direccion_arte": {
+      "protagonista": "Un aire acondicionado de pared blanco alargado con rejillas, y su unidad exterior gris con ventilador redondo, dibujados en estilo 3D limpio y amable.",
+      "secundarios": "Bolitas rojas con carita pequeña que representan el calor; gas refrigerante azul brillante que se tiñe de naranja o rojo según su temperatura; flechas grandes rojas, azules y amarillas.",
+      "ambiente": "Una casa en maqueta en corte: un cuarto con la unidad interior en la pared, el muro al medio y la unidad exterior por fuera.",
+      "escenario": "interior",
+      "partes": "Evaporador (radiador de aletas azul), compresor (cilindro metálico con pistón), condensador (radiador de aletas rojo con ventilador), válvula de expansión (pieza pequeña de cobre que estrecha el tubo), tubos de cobre transparentes.",
+      "metafora": "El calor es carga que se muda de dentro hacia afuera, y el gas es el camión de mudanzas que se carga frío y se descarga caliente.",
+      "tono_visual": "mecanismo: objeto grande en corte o rayos X, piezas que se encienden una a una con flechas; cámara que entra al objeto"
+    },
+    "verificacion": {
+      "cambios": [
+        "Escena 11: «Solo el compresor gasta electricidad» era inexacto, porque los ventiladores y la electrónica también consumen. Ahora dice «Casi toda la electricidad la gasta el compresor». La cifra de «unas tres o más» unidades de calor por cada una de electricidad (COP típico de 3 a 4) se mantiene.",
+        "Escena 1: quité el dato sobre «Octubre de 2026» como el más cálido registrado (Copernicus). No lo pude confirmar con una fuente fiable y no tiene relación con lo que dice la voz.",
+        "Escena 11: ajusté el dato de apoyo para aclarar que los ventiladores también consumen algo.",
+        "El resto de la voz es correcto y se dejó igual. Verifiqué el ciclo de compresión de vapor (evaporador, compresor, condensador y válvula de expansión), que el calor fluye de lo caliente a lo frío, y que la unidad exterior expulsa aire caliente. No hice búsquedas externas: la revisión se basó en conocimiento técnico estándar."
+      ],
+      "confianza": "alta"
+    }
+  }
+}

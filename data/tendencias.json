@@ -1,166 +1,165 @@
 {
-  "fecha": "2026-11-23",
+  "fecha": "2026-11-24",
   "tendencias": [
     {
-      "tendencia": "El 'Súper Niño' 2026-27 domina las noticias del clima en Latinoamérica y Europa. Hay lluvias récord en Chile, sequías y calor en otras regiones, y el Ideam de Colombia lo declaró oficialmente el 8 de octubre.",
-      "fuente": "https://www.unotv.com/ciencia-y-tecnologia/el-super-nino-ya-esta-haciendo-estragos-en-el-mundo-tifones-sequias-y-huracanes/ ; https://www.emol.com/noticias/Tecnologia/2026/11/10/1216703/el-nino-europa-medidas-efectos.html",
+      "tendencia": "El Niño vuelve a asomar y 2026 cierra como parte del cuatrienio más caliente registrado (+1,47 °C sobre el nivel preindustrial entre enero y septiembre)",
+      "fuente": "https://www.emol.com/noticias/Tecnologia/2026/11/10/1216703/el-nino-europa-medidas-efectos.html y https://noticias.perfil.com/noticias/ciencia/la-tierra-acumula-calor-cada-vez-mas-rapido-y-2026-cierra-el-cuatrienio-mas-caliente-en-177-anos-de-registros.phtml",
       "preguntas": [
         {
-          "pregunta": "¿Por qué el agua del mar tarda tanto en calentarse y en enfriarse?",
-          "angulo": "El agua guarda unas 4 veces más calor que el aire o la tierra por kilo. Por eso unos grados en el Pacífico cambian el clima de continentes enteros.",
-          "subtema": "ciencia de cosas cotidianas (clima)"
-        },
-        {
-          "pregunta": "¿Por qué se forman las nubes y cómo pesa una nube de lluvia?",
-          "angulo": "Una nube de tormenta puede pesar más de 500 toneladas y aun así flota, porque sus gotas son diminutas y el aire cálido las sostiene.",
-          "subtema": "ciencia de cosas cotidianas (clima)"
-        },
-        {
-          "pregunta": "¿Por qué el viento sopla de un lado a otro?",
-          "angulo": "El viento es el aire intentando igualar diferencias de presión causadas por zonas más calientes y más frías. Es literalmente aire 'cayendo cuesta abajo'.",
-          "subtema": "ciencia de cosas cotidianas (clima)"
-        },
-        {
-          "pregunta": "¿Cómo hace un pronóstico del clima para saber qué pasará en 5 días?",
-          "angulo": "Corre simulaciones del aire con cientos de variaciones del mismo día, y si la mayoría coincide, el pronóstico es confiable.",
-          "subtema": "tecnología que usamos sin entender"
-        }
-      ]
-    },
-    {
-      "tendencia": "Superluna y lluvias de estrellas de fin de noviembre. Pasó el pico de las Leónidas (17-18 nov), quedan las Táuridas hasta diciembre, la luna llena se acerca y las Oriónidas tienen su máximo el 28.",
-      "fuente": "https://www.nacion.com/ciencia/calendario-astronomico-de-noviembre-de-2026/KONSX6MDYNFVBH7ZSXKF5L4ZKY/story/ ; https://astronomia.ign.es/leonidas",
-      "preguntas": [
-        {
-          "pregunta": "¿Por qué la luna se ve gigante cerca del horizonte?",
-          "angulo": "Es una ilusión de percepción: la luna mide lo mismo. Puedes comprobarlo tapándola con una moneda a distancia de brazo.",
-          "subtema": "psicología cotidiana"
-        },
-        {
-          "pregunta": "¿Por qué una estrella fugaz es solo un grano de arena?",
-          "angulo": "Un granito de arena entra a unos 70 km/s y brilla porque comprime y calienta el aire a su paso, no porque 'se queme'.",
+          "pregunta": "¿Por qué el ventilador no enfría el aire?",
+          "angulo": "Solo mueve el aire y acelera la evaporación del sudor; si no hay nadie, la habitación hasta se calienta un poquito por el motor.",
           "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué vemos siempre la misma cara de la luna?",
-          "angulo": "La luna rota justo una vez por cada vuelta a la Tierra, así que nos muestra solo una cara. Es un 'bloqueo de marea'.",
-          "subtema": "por qué las cosas son como son"
+          "pregunta": "¿Por qué el asfalto quema más que la arena?",
+          "angulo": "Es una cuestión de color, de cuánto calor guarda cada material y de cuánto lo suelta. El asfalto oscuro absorbe mucho y lo mantiene.",
+          "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué cuesta tanto ver estrellas en la ciudad?",
-          "angulo": "La luz de las calles se dispersa en el aire y tapa el brillo débil de las estrellas. Los ojos tardan unos 20-30 minutos en adaptarse a la oscuridad.",
+          "pregunta": "¿Por qué sudamos más con humedad?",
+          "angulo": "El sudor no se evapora si el aire ya va cargado de agua, así que el cuerpo no logra enfriarse.",
           "subtema": "cómo funciona el cuerpo por dentro"
+        },
+        {
+          "pregunta": "¿Cómo mide un termómetro la temperatura del aire?",
+          "angulo": "Un líquido o un metal se dilata con el calor. Y un termómetro al sol marca otra cosa que a la sombra.",
+          "subtema": "ciencia de cosas cotidianas"
         }
       ]
     },
     {
-      "tendencia": "Se acerca el Día de Acción de Gracias (26 nov) y la cocina de temporada se vuelve tema de conversación: pavo, horno, puré y tartas.",
-      "fuente": "https://trends.google.com/trending?hl=es-419 (temporada, EE. UU. hispano)",
+      "tendencia": "Black Friday y Cyber Monday 2026: los videos de Black Friday ya funcionan en TikTok. Se usa solo el ángulo de objetos y tecnología, sin ofertas ni precios.",
+      "fuente": "https://virlo.ai/trending-on-tiktok-this-week",
       "preguntas": [
         {
-          "pregunta": "¿Por qué el horno dora la comida y la olla no?",
-          "angulo": "El dorado es la reacción de Maillard, que arranca sobre los 140 °C. El agua hirviendo se queda en 100 °C y nunca llega ahí.",
-          "subtema": "ciencia de cosas cotidianas (cocina)"
+          "pregunta": "¿Cómo lee el código de barras la caja del súper?",
+          "angulo": "El láser solo mide cuánta luz rebotan las barras blancas y negras; el número se traduce después.",
+          "subtema": "tecnología que usamos sin entender"
         },
         {
-          "pregunta": "¿Por qué el papel aluminio tiene una cara brillante y otra opaca?",
-          "angulo": "Sale de la fábrica laminado en pares, y la cara que toca el rodillo queda brillante. Para cocinar da casi igual cuál uses.",
+          "pregunta": "¿Cómo sabe una pantalla táctil dónde la tocaste?",
+          "angulo": "Tu dedo conduce electricidad y altera un campo eléctrico en la pantalla. Por eso no responde con guantes comunes.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Cómo funciona el pago con tarjeta sin contacto?",
+          "angulo": "La tarjeta no tiene batería: el lector le envía energía por ondas y ella responde.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Por qué las cajas de envío son de cartón corrugado?",
+          "angulo": "La capa ondulada del medio funciona como una cadena de pequeños arcos y resiste mucho más peso que el cartón liso.",
+          "subtema": "por qué las cosas son como son"
+        }
+      ]
+    },
+    {
+      "tendencia": "Acción de Gracias (jueves 26 de noviembre) y el inicio de la temporada de fin de año, con alta conversación entre hispanos de EE. UU. y en redes",
+      "fuente": "Fechas de calendario; temporada de Black Friday en https://virlo.ai/trending-on-tiktok-this-week",
+      "preguntas": [
+        {
+          "pregunta": "¿Por qué flotan los globos gigantes de los desfiles?",
+          "angulo": "Los llena helio, que pesa mucho menos que el aire. Un globo grande levanta mucha masa, pero hacen falta decenas de personas para guiarlo.",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Por qué el horno cocina más rápido con aire caliente en movimiento?",
+          "angulo": "El aire quieto forma una capa aislante alrededor de la comida; el ventilador la rompe y el calor llega más rápido.",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Por qué las luces navideñas se apagan todas cuando una se funde?",
+          "angulo": "Los focos viejos iban en serie, como una fila de personas agarradas de la mano. Si se corta un eslabón, se corta todo el circuito.",
           "subtema": "por qué las cosas son como son"
         },
         {
-          "pregunta": "¿Por qué el puré se pone pegajoso si lo bates de más?",
-          "angulo": "El batido rompe los gránulos de almidón de la papa y suelta una especie de pegamento.",
-          "subtema": "ciencia de cosas cotidianas (cocina)"
-        },
-        {
-          "pregunta": "¿Por qué la masa de las tartas se vuelve hojaldrada con mantequilla fría?",
-          "angulo": "La mantequilla se derrite en el horno, suelta vapor y deja capas con huecos entre ellas.",
-          "subtema": "ciencia de cosas cotidianas (cocina)"
+          "pregunta": "¿Por qué los cuchillos eléctricos y los de cocina cortan distinto el pan?",
+          "angulo": "El filo serrado concentra la fuerza en puntas diminutas que rompen la corteza dura sin aplastar la miga blanda.",
+          "subtema": "por qué las cosas son como son"
         }
       ]
     },
     {
-      "tendencia": "Apple y el nuevo iPhone Duo, presentado con humor en TikTok, junto con TikTok Pro y la competencia entre plataformas de videos cortos. Todo esto mantiene la conversación tecnológica.",
-      "fuente": "https://www.mercadonegro.pe/actualidad/apple-iphone-duo-tiktok/ ; https://wwwhatsnew.com/category/tiktok/",
+      "tendencia": "Récord de calor y mensajes de emergencia climática. Ángulo de objetos del hogar y frío/calor en hemisferios opuestos (verano en el sur, invierno en el norte).",
+      "fuente": "https://www.vanguardia.com/opinion/columnistas/2026/11/04/cientificos-piden-declarar-emergencia-mundial-por-cambio-climatico/",
       "preguntas": [
         {
-          "pregunta": "¿Cómo sabe la pantalla táctil dónde la tocas?",
-          "angulo": "Tu dedo conduce un poco de electricidad y altera el campo eléctrico de la pantalla. Por eso no responde con guantes comunes.",
-          "subtema": "tecnología que usamos sin entender"
+          "pregunta": "¿Cómo hace un aire acondicionado para sacar el calor de una habitación?",
+          "angulo": "No crea frío: mueve el calor de adentro hacia afuera con un gas que se comprime y se expande, como una bomba de calor.",
+          "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Cómo hace una pantalla para mostrar millones de colores con solo 3?",
-          "angulo": "Cada píxel tiene tres lucecitas (roja, verde y azul) tan pequeñas que tu ojo mezcla su luz.",
-          "subtema": "tecnología que usamos sin entender"
+          "pregunta": "¿Por qué la parte de arriba de una habitación está más caliente?",
+          "angulo": "El aire caliente es menos denso y sube; por eso el aire acondicionado se pone arriba y la estufa abajo.",
+          "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué el celular se calienta al grabar video?",
-          "angulo": "El procesador convierte energía en calor y el celular no tiene ventilador. Disipa el calor por el marco y la pantalla.",
-          "subtema": "tecnología que usamos sin entender"
+          "pregunta": "¿Por qué una botella con agua se congela y revienta?",
+          "angulo": "El agua es rara: al congelarse ocupa más espacio, casi un 9 % más, y empuja con fuerza contra las paredes.",
+          "subtema": "ciencia de cosas cotidianas"
         },
         {
-          "pregunta": "¿Por qué cuesta tanto dejar de deslizar videos cortos?",
-          "angulo": "Es el mismo mecanismo de las tragamonedas: la recompensa llega de forma impredecible y el cerebro sigue buscándola.",
-          "subtema": "psicología cotidiana"
+          "pregunta": "¿Por qué el metal se siente más frío que la madera si están a la misma temperatura?",
+          "angulo": "El metal le roba calor a la mano mucho más rápido, y el cerebro lo interpreta como frío.",
+          "subtema": "ciencia de cosas cotidianas"
         }
       ]
     },
     {
-      "tendencia": "Fútbol de la semana: el Galatasaray-Barcelona de Champions y la conversación sobre el Balón de Oro 2026 están entre lo más buscado en Google Trends.",
+      "tendencia": "El Balón de Oro 2026 y la conversación futbolera tras el Mundial 2026 (Google Trends: «quién ganó el Balón de Oro 2026»). Ángulo exclusivo del objeto balón, sin hablar de jugadores.",
+      "fuente": "https://trends.google.com/trending?hl=es-419",
+      "preguntas": [
+        {
+          "pregunta": "¿Por qué un balón de fútbol está hecho de pentágonos y hexágonos?",
+          "angulo": "Es una forma geométrica que acerca una esfera con piezas planas; los balones modernos ya usan menos paneles y termosellados.",
+          "subtema": "por qué las cosas son como son"
+        },
+        {
+          "pregunta": "¿Por qué un balón hace curvas en el aire?",
+          "angulo": "Al girar arrastra aire de un lado más rápido que del otro y se desvía (efecto Magnus).",
+          "subtema": "ciencia de cosas cotidianas"
+        },
+        {
+          "pregunta": "¿Cómo sabe la tecnología de línea de gol si el balón entró?",
+          "angulo": "Cámaras o un campo magnético detectan el balón y avisan al reloj del árbitro en menos de un segundo.",
+          "subtema": "tecnología que usamos sin entender"
+        },
+        {
+          "pregunta": "¿Por qué los trofeos dorados no son de oro puro?",
+          "angulo": "El oro puro es muy blando; casi todos son metal base con un baño fino de oro, a veces de apenas unas micras.",
+          "subtema": "por qué las cosas son como son"
+        }
+      ]
+    },
+    {
+      "tendencia": "Ola de despidos y salidas a bolsa en tecnología; la gente habla de inteligencia artificial y chatbots (Google Trends). Solo se usa el ángulo de cómo funcionan el celular y los servicios que usamos.",
       "fuente": "https://trends.google.com/trending?hl=es",
       "preguntas": [
         {
-          "pregunta": "¿Por qué el balón hace esa curva en un tiro libre?",
-          "angulo": "Es el efecto Magnus: el giro arrastra más aire de un lado y empuja el balón hacia el otro. La curva puede ser de varios metros.",
-          "subtema": "ciencia de cosas cotidianas"
-        },
-        {
-          "pregunta": "¿Por qué el césped de los estadios se ve en franjas claras y oscuras?",
-          "angulo": "No es pintura. Se peina el pasto hacia un lado y otro, y refleja la luz distinto según hacia dónde mira.",
-          "subtema": "por qué las cosas son como son"
-        },
-        {
-          "pregunta": "¿Por qué cuando haces un gol sientes que el tiempo se alarga?",
-          "angulo": "En momentos de emoción el cerebro graba más detalles por segundo, y al recordarlos parece que duraron más.",
-          "subtema": "psicología cotidiana"
-        },
-        {
-          "pregunta": "¿Cómo sabe la tecnología de la línea de gol si el balón entró?",
-          "angulo": "Cámaras o sensores siguen el balón en 3D y avisan al reloj del árbitro en menos de un segundo.",
-          "subtema": "tecnología que usamos sin entender"
-        }
-      ]
-    },
-    {
-      "tendencia": "Se acercan el Black Friday y el Cyber Monday, con filas, cajas y pagos de todo tipo. Los ángulos aquí son los objetos y la tecnología que hay detrás, no precios ni ofertas.",
-      "fuente": "https://trends.google.com/trending?hl=es-419 (temporada)",
-      "preguntas": [
-        {
-          "pregunta": "¿Cómo lee una caja registradora el código de barras?",
-          "angulo": "El láser no lee los números, mide cuánta luz rebotan las barras negras y las blancas. Las barras gruesas y finas forman un código.",
+          "pregunta": "¿Cómo sabe el GPS del celular dónde estás sin gastar internet?",
+          "angulo": "Recibe señales de satélites y calcula la distancia por el tiempo que tarda cada una; no necesita enviar nada.",
           "subtema": "tecnología que usamos sin entender"
         },
         {
-          "pregunta": "¿Cómo paga el celular con solo acercarlo a la terminal?",
-          "angulo": "La terminal emite un campo magnético que da energía al chip. No necesita batería ni contacto para responder.",
+          "pregunta": "¿Por qué el wifi se pone lento cuando hay muchos aparatos?",
+          "angulo": "El router reparte turnos de habla, como una sola conversación en una mesa muy llena.",
           "subtema": "tecnología que usamos sin entender"
         },
         {
-          "pregunta": "¿Por qué la fila de al lado siempre parece avanzar más rápido?",
-          "angulo": "Notamos más la fila que no avanza que la que sí. El cerebro recuerda la frustración y olvida los momentos buenos.",
-          "subtema": "psicología cotidiana"
+          "pregunta": "¿Cómo hace el teclado del celular para adivinar la siguiente palabra?",
+          "angulo": "Calcula qué palabra suele venir después de la anterior según lo que escribes. Es estadística simple, no magia.",
+          "subtema": "tecnología que usamos sin entender"
         },
         {
-          "pregunta": "¿Por qué las tiendas huelen a algo y suenan con cierta música?",
-          "angulo": "Los olores llegan directo a la zona de la memoria y las emociones. La música lenta hace que la gente camine más despacio.",
-          "subtema": "psicología cotidiana"
+          "pregunta": "¿Por qué la batería del celular dura menos con frío?",
+          "angulo": "Dentro, las reacciones químicas se vuelven lentas con el frío, así que entrega menos energía aunque aún tenga carga.",
+          "subtema": "tecnología que usamos sin entender"
         }
       ]
     }
   ],
   "usadas": [
-    "¿Por qué el celular se calienta al grabar video?",
-    "¿Cómo hace un pronóstico del clima para saber qué pasará en 5 días?"
+    "¿Cómo hace un aire acondicionado para sacar el calor de una habitación?"
   ],
   "clasicos": 0
 }
