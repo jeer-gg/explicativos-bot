@@ -1075,17 +1075,4 @@ assert _cf(_g, _o) >= 0.9, _cf(_g, _o)
 _otra = [{"w": w} for w in "hoy vamos a hablar de un tema muy distinto para todos".split()]
 assert _cf(_g, _otra) < 0.3, "si la voz dice otra cosa, se nota"
 
-# ---------- 18) Cortes de plano solo cuando el tema lo pide ----------
-print("== Cortes de plano ==")
-_guion = {"escenas": [{"voz": "a", "corte": True}, {"voz": "b", "corte": True}, {"voz": "c"}, {"voz": "d", "corte": True},
-                      {"voz": "e", "corte": True}, {"voz": "f", "corte": True}]}
-_t = {"escenas": [{"inicio": i * 2.0, "duracion": 2.0, "palabras": []} for i in range(6)], "audio": "voz.mp3"}
-_plan = prod.armar_plan(_cfgs["casa"], _t, [f"Escena{i}" for i in range(6)], _guion, _dir.sortear_estilo(_cfgs["casa"]), "A")
-_cortes = [e["corte"] for e in _plan["escenas"]]
-assert _cortes[0] is False, "nunca en la primera escena"
-assert sum(_cortes) == 3 and _cortes == [False, True, False, True, True, False], _cortes
-import bot.estudio as _est
-assert "EMPIEZA CON UN CORTE" in _est._vecinas({"escenas": [{"visual": "x"}, {"visual": "y", "corte": True}]}, 1)
-assert "continúa desde ahí" in _est._vecinas({"escenas": [{"visual": "x"}, {"visual": "y"}]}, 1)
-
 print("\nSIMULACIÓN CORRECTA. Archivos en", TMP)

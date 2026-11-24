@@ -9,8 +9,6 @@ UN mundo que va cambiando. Un avión que empieza como una tabla con un palo y ga
 cada frase; una cisterna que se llena, una bola que sube y cierra la llave; un triángulo de
 madera que se cae cuando le llueven tornillos y aguanta cuando se arma bien. El objeto es
 siempre el mismo (misma forma, mismos colores, mismo sitio) y cada escena le cambia una cosa.
-Si el guion marca un corte de plano en alguna escena (otro lugar, otra escala, un recuerdo), esa
-escena puede no usar el mundo; el mundo sigue igual para cuando el video vuelve a él.
 
 ## Estilo del canal
 {estilo}
