@@ -1,0 +1,52 @@
+{
+  "reglas": [
+    {
+      "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
+      "area": "voz",
+      "veces": 1,
+      "ultima": "2026-11-24T10:53:32+00:00",
+      "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
+      "ejemplo": "9 silencio(s) largos dentro de la narración"
+    },
+    {
+      "regla": "El subtítulo del gancho debe tener opacidad total y contraste alto sobre cualquier fondo. Las tarjetas de datos no deben tapar al protagonista ni la acción, y solo deben aparecer cuando la voz menciona ese dato.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T10:53:32+00:00",
+      "clave": "acción aparecer contraste cualquier cuando datos deben fondo gancho menciona opacidad protagonista sobre subtítulo tapar tarjetas tener total",
+      "ejemplo": "En el fotograma 1, el gancho, el subtítulo «DOS» está casi transparente y se pierde sobre la fachada. Además la tarjeta «1937 año» tapa el edificio y la escena. La voz no menciona 1937 en ese momento."
+    },
+    {
+      "regla": "Cada subtítulo debe salir en el mismo instante que la frase que resume, sin adelantarse a la siguiente. Al presentar a un personaje, la imagen debe mostrar su oficio con un objeto reconocible, como la escoba.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T10:53:32+00:00",
+      "clave": "adelantarse escoba frase imagen instante mismo mostrar objeto oficio personaje presentar reconocible resume salir siguiente subtítulo",
+      "ejemplo": "En el fotograma 2 la voz presenta al barrendero y dice su nombre, pero el subtítulo dice «AMORTIGUA EL GOLPE», que corresponde a una frase posterior. Tampoco se ve ninguna escoba ni se lee el nombre. El subtítulo y la imagen anticipan el siguiente momento."
+    },
+    {
+      "regla": "Los textos de las tarjetas (fechas, años) deben verse completos dentro del encuadre. La imagen debe mostrar a los personajes de la frase que se narra, no solo un objeto simbólico gigante.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T10:53:32+00:00",
+      "clave": "completos deben dentro encuadre fechas frase gigante imagen mostrar narra objeto personajes simbólico tarjetas textos verse",
+      "ejemplo": "En el fotograma 3 la voz dice que los dos sobreviven y que lo más raro viene un año después. La imagen solo muestra un edificio vacío con una hoja de calendario enorme cuyo texto está cortado («93…»), sin personajes ni heridos."
+    },
+    {
+      "regla": "Todos los fotogramas con voz deben llevar subtítulo. Los personajes que son el centro de una acción clave deben ser lo bastante grandes para entenderse a simple vista.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T10:53:32+00:00",
+      "clave": "acción bastante centro clave deben entenderse fotogramas grandes llevar personajes simple subtítulo todos vista",
+      "ejemplo": "En el fotograma 5, cuando la voz dice «Se cae, y abajo, otra vez, está Figlock», no hay subtítulo. El niño que cae es diminuto y casi no se distingue en la ventana, así que el momento clave no se lee."
+    },
+    {
+      "regla": "En el momento clave de la historia, la imagen debe mostrar la acción que cuenta la voz, con los personajes bien visibles. Los elementos de fuente o cita (revista, documento) deben aparecer solo cuando la voz los nombra, y sus textos no deben quedar cortados.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T10:53:32+00:00",
+      "clave": "acción aparecer clave cortados cuando cuenta deben documento elementos fuente historia imagen momento mostrar nombra personajes quedar revista textos visibles",
+      "ejemplo": "En el fotograma 6 la voz dice «Cae sobre él, de nuevo. Y de nuevo, los dos sobreviven», que es el clímax. La pantalla muestra una hoja gigante de la revista Time con el subtítulo «LA REVISTA TIME», que pertenece a una frase posterior. Los personajes son diminutos y el cartel «TIME - OC» está cortado. El público no ve la caída ni el aterrizaje prometidos."
+    }
+  ]
+}

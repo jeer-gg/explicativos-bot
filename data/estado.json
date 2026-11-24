@@ -1,40 +1,8 @@
 {
   "telegram_offset": 249267115,
-  "pendientes": {
-    "20261121-0650": {
-      "titulo": "Los nudos de tus luces empiezan por la punta (Parte 2)",
-      "descripcion": "Parte 2: qué nudos salieron en el experimento, hasta de once cruces, y por qué casi siempre nacen en un extremo de la cuerda. Con un truco para tus luces de Navidad.\n\n¿Cuál fue el nudo de luces más imposible que has desenredado?",
-      "hashtags": [
-        "#NudosDeNavidad",
-        "#LucesNavideñas",
-        "#CienciaCotidiana",
-        "#BlackFriday",
-        "#DatoCurioso"
-      ],
-      "duracion": 52.18,
-      "tema": "Qué tipos de nudos salieron en las cajas y cómo se forman, desde un extremo de la cuerda",
-      "tendencia": "Cuenta regresiva para el Black Friday (27 de noviembre) y las compras navideñas, con luces y adornos ya en las tiendas.",
-      "serie": {
-        "titulo": "El misterio del nudo que aparece solo",
-        "parte": 2,
-        "total": 2
-      },
-      "subtema": "por qué las cosas son como son",
-      "estructura": "HISTORIA EN PARTES: una historia real e intrigante detrás de algo cotidiano (un invento por accidente, un error que cambió todo, un misterio con explicación científica) contada en 2 o 3 partes; cada parte responde su propia pregunta y termina con una intriga que lleva a la siguiente",
-      "paleta": "marca",
-      "tipo_gancho": "situación cotidiana con giro inesperado",
-      "tipo_gancho_b": "",
-      "ganchos": {
-        "A": "Cuidado: la punta de tus luces es la que arma el nudo cuando se agitan en la caja.",
-        "B": ""
-      },
-      "nota_media": 5.4,
-      "creado": "2026-11-21T07:26:10+00:00"
-    }
-  },
+  "pendientes": {},
   "latido": "2026-11-24T10:26:48+00:00",
-  "turno_hecho": "casa@2026-11-24T02:45",
+  "turno_hecho": "historias@2026-11-24T01:17",
   "avisado_limite": "2026-11-24T10:25:00+00:00",
-  "vigilante": "2026-11-23T14:23:01+00:00",
-  "reintentar_desde": "2026-11-24T10:25:00+00:00"
+  "vigilante": "2026-11-23T14:23:01+00:00"
 }
