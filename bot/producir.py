@@ -42,13 +42,28 @@ def momento_clave(palabras: list, clave: str):
     return None
 
 
-# Escenarios según el tema (los Reels ganadores llenan la pantalla con un lugar que va con el tema)
+# Escenarios según el tema (los Reels ganadores llenan la pantalla con un lugar que va con el tema).
+# El escenario cambia con cada video; los COLORES de cada escenario los pone la página
+# (estilo.escenarios en su archivo), para que todos sus videos tengan la misma paleta.
 ESCENARIOS = {
-    "cielo": {"fondo": "#9CCDF2", "suelo": "#7DBE4E"},
-    "exterior": {"fondo": "#D7E6EF", "suelo": "#D3CDC1"},
-    "oscuro": {"fondo": "#121318", "suelo": "#1C1D25", "tinta": "#F2EFE9"},
+    "cielo": {"fondo": "#9CCDF2", "suelo": "#7DBE4E",
+              "degradado": "linear-gradient(180deg, #3C8DDE 0%, #6FB2EC 38%, #B9DDF7 72%, #D9EEFB 100%)"},
+    "exterior": {"fondo": "#D7E6EF", "suelo": "#D3CDC1",
+                 "degradado": "linear-gradient(180deg, #8FC0E6 0%, #C4DEEF 45%, #EAF1F2 80%, #F1EEE6 100%)"},
+    "interior": {"fondo": "#EFE6D8", "suelo": "#C9A27A",
+                 "degradado": "radial-gradient(ellipse 70% 55% at 30% 25%, #FFF8EC 0%, #EFE6D8 50%, #D9CBB5 100%)",
+                 "foco": "#FFE9C4"},
+    "oscuro": {"fondo": "#121318", "suelo": "#1C1D25", "tinta": "#F2EFE9", "foco": "#FFE0B0"},
     "estudio": {},
 }
+_CLAVES_ESCENARIO = ("fondo", "suelo", "tinta", "degradado", "foco")
+
+
+def escenarios(cfg: dict | None = None) -> dict:
+    """Los escenarios con los colores de la página (lo que no ponga la página queda igual)."""
+    propios = ((cfg or {}).get("estilo") or {}).get("escenarios") or {}
+    return {n: {**base, **{k: v for k, v in (propios.get(n) or {}).items() if k in _CLAVES_ESCENARIO and v}}
+            for n, base in ESCENARIOS.items()}
 
 
 def escenario_de(guion: dict, cfg: dict | None = None) -> str:
@@ -59,8 +74,8 @@ def escenario_de(guion: dict, cfg: dict | None = None) -> str:
     return e if e in ESCENARIOS else "estudio"
 
 
-def paleta_con_escenario(colores: dict, escenario: str) -> dict:
-    cambio = ESCENARIOS.get(escenario, {})
+def paleta_con_escenario(colores: dict, escenario: str, cfg: dict | None = None) -> dict:
+    cambio = escenarios(cfg).get(escenario, {})
     paleta = {**colores, "acentos": list(colores["acentos"])}
     if cambio.get("fondo"):
         paleta["fondo"] = cambio["fondo"]
@@ -71,6 +86,14 @@ def paleta_con_escenario(colores: dict, escenario: str) -> dict:
             paleta["acentos"].append(paleta["acentos"][-1])
         paleta["acentos"][4] = cambio["suelo"]
     return paleta
+
+
+def acabado_de(cfg: dict | None = None) -> dict:
+    """Estilo de animación de la página: dibujo (contorno y sombreado de caricatura) o plastilina."""
+    estilo = (cfg or {}).get("estilo") or {}
+    acabado = str(estilo.get("acabado", "dibujo")).strip().lower()
+    return {"acabado": acabado if acabado in ("dibujo", "plastilina") else "dibujo",
+            "color_contorno": estilo.get("color_contorno") or "#1B1B1F"}
 
 
 def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
@@ -91,8 +114,11 @@ def armar_plan(cfg, tiempos_variante, nombres, guion, estilo, variante):
         "audio": tiempos_variante["audio"],
         "musica": cfg["produccion"].get("musica", "") or "",
         "subtitulos": cfg["produccion"].get("subtitulos", True),
-        "paleta": paleta_con_escenario(estilo["colores"], escenario_de(guion, cfg)),
+        "paleta": paleta_con_escenario(estilo["colores"], escenario_de(guion, cfg), cfg),
         "escenario": escenario_de(guion, cfg),
+        "fondo_css": escenarios(cfg)[escenario_de(guion, cfg)].get("degradado", ""),
+        "foco": escenarios(cfg)[escenario_de(guion, cfg)].get("foco", ""),
+        **acabado_de(cfg),
         "portada": (guion.get("portada") or "").upper()[:60],
         "escenas": escenas,
         # Un solo mundo que evoluciona (si se pudo dibujar el mundo compartido)

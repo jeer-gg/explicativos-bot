@@ -4,10 +4,10 @@
 # META_PAGE_TOKEN_HISTORIAS. Claude, Gemini y Telegram son los mismos que la otra página.
 
 canal:
-  etiqueta: "Historias"
+  etiqueta: "History Time"
   formato: "historia"
   rol: "historias reales de suspenso, misterios y curiosidades científicas"
-  nombre: "Historias reales que parecen inventadas"
+  nombre: "History Time"
   idioma: "español latino neutro, como un narrador de misterio cercano"
   publico: "adultos de 18 a 55 años en Latinoamérica y los hispanos de Estados Unidos y España"
   ejemplo_tema: >-
@@ -25,9 +25,60 @@ canal:
   tendencias:
     activo: false   # las historias no dependen de lo que está en tendencia hoy
 
+  # Receta del nicho (investigación de noviembre de 2026 sobre los videos con más vistas).
+  receta:
+    - "Arranca en frío con el detalle más raro de la historia, de un caso con nombre, lugar y año («300 personas vivían en esta isla. Una mañana, el barco llegó y no había nadie»), nunca «5 misterios»."
+    - "Tres tiempos: quién y dónde, el detalle que lo vuelve extraño, y el giro o la pregunta."
+    - "Tono de documental: hechos contados con calma, sin empujar una sola teoría; si algo no se sabe, se dice."
+    - "Cada fecha, nombre y cifra se verifica con la búsqueda web antes de usarla."
+    - "Lo que da credibilidad se muestra como objeto grande: la carta, el diario, la foto de época, el mapa."
+    - "Si el caso sigue abierto, termina con la pregunta en el aire e invita a comentar qué creen; si se resolvió, el desenlace es el pago final."
+  # Guía del nicho (investigación de noviembre de 2026): qué temas, ganchos, ritmo y estilo funcionan.
+  guia:
+    emocion_objetivo: 'intriga y escalofrío (suspenso), sin morbo: la necesidad de saber qué pasó'
+    temas_virales:
+    - desapariciones inexplicables con nombre, lugar y año (barcos, pueblos, expediciones)
+    - misterios sin resolver con un detalle imposible (lo que nadie pudo explicar)
+    - casos documentados y desclasificados que parecen inventados
+    - superlativos históricos verificables (la guerra más corta, el rescate más improbable)
+    - supervivencias increíbles y casualidades reales con desenlace sorprendente
+    temas_flojos:
+    - listas de 'misterios' sin un caso concreto
+    - teorías sin hechos documentados
+    - historias con víctimas o muertes como centro
+    gancho:
+    - abre con el hecho más impactante de la historia en la primera frase, a mitad de la acción
+    - un nombre, un lugar y un año desde el principio dan credibilidad
+    - la primera imagen ya muestra el objeto o lugar clave con luz de suspenso
+    retencion:
+    - 'estructura de micro historia: quién y dónde, el conflicto o el detalle extraño, y el giro o la pregunta'
+    - 'contar como historia, no como lista de datos: las historias se recuerdan más'
+    - 'presentar los hechos sin empujar una sola teoría: la gente debate en los comentarios'
+    - guardar el dato más fuerte para el final (el pago), y si el caso sigue abierto, cerrar con la pregunta
+    ritmo: 'más pausado y grave que los demás: pausas dramáticas antes de cada revelación, la cámara se
+      acerca despacio'
+    evitar:
+    - imágenes gráficas o morbosas
+    - afirmar teorías como hechos
+    - fechas o nombres sin verificar
+    estilos_por_tema:
+      desaparicion: lugar vacío en maqueta (barco, faro, pueblo) con niebla y un foco que barre; objetos
+        abandonados
+      documento: la carta, el diario o el mapa como objeto 3D grande que se abre; luz de lámpara
+      persecucion: maqueta con figuras en movimiento, cámara que sigue; luz roja de alarma
+      revelacion: el foco se cierra sobre el objeto clave y luego se abre de golpe para mostrar la respuesta
+  pesos_virales:
+    curiosidad: 3
+    emocion: 3
+    compartir: 2
+    utilidad: 0
+    universal: 1
+    visual: 2
+    verificable: 3
 produccion:
-  duracion_min: 50
-  duracion_max: 85
+  palabras_por_segundo: 2.4   # ritmo de la voz en esta página
+  duracion_min: 45
+  duracion_max: 80
   escenas_min: 10
   escenas_max: 14
   voz: "es-MX-JorgeNeural"   # voz de respaldo (Edge), masculina como la principal
@@ -49,18 +100,30 @@ produccion:
       exaggerated.
 
 estilo:
-  escenario_fijo: "oscuro"   # siempre el escenario oscuro con foco cálido
+  # Estilo de animación: dibujo (contorno fino y sombreado de caricatura), con luz de cine.
+  acabado: "dibujo"
   descripcion_3d: >
-    Estilo de marca de la página: cine oscuro en 3D, como una obra de teatro en miniatura.
-    Escenario oscuro con un foco de luz cálida, sombras largas y bien definidas, contornos
-    negros finos y sombreado de caricatura. Figuras estilizadas tipo maniquí, sin caras ni
-    rasgos: el protagonista de un color fuerte (rojo) y los demás en grises. Objetos clave
-    grandes y detallados, lugares como maquetas de época. El suspenso se cuenta con la luz: el
-    foco se cierra, una luz roja de alarma, una sombra que crece, un destello. Cada fotograma
-    lleno y bonito, cámara cercana que se mueve despacio. Sin emojis ni personas realistas.
+    Estilo de marca de la página: cine en 3D, como una obra de teatro en miniatura. El lugar
+    cambia con cada historia (un barco de noche, un laboratorio, un pueblo, el espacio), pero
+    siempre con la misma paleta de cine: tonos bajos y nocturnos, un foco de luz cálida que
+    sigue al protagonista, sombras largas y bien definidas, contornos negros finos y sombreado
+    de caricatura. Personas dibujadas en 2D (Persona2D), sin caras ni rasgos: el protagonista de
+    un color fuerte (rojo) y los demás en grises. Objetos clave grandes y detallados, lugares como
+    maquetas de época. El suspenso se cuenta con la luz: el foco se cierra, una luz roja de
+    alarma, una sombra que crece, un destello. Cada fotograma lleno y bonito, cámara cercana que
+    se mueve despacio. Sin emojis ni personas realistas.
+  # Colores de cada escenario en esta página: todo en clave de noche y cine.
+  escenarios:
+    cielo:    {fondo: "#16213A", suelo: "#233127", foco: "#FFE0B0", tinta: "#F2EFE9",
+               degradado: "linear-gradient(180deg, #0B1222 0%, #16213A 45%, #2E3D5E 80%, #4A4A63 100%)"}
+    exterior: {fondo: "#1E1F2C", suelo: "#2A2A31", foco: "#FFD9A0", tinta: "#F2EFE9",
+               degradado: "linear-gradient(180deg, #14151F 0%, #23243A 45%, #4A3946 85%, #6B4A45 100%)"}
+    interior: {fondo: "#1E1915", suelo: "#2E241B", foco: "#FFD49A", tinta: "#F2EFE9",
+               degradado: "radial-gradient(ellipse 70% 55% at 45% 35%, #4A3626 0%, #1E1915 60%, #0C0A08 100%)"}
+    estudio:  {fondo: "#17181E", suelo: "#22232B", foco: "#FFE0B0", tinta: "#F2EFE9"}
   guia_escenas: >
-    Esta página cuenta HISTORIAS REALES de suspenso. Las personas son figuras tipo maniquí sin
-    cara (cuerpo, cabeza lisa, brazos), nunca rostros ni retratos de gente real: el
+    Esta página cuenta HISTORIAS REALES de suspenso. Las personas son figuras 2D sin cara
+    (Persona2D, con color={...}), nunca rostros ni retratos de gente real: el
     protagonista en rojo (acentos[0]) y los demás en gris. Lo importante se cuenta con objetos
     clave grandes (la carta, el reloj, la antena, la puerta) y con la luz: el foco cálido
     sigue al protagonista; para la tensión, la luz se cierra o se vuelve roja; para la
@@ -77,6 +140,7 @@ ganchos:
     - "pregunta que no te deja ir («¿Cómo sobrevive alguien 76 días solo en el mar?»)"
     - "el error que lo cambió todo («Un descuido de dos minutos cambió la medicina»)"
     - "nadie lo creyó («Nadie le creyó… hasta que encontraron esto»)"
+    - "lugar con un detalle imposible («300 personas vivían en esta isla. Una mañana, no había nadie»)"
   estructuras:
     - "EL MISTERIO: un hecho real que nadie supo explicar; se cuenta qué pasó, las teorías que fallaron y la explicación que hay hoy (o por qué sigue abierto)"
     - "CUENTA ATRÁS: una situación real contra el reloj (un rescate, una falla, un experimento) contada minuto a minuto hasta el desenlace"
@@ -84,7 +148,8 @@ ganchos:
     - "NADIE LE CREYÓ: alguien real que vio o dijo algo que nadie creyó, y la prueba que al final le dio la razón"
     - "LA CASUALIDAD IMPOSIBLE: una coincidencia real tan rara que parece inventada, con los datos que la prueban"
     - "HISTORIA EN PARTES: una historia real larga contada en 2 o 3 partes; cada parte termina en el momento de más tensión"
+    - "EL CASO ABIERTO: un caso real sin resolver; quién y dónde, el detalle que nadie pudo explicar, las teorías (sin elegir una), y termina con la pregunta abierta para que comenten"
 
 publicacion:
-  horarios: ["08:00", "12:30", "21:00"]
+  horarios: ["22:00"]   # noche en todo el continente (20:00 en México): el suspenso rinde de noche
   hashtags: ["#historiasreales", "#misterio", "#curiosidades", "#sabiasque"]

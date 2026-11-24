@@ -64,9 +64,33 @@ Un archivo TSX que exporta:
   (como una marca impresa), pequeño y sin tapar nada.
 - Nada de personajes decorativos ni mascotas: personajes solo si son parte de la historia.
 
+## Técnica 2.5D (obligatoria): 3D y 2D en el mismo mundo
+Cada figura se hace con la técnica que mejor le queda, y todo se ve como UN solo dibujo:
+- En 3D (volumen, sombreado de caricatura y contorno): lo que gira, se abre, se ve por dentro o
+  tiene forma rígida: máquinas, aparatos, muebles, tuberías, engranajes, edificios, recipientes.
+  Usa primero las piezas listas de `../lib25d` (Inodoro, Grifo, Tuberia, Engranaje, Bombillo,
+  Enchufe, Cajon) y `Pieza` de `../lib3d` para lo demás.
+- En 2D (recortes dibujados con curvas, de `../lib25d`): todo lo vivo, blando o líquido, que en
+  3D con cajas y esferas sale tosco: manos (`Mano`), personas (`Persona2D`), agua (`Agua`, y
+  `Efecto` chorro/gotas/burbujas), vapor, humo, fuego, chispas, ondas, destellos, plantas, nubes
+  de pensamiento y la cabeza en corte (`Cabeza2D`). NUNCA armes una mano, una persona o agua
+  con piezas 3D (en lugar de `Muneco`, usa `Persona2D`).
+- Los recortes 2D van de frente a la cámara, a distintas profundidades (z) para dar
+  profundidad: delante del objeto lo que lo toca (la mano), detrás lo que está dentro (el agua
+  en un tanque abierto).
+- Personas que se mueven con naturalidad: `Persona2D` con pose "camina" SOLO mientras se desplaza,
+  y a paso de caminar (entre 0,6 y 0,9 unidades por segundo, hacia donde mira; usa `espejo` para ir
+  a la izquierda). Si no se desplaza, usa "parado", "piensa", "senala" o "sorprendida": nunca
+  deslices a una persona quieta ni la hagas caminar en el sitio. Trayectos cortos (no más de 3
+  segundos caminando); para ir lejos, mejor que viaje la cámara.
+- Todo lo que se apoya en el suelo lleva su `<Sombra />` suave debajo.
+- Interior de una casa o un cuarto: pon `<Habitacion />` como fondo.
+- Ejemplo: una mano 2D (`<Mano pose="agarra" ... />`) levanta la tapa de un `<Inodoro tapa={...} />`
+  3D, el frente del tanque se corta (`corte`) y adentro se ve el `Agua` 2D bajando por la fuga.
+
 ## Contrato técnico (obligatorio)
 - Imports permitidos SOLO de `react`, `remotion` (interpolate, spring, Easing), `three`
-  (solo si hace falta: `import * as THREE from 'three'`) y `../lib3d`.
+  (solo si hace falta: `import * as THREE from 'three'`), `../lib3d` y `../lib25d`.
 - Construye sobre todo con `Pieza`; si necesitas otra forma, `<mesh castShadow>` con geometrías
   de three y `<Mat color=... />`.
 - Prohibido: `useFrame`, `useThree`, `useState`, `useEffect`, `Math.random`, `Date`, cargar
@@ -75,7 +99,7 @@ Un archivo TSX que exporta:
 - Máximo 450 líneas. Código limpio que compile. Al principio, un comentario corto con qué se ve
   en cada `paso`.
 
-## Herramientas de ../lib3d
+## Herramientas de ../lib3d y ../lib25d
 ```tsx
 {lib}
 ```

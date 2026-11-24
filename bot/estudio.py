@@ -5,6 +5,7 @@ from pathlib import Path
 from .claude import Claude, extraer_codigo
 from .config import ESCENAS, REMOTION, prompt
 from . import render
+from .equipo import profesional
 
 RESPALDO_3D = """import React from 'react';
 import {EscenaProps, EscenaRespaldo3D} from '../lib3d';
@@ -29,6 +30,14 @@ def con_mundo(nombres: list[str]) -> list[str]:
     """Archivos que se compilan: las escenas y, si está activo, el mundo compartido."""
     return nombres + (["Mundo"] if MUNDO["activo"] and "Mundo" not in nombres else [])
 
+
+
+def _lib3d() -> str:
+    """lib3d completa más la API de la técnica 2.5D (piezas 3D listas y recortes 2D)."""
+    lib = (REMOTION / "src" / "lib3d.tsx").read_text(encoding="utf-8")
+    l25 = (REMOTION / "src" / "lib25d.tsx").read_text(encoding="utf-8")
+    api = l25[l25.find("<<API2.5D") + 9: l25.find("API2.5D>>")] if "<<API2.5D" in l25 else ""
+    return lib + "\n\n// ===== ../lib25d: técnica 2.5D (importa de '../lib25d') =====" + api
 
 BLOQUE_MUNDO = """
 ## Mundo compartido (OBLIGATORIO en este video)
@@ -68,8 +77,8 @@ export const {nombre}: React.FC<EscenaProps> = (props) => <EscenaRespaldo {...pr
 
 def _system(cfg: dict, nombre: str) -> str:
     tres = MOTOR["actual"] == "3d"
-    lib = (REMOTION / "src" / ("lib3d.tsx" if tres else "lib.tsx")).read_text(encoding="utf-8")
-    ejemplo = (ESCENAS / ("Ejemplo3D.tsx" if tres else "Ejemplo.tsx")).read_text(encoding="utf-8")
+    lib = _lib3d() if tres else (REMOTION / "src" / "lib.tsx").read_text(encoding="utf-8")
+    ejemplo = (ESCENAS / ("Ejemplo25D.tsx" if tres else "Ejemplo.tsx")).read_text(encoding="utf-8")
     estilo = cfg["estilo"]["descripcion_3d" if tres else "descripcion"].strip()
     from .autocontrol import texto_reglas
     extra = texto_reglas("escenas")
@@ -78,7 +87,7 @@ def _system(cfg: dict, nombre: str) -> str:
         extra = "\n## Guía de esta página\n" + guia + "\n" + extra
     if tres and MUNDO["activo"] and MUNDO["codigo"] and nombre != "Mundo":
         extra = BLOQUE_MUNDO.replace("{codigo}", MUNDO["codigo"]) + extra
-    return (prompt("escena3d.md" if tres else "escena.md").replace("Responde SOLO con", extra + "\nResponde SOLO con")
+    return profesional("director_arte") + (prompt("escena3d.md" if tres else "escena.md").replace("Responde SOLO con", extra + "\nResponde SOLO con")
             .replace("{estilo}", estilo)
             .replace("{lib}", lib)
             .replace("{ejemplo}", ejemplo)
@@ -89,7 +98,7 @@ GANCHO = """
 ESTA ES LA ESCENA DEL GANCHO: decide si la gente deja de hacer scroll. Desde el fotograma 0
 (que es también la miniatura) debe verse algo llamativo, grande y en el centro, ya en plena
 acción o a punto de pasar (algo que cae, se rompe, se tacha, sale volando, o un objeto
-gigante con ojos sorprendidos). Nada de presentar el lugar con calma: el golpe principal
+gigante en pleno movimiento). Nada de presentar el lugar con calma: el golpe principal
 ocurre en el primer segundo y hay al menos 4 golpes visuales."""
 
 
@@ -164,11 +173,11 @@ Construye el archivo Mundo.tsx con PARTES, un componente por parte, y Mundo."""
 
 def dibujar_mundo(claude: Claude, cfg: dict, guion: dict, estilo: dict) -> str:
     """Dibuja el mundo compartido (Mundo.tsx) una sola vez por video."""
-    lib = (REMOTION / "src" / "lib3d.tsx").read_text(encoding="utf-8")
-    ejemplo = (ESCENAS / "Ejemplo3D.tsx").read_text(encoding="utf-8")
+    lib = _lib3d()
+    ejemplo = (ESCENAS / "Ejemplo25D.tsx").read_text(encoding="utf-8")
     guia = (cfg.get("estilo") or {}).get("guia_escenas", "").strip()
     estilo_txt = cfg["estilo"]["descripcion_3d"].strip() + (("\n\nGuía de esta página:\n" + guia) if guia else "")
-    system = (prompt("mundo3d.md").replace("{estilo}", estilo_txt)
+    system = profesional("director_arte") + (prompt("mundo3d.md").replace("{estilo}", estilo_txt)
               .replace("{lib}", lib).replace("{ejemplo}", ejemplo))
     texto = claude.texto(system, _pedido_mundo(guion, estilo), modelo=claude.modelo_escenas, max_tokens=14000)
     codigo = extraer_codigo(texto)
@@ -202,8 +211,8 @@ def reparar(claude: Claude, cfg: dict, nombre: str, error: str) -> None:
     ruta = ESCENAS / f"{nombre}.tsx"
     codigo = ruta.read_text(encoding="utf-8")
     if nombre == "Mundo":
-        lib = (REMOTION / "src" / "lib3d.tsx").read_text(encoding="utf-8")
-        sistema = (prompt("mundo3d.md").replace("{estilo}", cfg["estilo"]["descripcion_3d"].strip())
+        lib = _lib3d()
+        sistema = profesional("director_arte") + (prompt("mundo3d.md").replace("{estilo}", cfg["estilo"]["descripcion_3d"].strip())
                    .replace("{lib}", lib).replace("{ejemplo}", "(no hace falta)"))
     else:
         sistema = _system(cfg, nombre)
@@ -246,12 +255,14 @@ def escribir_indice(nombres: list[str]):
               "import type React from 'react';",
               "import type {EscenaProps} from '../lib';",
               "import {Ejemplo} from './Ejemplo';",
-              "import {Ejemplo3D} from './Ejemplo3D';"]
+              "import {Ejemplo3D} from './Ejemplo3D';",
+              "import {Ejemplo25D} from './Ejemplo25D';"]
     lineas += [f"import {{{n}}} from './{n}';" for n in nombres]
     lineas.append("")
     lineas.append("export const ESCENAS: Record<string, React.FC<EscenaProps>> = {")
     lineas.append("  Ejemplo,")
     lineas.append("  Ejemplo3D,")
+    lineas.append("  Ejemplo25D,")
     lineas += [f"  {n}," for n in nombres]
     lineas.append("};")
     (ESCENAS / "index.ts").write_text("\n".join(lineas) + "\n", encoding="utf-8")
@@ -264,7 +275,7 @@ def limpiar_escenas_viejas():
     _REPAROS.clear()
     MUNDO.update(activo=False, codigo="")
     for f in ESCENAS.glob("*.tsx"):
-        if f.name not in ("Ejemplo.tsx", "Ejemplo3D.tsx"):
+        if f.name not in ("Ejemplo.tsx", "Ejemplo3D.tsx", "Ejemplo25D.tsx"):
             f.unlink()
 
 

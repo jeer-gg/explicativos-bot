@@ -47,9 +47,14 @@ def revisar_telegram():
 
 
 def revisar_meta():
+    from . import config
     _revisar_pagina("", "Facebook")
-    if os.environ.get("META_PAGE_ID_HISTORIAS") or os.environ.get("META_PAGE_TOKEN_HISTORIAS"):
-        _revisar_pagina("_HISTORIAS", "Facebook (historias)")
+    for canal in config.canales()[1:]:
+        sufijo = "_" + canal.upper()
+        if os.environ.get("META_PAGE_ID" + sufijo) or os.environ.get("META_PAGE_TOKEN" + sufijo):
+            _revisar_pagina(sufijo, f"Facebook ({canal})")
+        else:
+            informar(f"Facebook ({canal})", True, f"sin conectar todavía (faltan META_PAGE_ID{sufijo} y META_PAGE_TOKEN{sufijo}); esta página no trabaja hasta que los agregues")
 
 
 def _revisar_pagina(sufijo: str, nombre: str):

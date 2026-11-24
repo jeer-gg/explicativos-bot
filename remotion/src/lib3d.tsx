@@ -12,7 +12,7 @@ export type {EscenaProps, Palabra, Paleta};
 export type V3 = [number, number, number];
 
 /** Aspecto global que fija el video: "dibujo" (sombreado de caricatura) o "plastilina". */
-export const ASPECTO = {dibujo: true};
+export const ASPECTO = {dibujo: true, contorno: true, colorContorno: '#1B1B1F', rugosidad: 0};
 
 let degradado: THREE.DataTexture | null = null;
 const tonos = () => {
@@ -46,7 +46,7 @@ export const Mat: React.FC<{color: string; rugosidad?: number; metal?: number; b
   ) : (
   <meshStandardMaterial
     color={color}
-    roughness={rugosidad}
+    roughness={ASPECTO.rugosidad && metal < 0.5 ? Math.max(rugosidad, ASPECTO.rugosidad) : rugosidad}
     metalness={metal}
     emissive={brillo ?? '#000000'}
     emissiveIntensity={brillo ? intensidadBrillo : 0}
@@ -478,13 +478,13 @@ export const Pieza: React.FC<{
       <mesh geometry={g} castShadow receiveShadow>
         <Mat color={color} brillo={brillo} opacidad={opacidad} metal={metal} />
       </mesh>
-      {contorno ? (
+      {contorno && ASPECTO.contorno ? (
         <>
           <mesh geometry={g} scale={1.025}>
-            <meshBasicMaterial color="#1B1B1F" side={THREE.BackSide} />
+            <meshBasicMaterial color={ASPECTO.colorContorno} side={THREE.BackSide} />
           </mesh>
           <lineSegments geometry={e}>
-            <lineBasicMaterial color="#1B1B1F" />
+            <lineBasicMaterial color={ASPECTO.colorContorno} />
           </lineSegments>
         </>
       ) : null}

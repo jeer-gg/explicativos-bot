@@ -32,7 +32,11 @@ export type PlanVideo = {
   escenas: EscenaPlan[];
   continuo?: boolean; // 3D: todas las escenas en el mismo lugar (un solo mundo que evoluciona)
   estilo_subtitulos?: 'concepto' | 'completo';
-  escenario?: 'cielo' | 'exterior' | 'oscuro' | 'estudio';
+  escenario?: 'cielo' | 'exterior' | 'interior' | 'oscuro' | 'estudio';
+  fondo_css?: string; // degradado del fondo con los colores de la página
+  foco?: string; // color de la luz principal
+  acabado?: 'dibujo' | 'plastilina'; // estilo de animación de la página
+  color_contorno?: string;
 };
 
 export type Grafico =

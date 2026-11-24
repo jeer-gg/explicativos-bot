@@ -2,23 +2,22 @@
 # Puedes editar este archivo desde el iPhone en github.com (botón del lápiz).
 
 canal:
-  etiqueta: "Explicativos"   # así aparece en los avisos de Telegram
+  etiqueta: "C MAMUD"   # así aparece en los avisos de Telegram
   formato: "explicativo"
-  nombre: "Explicativos de la vida cotidiana"
+  nombre: "C MAMUD"
   idioma: "español latino neutro, cercano, con humor ligero"
   publico: "adultos de 25 a 55 años en Latinoamérica y República Dominicana"
   # Subtemas que el director rota. Puedes añadir o quitar.
   subtemas:
-    - "ciencia de cosas cotidianas (cocina, casa, clima)"
+    - "ciencia de cosas cotidianas (cocina, clima, objetos)"
     - "cómo funciona el cuerpo por dentro (pura mecánica: cómo ve el ojo, cómo suena la voz; sin decir qué es bueno o malo para la salud)"
     - "por qué las cosas son como son (diseños, costumbres, objetos)"
-    - "psicología cotidiana (hábitos, memoria, decisiones)"
     - "tecnología que usamos sin entender (celular, wifi, GPS)"
   # Temas de actualidad: una vez al día el bot hace un recuento de lo que está en tendencia y
   # saca preguntas relacionadas que la gente se hace; los videos del día salen de esa lista.
   tendencias:
     activo: true
-    por_cada_clasico: 2   # cada día: 2 de actualidad por cada clásico (con 3 al día: 2 + 1, cerca del 70/30)
+    por_cada_clasico: 2   # 2 de actualidad por cada clásico (cerca del 70/30)
     paises: ["el mundo entero", "toda Latinoamérica", "los hispanos de Estados Unidos y España"]
   # Temas prohibidos: el director nunca los elegirá.
   prohibidos:
@@ -31,7 +30,60 @@ canal:
     - "salud: lo que es bueno o malo para el cuerpo, comida y bacterias, dietas, enfermedades, riesgos"
     - "dinero: precios, ofertas, compras, inflación, intereses, inversiones, bolsa, criptomonedas"
 
+  # Receta del nicho (investigación de noviembre de 2026 sobre los videos con más vistas).
+  receta:
+    - "Abre con algo cotidiano que todos usan y el truco escondido que pasa sin que lo veas, dicho como un hecho («Cada vez que aprietas el botón del ascensor, pasa esto en el techo»)."
+    - "En la segunda o tercera escena ya estás ADENTRO: corte o vista de rayos X del objeto."
+    - "El mecanismo se revela en pasos pequeños: una pieza nueva por paso, con flechas y su nombre en grande."
+    - "En pantalla cambia algo nuevo cada segundo y la cámara nunca se queda quieta."
+    - "Antes del final, la línea del «por eso»: lo que tú notas en la vida real gracias a ese mecanismo."
+    - "Remata con la sorpresa o el arreglo, encadenado con la primera frase para que lo vuelvan a ver."
+  # Guía del nicho (investigación de noviembre de 2026): qué temas, ganchos, ritmo y estilo funcionan.
+  guia:
+    emocion_objetivo: asombro y sorpresa ('no puede ser, ¿en serio funciona así?'), seguidos del alivio
+      de entenderlo
+    temas_virales:
+    - objetos que todos usan a diario y esconden un mecanismo ingenioso (ascensor, cierre, candado, inodoro,
+      microondas, semáforo)
+    - preguntas que todos se han hecho y nadie sabe responder ('¿por qué…?')
+    - cosas que parecen simples pero son ingeniería brillante
+    - el 'cómo se hace' de algo cotidiano (de la fábrica a tu mano)
+    - superlativos verificables (el más rápido, el más pequeño, el primero) ligados a algo cotidiano
+    temas_flojos:
+    - datos sueltos sin mecanismo que mostrar
+    - temas abstractos sin un objeto que se pueda dibujar
+    - listas de datos ('5 cosas que…')
+    gancho:
+    - la voz arranca en el segundo 0 con la frase gancho, sin presentación
+    - en el primer segundo se ve el objeto en acción con un movimiento llamativo (cambio visual antes del
+      segundo 3)
+    - plantea la pregunta o el misterio del mecanismo y promete mostrarlo por dentro
+    retencion:
+    - 'mecanismo, no motivación: el espectador se queda porque quiere VER cómo funciona'
+    - a mitad del video, un mini giro ('pero eso no es lo más loco…') que reabre la curiosidad
+    - cada idea se dice una vez y se muestra clara (voz + imagen al mismo tiempo)
+    - el remate conecta con la primera imagen para que se repita en bucle
+    ritmo: 'ágil: un cambio visual cada 2,5 a 3 segundos, frases cortas con pausas naturales, sin relleno'
+    evitar:
+    - introducciones ('hoy te voy a explicar')
+    - pedir que sigan la página al principio
+    - terminar sin mostrar la respuesta
+    estilos_por_tema:
+      mecanismo: objeto grande en corte o rayos X, piezas que se encienden una a una con flechas; cámara
+        que entra al objeto
+      escala: algo diminuto o gigante comparado con un objeto conocido; zoom continuo que cambia de escala
+      proceso: línea de montaje en una maqueta, el objeto avanzando de estación en estación
+      comparacion: dos versiones lado a lado (antes y ahora, bien y mal) con la diferencia resaltada
+  pesos_virales:
+    curiosidad: 3
+    emocion: 2
+    compartir: 2
+    utilidad: 1
+    universal: 2
+    visual: 3
+    verificable: 2
 produccion:
+  palabras_por_segundo: 2.6   # ritmo de la voz en esta página
   # Duración objetivo del Reel en segundos (Facebook acepta de 3 a 90).
   duracion_min: 40   # orientativo: el guion dura lo que la explicación necesita, sin relleno
   duracion_max: 70
@@ -76,7 +128,7 @@ produccion:
     la primera frase con energía y sorpresa. Ritmo natural, con pausas breves entre frases.
     Sube la intensidad en los datos sorprendentes, baja un poco y hazlo íntimo antes de la
     respuesta, y remata con énfasis. Lee exactamente este texto, sin añadir ni quitar palabras:
-  whisper_modelo: "base"          # para saber en qué momento se dice cada palabra
+  whisper_modelo: "small"         # para saber en qué momento se dice cada palabra (small entiende bien el español)
   # Animación: "3d" (escenas 3D con luces y sombras) o "2d" (ilustración plana)
   motor: "3d"
   # true = todo el video pasa en UN mundo que evoluciona (el objeto se arma, se llena, falla,
@@ -87,7 +139,7 @@ produccion:
   # programados en Facebook para el siguiente horario libre de esa página. Descansa cuando todas
   # las páginas tienen ya esta cantidad de videos programados por delante.
   modo_cadena: "continuo"     # "continuo" o "turnos" (horas fijas de abajo)
-  cola_maxima: 5              # videos programados por delante, por página (unos 1,5 días)
+  cola_maxima: 2              # videos programados por delante, por página (con 1 al día: 2 días; así salen frescos)
   # Solo si modo_cadena es "turnos": horas fijas de producción (hora de RD).
   turnos:
     - {hora: "03:17", canal: "explicativos"}
@@ -157,6 +209,7 @@ ganchos:
     - "te mintieron («Te mintieron: casi nadie se fija en ti»)"
     - "ya lo tienes, pero falta algo («Ya tienes un avión… pero así no vuela»)"
   # Formatos ganadores (sacados de Reels con cientos de miles de vistas). Se sortea uno por video.
+    - "objeto cotidiano con truco escondido («Cada vez que aprietas el botón del ascensor, pasa esto en el techo»)"
   estructuras:
     - "NO ESTÁ DE ADORNO: un detalle de un objeto cotidiano que parece decoración pero cumple una función clave; se muestra el objeto, se quita el detalle, se ve qué pasaría sin él y se explica por qué está ahí"
     - "PIEZA POR PIEZA: se construye desde cero un objeto o lugar cotidiano, pieza por pieza, explicando para qué sirve cada parte y qué pasaría si faltara"
@@ -167,6 +220,7 @@ ganchos:
     - "LA MISMA IDEA: cómo un objeto evolucionó desde su versión más antigua hasta la que usas hoy, mostrando que el principio es el mismo"
     - "DE LO MÍNIMO A LO REAL: arranca con la versión más simple posible del objeto («ya tienes un avión: una tabla con un palo»); cada frase muestra un problema, el fallo exagerado, y la pieza real que lo resuelve se agrega con su nombre; al final, el objeto completo funcionando"
     - "SIGUE EL CAMINO: se recorre un sistema cotidiano de principio a fin en un solo mundo en corte (el agua desde la calle hasta tu llave, la luz desde el poste hasta el foco); cada tramo agrega una pieza con su nombre y lo que pasaría sin ella"
+    - "EL TRUCO ESCONDIDO: un objeto cotidiano que hace algo que nadie ve; se muestra por fuera, se entra en corte o rayos X, el mecanismo aparece pieza por pieza con su nombre, el «por eso» en tu vida, y un remate que vuelve al inicio"
 
 series:
   # Continuación automática: si un video saca este múltiplo de las vistas normales, se hace su parte 2.
@@ -181,9 +235,11 @@ aprobacion:
   escuchar_minutos: 30  # minutos que el bot espera tu botón para publicar al instante
 
 publicacion:
-  # Horas a las que se publica (hora de República Dominicana). Basado en estudios de 2026:
-  # mañana temprano, mediodía y noche son los picos de actividad en Facebook.
-  horarios: ["09:00", "13:00", "20:00"]
+  # Horas a las que se publica (hora de República Dominicana). Un video al día por página, a la
+  # hora pico de su nicho pensando en México y Colombia (el grueso del público): Curioso 10:00,
+  # Pensan2 14:00, C MAMUD 20:00, History Time 22:00. Los videos se hacen a cualquier hora, cuando
+  # hay uso de Claude, y quedan programados en Facebook. Para 2 al día, agrega otra hora a su lista.
+  horarios: ["20:00"]   # tarde-noche (18:00 en México, 19:00 en Colombia): videos para ver con calma
   zona_horaria: "America/Santo_Domingo"
   hashtags: ["#ciencia", "#curiosidades", "#aprende", "#explicacion"]
 
@@ -211,3 +267,14 @@ claude:
   intentos_arreglo: 2
   # true = si tras los intentos aún queda algún error, se publica igual (no te pregunta).
   publicar_si_no_se_arregla: true
+
+# Reglas de calidad para TODAS las páginas (investigación de noviembre de 2026).
+guia_general:
+  - "La voz empieza en el segundo 0 con el gancho: en Facebook, los Reels con voz en los primeros 3 segundos retienen mucho más."
+  - "Antes del segundo 3 la imagen ya cambió al menos una vez (movimiento, zoom o algo que aparece)."
+  - "Después, un cambio visual cada 2,5 a 3 segundos: nada se queda quieto."
+  - "Casi todos ven sin sonido: las palabras clave en pantalla deben contar la idea por sí solas."
+  - "Emociones de alta activación (asombro, sorpresa, intriga, diversión) hacen que se comparta; las neutras no."
+  - "Abrir una pregunta al principio y no cerrarla hasta el final; a la mitad, reabrir la curiosidad con un giro."
+  - "Una sola idea por video, contada como historia (inicio, conflicto, revelación), nunca como lista."
+  - "El final paga lo prometido en el gancho y conecta con la primera imagen."

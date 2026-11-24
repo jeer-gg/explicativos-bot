@@ -46,10 +46,17 @@ def canal_listo(canal: str) -> bool:
     return all(os.environ.get(f"{s}_{sufijo}", "").strip() for s in _SECRETOS_DE_PAGINA)
 
 
+# Diccionarios que cada página reemplaza enteros (no se mezclan con los de la principal).
+_ENTEROS = {"guia", "escenarios"}
+
+
 def _mezclar(base: dict, cambios: dict) -> dict:
     r = dict(base)
     for k, v in (cambios or {}).items():
-        r[k] = _mezclar(r[k], v) if isinstance(v, dict) and isinstance(r.get(k), dict) else v
+        if k in _ENTEROS:
+            r[k] = v
+        else:
+            r[k] = _mezclar(r[k], v) if isinstance(v, dict) and isinstance(r.get(k), dict) else v
     return r
 
 
