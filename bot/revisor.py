@@ -23,7 +23,7 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
         "solares 3D detallados en una azotea soleada, con cables y medidores; figuras grises en "
         "un escenario oscuro con un foco cálido sobre la figura roja protagonista, con tarjetas "
         "de datos grandes. Todos: fotograma lleno y bonito, protagonista que contrasta con el "
-        "fondo, buena luz, colores limpios, un solo mundo que va cambiando (con cortes de plano solo donde el tema lo pide). Esas son referencias "
+        "fondo, buena luz, colores limpios, un solo mundo que va cambiando. Esas son referencias "
         "de calidad, no de estilo: juzga con la paleta y el estilo de animación de ESTA página "
         "(descritos arriba); por ejemplo, si la página es de plastilina, que no haya contornos "
         "está bien. Técnica 2.5D: manos, personas, agua, humo y plantas van dibujados en 2D con "
