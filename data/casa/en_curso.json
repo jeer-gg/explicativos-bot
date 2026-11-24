@@ -1,0 +1,238 @@
+{
+  "inicio": "2026-11-24T02:45:38+00:00",
+  "escenas": {
+    "Mundo": "// Mundo compartido: «Tu inodoro se rellena solo». Baño-maqueta en corte, inodoro de perfil con el\n// frente del tanque abierto (tanque a la izquierda contra la pared, taza a la derecha).\n// paso 0: tanque lleno con tapa, aleta roja sobre el desagüe, todo en marcha.\n// paso 1: igual (la escena 1 quita la tapa).\n// paso 2-3: tapa apoyada a un lado contra la pared; tanque destapado.\n// paso 4: aleta roja deformada, fuga constante por el conducto hacia la taza.\n// paso 5: + ciclo de relleno (la válvula suelta un chorro intermitente).\n// paso 6: + agua del tanque teñida con colorante; taza clara.\n// paso 7: + taza teñida (fuga confirmada).\n// paso 8: llave de paso cerrada, tanque vacío, aleta vieja a la vista.\n// paso 9: aleta vieja retirada, cadena suelta colgando, desagüe descubierto.\n// paso 10: aleta verde nueva, cadena floja; llave aún cerrada, tanque vacío.\n// paso 11: llave abierta, tanque lleno y quieto, taza clara: reparado.\nimport React from 'react';\nimport * as THREE from 'three';\nimport {Pieza, Linea, Brillo} from '../lib3d';\nimport type {Paleta, V3} from '../lib3d';\nimport {Recorte, Sombra, Planta, PiezaGeo, Efecto, Tuberia, ESTILO25D} from '../lib25d';\n\nexport const PARTES = [\n  'inodoro', 'tanque', 'tapa', 'agua', 'aguataza', 'aleta', 'aletanueva', 'cadena',\n  'flotador', 'valvula', 'rebose', 'desague', 'palanca', 'llave', 'tubo', 'fuga',\n] as const;\n\nexport type ParteProps = {paleta: Paleta; resaltado?: boolean; frame?: number};\nexport type MundoProps = {paso: number; frame: number; fps: number; paleta: Paleta; ocultar?: string[]; resaltar?: string[]};\n\n// ---------- colores y medidas ----------\nconst BLANCO = '#FBF8F1';\nconst CROMO = '#C9CED6';\nconst GRIS = '#8E979F';\nconst GRIS_OSC = '#5F666E';\nconst ROJO = '#D6452E';\nconst VERDE = '#3FAE5A';\nconst COBRE = '#C8783E';\nconst MADERA = '#B98552';\nconst AZULEJO = '#EFE6D6';\nconst JUNTA = '#D6C8B0';\nconst AGUA = '#5DBBEE';\nconst TENIDA = '#2338B5';\nconst FPS = 30;\nconst O: V3 = [0.1, 0.08, 0]; // todo el baño va sobre la tarima (y = 0.08)\nconst Z = -0.15; // plano medio del tanque\nconst FONDO_T = 1.0; // fondo interior del tanque (local)\nconst ALTO_AGUA = 0.6;\n\nconst EnMundo: React.FC<{children: React.ReactNode}> = ({children}) => <group position={O}>{children}</group>;\nconst res = (p: ParteProps, color: string) => (p.resaltado ? p.paleta.acentos[2] : color);\n\n// ---------- estados por paso (las escenas animan entre uno y otro) ----------\nexport const nivelTanque = (paso: number) => (paso >= 8 && paso <= 10 ? 0.03 : 0.8);\nexport const superficie = (nivel: number) => FONDO_T + ALTO_AGUA * nivel;\nexport const anguloFlotador = (nivel: number) =>\n  Math.min(0.9, Math.max(0.05, Math.asin(Math.min(1, Math.max(-1, (1.5 - superficie(nivel) + 0.01) / 0.16)))));\nexport const giroLlave = (paso: number) => (paso >= 8 && paso <= 10 ? Math.PI / 2 : 0); // 0 abierta, PI/2 cerrada\nexport const llaveAbierta = (paso: number) => giroLlave(paso) === 0;\nexport const tanqueTenido = (paso: number) => paso === 6 || paso === 7;\nexport const tazaTenida = (paso: number) => paso === 7;\nexport const hayFuga = (paso: number) => paso >= 4 && paso <= 7;\nexport const aletaDeformada = (paso: number) => paso >= 4;\nexport const tapaQuitada = (paso: number) => paso >= 2;\nexport const modoCadena = (paso: number): 'tensa' | 'suelta' | 'floja' => (paso <= 8 ? 'tensa' : paso === 9 ? 'suelta' : 'floja');\n\n// Puntos clave en coordenadas del mundo (para etiquetas y flechas de las escenas).\nconst w = (p: V3): V3 => [p[0] + O[0], p[1] + O[1], p[2] + O[2]];\nexport const PUNTOS = {\n  aleta: w([-0.6, 1.05, Z]),\n  desague: w([-0.6, 1.02, Z]),\n  flotador: w([-0.67, 1.47, -0.1]),\n  valvula: w([-0.86, 1.48, Z]),\n  rebose: w([-0.42, 1.54, Z]),\n  palanca: w([-0.27, 1.53, -0.05]),\n  llave: w([-1.03, 0.32, -0.06]),\n  taza: w([0.2, 0.52, 0]),\n  tanque: w([-0.64, 1.3, Z]),\n  tapaFuera: w([0.75, 0.28, -0.72]),\n};\n\n// ---------- geometría de la taza ----------\nconst gTaza = new THREE.LatheGeometry(\n  ([[0.001, 0], [0.2, 0], [0.2, 0.18], [0.28, 0.3], [0.38, 0.5], [0.42, 0.58], [0.4, 0.61], [0.3, 0.6], [0.24, 0.5], [0.001, 0.5]] as [number, number][]).map(\n    ([r, y]) => new THREE.Vector2(r, y),\n  ),\n  40,\n);\n\n// ---------- partes ----------\n/** Cuerpo de porcelana: taza, aro, cuerpo trasero y el conducto del tanque a la taza. */\nexport const Inodoro: React.FC<ParteProps> = (p) => {\n  const c = res(p, BLANCO);\n  return (\n    <EnMundo>\n      <Sombra posicion={[-0.25, 0, -0.1]} radio={0.95} />\n      <PiezaGeo geometria={gTaza} color={c} posicion={[0.2, 0, 0]} escala={[1.2, 1, 0.95]} />\n      <Pieza forma=\"toro\" medidas={[0.34, 0.035]} color={c} posicion={[0.2, 0.63, 0]} rotacion={[Math.PI / 2, 0, 0]} escala={[1.2, 0.95, 1]} />\n      <Pieza forma=\"caja\" medidas={[0.5, 0.95, 0.42]} color={c} posicion={[-0.6, 0.475, Z]} />\n      <Pieza forma=\"caja\" medidas={[0.45, 0.3, 0.4]} color={c} posicion={[-0.2, 0.42, Z]} />\n      <Pieza forma=\"caja\" medidas={[1.0, 0.06, 0.44]} color={c} posicion={[-0.35, 0.03, Z]} />\n      {/* conducto del tanque a la taza, visible en el corte */}\n      <Linea desde={[-0.6, 0.95, 0.07]} hasta={[-0.6, 0.64, 0.07]} grosor={0.03} color={JUNTA} />\n      <Linea desde={[-0.6, 0.64, 0.07]} hasta={[-0.2, 0.62, 0.07]} grosor={0.03} color={JUNTA} />\n      <Linea desde={[-0.2, 0.62, 0.07]} hasta={[-0.04, 0.55, 0.02]} grosor={0.03} color={JUNTA} />\n    </EnMundo>\n  );\n};\n\n/** Paredes del tanque (sin la delantera: vista en corte). */\nexport const Tanque: React.FC<ParteProps> = (p) => {\n  const c = res(p, BLANCO);\n  return (\n    <EnMundo>\n      <Pieza forma=\"caja\" medidas={[0.62, 0.66, 0.05]} color={c} posicion={[-0.64, 1.28, -0.385]} />\n      <Pieza forma=\"caja\" medidas={[0.05, 0.66, 0.5]} color={c} posicion={[-0.925, 1.28, Z]} />\n      <Pieza forma=\"caja\" medidas={[0.05, 0.66, 0.5]} color={c} posicion={[-0.355, 1.28, Z]} />\n      <Pieza forma=\"caja\" medidas={[0.62, 0.05, 0.5]} color={c} posicion={[-0.64, 0.975, Z]} />\n    </EnMundo>\n  );\n};\n\n/** Tapa del tanque: encima (quitada = false) o apoyada contra la pared a la derecha. */\nexport const Tapa: React.FC<ParteProps & {quitada?: boolean}> = ({quitada = false, ...p}) => (\n  <EnMundo>\n    {quitada ? (\n      <group>\n        <Sombra posicion={[0.75, 0, -0.62]} radio={0.4} />\n        <Pieza forma=\"caja\" medidas={[0.68, 0.06, 0.56]} color={res(p, BLANCO)} posicion={[0.75, 0.28, -0.74]} rotacion={[-Math.PI / 2 + 0.12, 0, 0]} />\n      </group>\n    ) : (\n      <Pieza forma=\"caja\" medidas={[0.68, 0.06, 0.56]} color={res(p, BLANCO)} posicion={[-0.64, 1.64, Z]} />\n    )}\n  </EnMundo>\n);\n\n/** Agua del tanque en 2D (capa trasera + velo delantero para que las piezas se vean sumergidas). */\nexport const Agua: React.FC<ParteProps & {nivel?: number; tenida?: boolean; fuga?: boolean}> = ({nivel = 0.8, tenida = false, fuga = false, ...p}) => {\n  if (nivel <= 0.001) return null;\n  const colores = {...ESTILO25D.colores, agua: res(p, tenida ? TENIDA : AGUA)};\n  const op = {nivel, fuga: fuga ? ([0.57, 0.06] as [number, number]) : null, fuerza: fuga ? 0.8 : 0, c: colores};\n  return (\n    <EnMundo>\n      <Recorte dibujo=\"agua\" ancho={0.56} alto={ALTO_AGUA} posicion={[-0.64, FONDO_T + ALTO_AGUA / 2, -0.33]} opciones={op} frame={p.frame ?? 0} fps={FPS} />\n      <Recorte dibujo=\"agua\" ancho={0.56} alto={ALTO_AGUA} posicion={[-0.64, FONDO_T + ALTO_AGUA / 2, 0.07]} opciones={op} opacidad={0.28} frame={p.frame ?? 0} fps={FPS} />\n    </EnMundo>\n  );\n};\n\n/** Agua quieta al fondo de la taza (clara o teñida). */\nexport const AguaTaza: React.FC<ParteProps & {tenida?: boolean}> = ({tenida = false, ...p}) => (\n  <EnMundo>\n    <mesh position={[0.2, 0.505, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.2, 0.95, 1]}>\n      <circleGeometry args={[0.245, 40]} />\n      <meshBasicMaterial color={res(p, tenida ? TENIDA : AGUA)} toneMapped={false} />\n    </mesh>\n  </EnMundo>\n);\n\n/** Asiento de la válvula de descarga con el hueco (desagüe) por donde baja el agua. */\nexport const Desague: React.FC<ParteProps> = (p) => (\n  <EnMundo>\n    <Pieza forma=\"cilindro\" medidas={[0.08, 0.09, 0.04]} color={res(p, GRIS)} posicion={[-0.6, 1.02, Z]} />\n    <Pieza forma=\"cilindro\" medidas={[0.058, 0.058, 0.006]} color=\"#2E3338\" posicion={[-0.6, 1.042, Z]} contorno={false} />\n  </EnMundo>\n);\n\n/** Tubo de rebose con los dos pasadores (ganchitos) donde se enganchan las orejas de la aleta. */\nexport const Rebose: React.FC<ParteProps> = (p) => (\n  <EnMundo>\n    <Pieza forma=\"cilindro\" medidas={[0.03, 0.03, 0.54]} color={res(p, CROMO)} posicion={[-0.42, 1.27, Z]} />\n    <Pieza forma=\"toro\" medidas={[0.03, 0.008]} color={res(p, GRIS)} posicion={[-0.42, 1.54, Z]} rotacion={[Math.PI / 2, 0, 0]} />\n    <Pieza forma=\"caja\" medidas={[0.04, 0.03, 0.14]} color={res(p, GRIS_OSC)} posicion={[-0.45, 1.045, Z]} />\n  </EnMundo>\n);\n\n/** Forma común de la aleta: disco cónico de goma con capucha y brazo a los pasadores. */\nconst FormaAleta: React.FC<{color: string; inclinacion: number; torcida: boolean; tiembla: number}> = ({color, inclinacion, torcida, tiembla}) => (\n  <group position={[-0.47, 1.045, Z]} rotation={[torcida ? 0.12 : 0, 0, inclinacion + tiembla]}>\n    <group position={[-0.13, 0.0, 0]} scale={torcida ? [1.08, 0.8, 0.9] : 1}>\n      <Pieza forma=\"cilindro\" medidas={[0.085, 0.072, 0.035]} color={color} />\n      <Pieza forma=\"media_esfera\" medidas={[0.055]} color={color} posicion={[0, 0.017, 0]} escala={[1, 0.55, 1]} />\n      <Pieza forma=\"toro\" medidas={[0.013, 0.004]} color={GRIS_OSC} posicion={[0, 0.05, 0]} />\n    </group>\n    <Pieza forma=\"caja\" medidas={[0.09, 0.02, 0.1]} color={color} posicion={[-0.04, 0.005, 0]} />\n  </group>\n);\n\n/** Aleta vieja (roja). deformada: torcida y levantada en el borde, deja pasar el agua. */\nexport const Aleta: React.FC<ParteProps & {deformada?: boolean}> = ({deformada = false, ...p}) => {\n  const tiembla = deformada ? Math.sin((p.frame ?? 0) * 0.9) * 0.015 : 0;\n  return (\n    <EnMundo>\n      <FormaAleta color={res(p, deformada ? '#B9392A' : ROJO)} inclinacion={deformada ? -0.16 : 0} torcida={deformada} tiembla={tiembla} />\n    </EnMundo>\n  );\n};\n\n/** Aleta nueva (verde), plana y sellando. */\nexport const AletaNueva: React.FC<ParteProps> = (p) => (\n  <EnMundo>\n    <FormaAleta color={res(p, VERDE)} inclinacion={0} torcida={false} tiembla={0} />\n  </EnMundo>\n);\n\n/** Palanca: manija cromada por fuera del tanque y brazo por dentro. bajada 0..1 la acciona. */\nexport const Palanca: React.FC<ParteProps & {bajada?: number}> = ({bajada = 0, ...p}) => (\n  <EnMundo>\n    <Pieza forma=\"cilindro\" medidas={[0.035, 0.035, 0.02]} color={res(p, CROMO)} posicion={[-0.325, 1.53, -0.05]} rotacion={[0, 0, Math.PI / 2]} />\n    <group position={[-0.33, 1.53, -0.08]} rotation={[0, 0, -0.5 * bajada]}>\n      <Pieza forma=\"caja\" medidas={[0.12, 0.035, 0.05]} color={res(p, CROMO)} posicion={[0.07, 0, 0.03]} />\n      <Pieza forma=\"caja\" medidas={[0.25, 0.02, 0.02]} color={res(p, GRIS)} posicion={[-0.125, 0, -0.04]} />\n    </group>\n  </EnMundo>\n);\n\n/** Cadena de eslabones del brazo de la palanca a la aleta. */\nexport const Cadena: React.FC<ParteProps & {modo?: 'tensa' | 'suelta' | 'floja'}> = ({modo = 'tensa', ...p}) => {\n  const a: V3 = [-0.585, 1.515, -0.12];\n  const b: V3 = modo === 'suelta' ? [-0.57, 1.2, -0.12] : [-0.6, 1.1, Z];\n  const n = modo === 'floja' ? 13 : modo === 'suelta' ? 9 : 11;\n  const vaiven = modo === 'suelta' ? Math.sin((p.frame ?? 0) / 14) * 0.02 : 0;\n  return (\n    <EnMundo>\n      {Array.from({length: n}, (_, i) => {\n        const t = i / (n - 1);\n        const comba = modo === 'floja' ? 0.06 * Math.sin(Math.PI * t) : vaiven * t;\n        const pos: V3 = [a[0] + (b[0] - a[0]) * t + comba, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];\n        return <Pieza key={i} forma=\"toro\" medidas={[0.013, 0.004]} color={res(p, CROMO)} posicion={pos} rotacion={[0, i % 2 ? Math.PI / 2 : 0, 0]} escala={[1, 1.5, 1]} />;\n      })}\n    </EnMundo>\n  );\n};\n\n/** Válvula de llenado con su tubito de relleno hacia el rebose. chorro 0..1: agua que entra. */\nexport const Valvula: React.FC<ParteProps & {chorro?: number}> = ({chorro = 0, ...p}) => (\n  <EnMundo>\n    <Pieza forma=\"cilindro\" medidas={[0.03, 0.03, 0.1]} color={res(p, GRIS_OSC)} posicion={[-0.86, 0.93, Z]} />\n    <Pieza forma=\"cilindro\" medidas={[0.035, 0.042, 0.46]} color={res(p, GRIS_OSC)} posicion={[-0.86, 1.23, Z]} />\n    <Pieza forma=\"cilindro\" medidas={[0.058, 0.058, 0.07]} color={res(p, GRIS)} posicion={[-0.86, 1.48, Z]} />\n    <Linea desde={[-0.82, 1.5, -0.13]} hasta={[-0.62, 1.585, -0.13]} grosor={0.008} color=\"#34343A\" />\n    <Linea desde={[-0.62, 1.585, -0.13]} hasta={[-0.42, 1.55, -0.13]} grosor={0.008} color=\"#34343A\" />\n    {chorro > 0.02 ? <Efecto tipo=\"chorro\" posicion={[-0.86, 1.28, -0.05]} tam={0.16} fuerza={chorro} frame={p.frame ?? 0} fps={FPS} /> : null}\n  </EnMundo>\n);\n\n/** Flotador gris en su brazo: baja con el agua y abre la válvula. nivel = nivel del tanque. */\nexport const Flotador: React.FC<ParteProps & {nivel?: number}> = ({nivel = 0.8, ...p}) => {\n  const vaiven = nivel > 0.1 ? Math.sin((p.frame ?? 0) / 18) * 0.015 : 0;\n  return (\n    <EnMundo>\n      <group position={[-0.83, 1.5, -0.1]} rotation={[0, 0, -anguloFlotador(nivel) + vaiven]}>\n        <Pieza forma=\"caja\" medidas={[0.13, 0.016, 0.016]} color={res(p, GRIS_OSC)} posicion={[0.065, 0, 0]} />\n        <Pieza forma=\"esfera\" medidas={[0.05]} color={res(p, '#A7AFB8')} posicion={[0.16, 0, 0]} />\n      </group>\n    </EnMundo>\n  );\n};\n\n/** Llave de paso junto a la pared, con manija naranja. giro 0 = abierta, PI/2 = cerrada. */\nexport const Llave: React.FC<ParteProps & {giro?: number}> = ({giro = 0, ...p}) => (\n  <EnMundo>\n    <Pieza forma=\"cilindro\" medidas={[0.04, 0.04, 0.1]} color={res(p, CROMO)} posicion={[-1.03, 0.32, -0.1]} rotacion={[0, 0, Math.PI / 2]} />\n    <Pieza forma=\"cilindro\" medidas={[0.015, 0.015, 0.06]} color={res(p, CROMO)} posicion={[-1.03, 0.32, -0.05]} rotacion={[Math.PI / 2, 0, 0]} />\n    <group position={[-1.03, 0.32, -0.015]} rotation={[0, 0, giro]}>\n      <Pieza forma=\"caja\" medidas={[0.17, 0.045, 0.025]} color={res(p, p.paleta.acentos[0])} />\n    </group>\n  </EnMundo>\n);\n\n/** Tubería: cobre dentro de la pared (en corte) y manguera flexible de la llave al tanque. */\nexport const Tubo: React.FC<ParteProps & {flujo?: number}> = ({flujo = 0, ...p}) => (\n  <EnMundo>\n    <Pieza forma=\"cilindro\" medidas={[0.022, 0.022, 0.32]} color={res(p, COBRE)} posicion={[-1.22, 0.16, -0.1]} />\n    <Pieza forma=\"esfera\" medidas={[0.03]} color={res(p, COBRE)} posicion={[-1.22, 0.32, -0.1]} />\n    <Pieza forma=\"cilindro\" medidas={[0.022, 0.022, 0.16]} color={res(p, COBRE)} posicion={[-1.14, 0.32, -0.1]} rotacion={[0, 0, Math.PI / 2]} />\n    <Tuberia puntos={[[-1.0, 0.33, -0.1], [-1.0, 0.86, -0.1], [-0.86, 0.88, Z]]} radio={0.016} color={res(p, '#D8DDE3')} flujo={flujo} frame={p.frame ?? 0} fps={FPS} />\n  </EnMundo>\n);\n\n/** Fuga: gotas que bajan del desagüe por el conducto y ondas en la taza. */\nexport const Fuga: React.FC<ParteProps> = (p) => {\n  const f = p.frame ?? 0;\n  const ruta: V3[] = [[-0.6, 1.0, Z], [-0.6, 0.95, 0.09], [-0.6, 0.64, 0.09], [-0.2, 0.62, 0.09], [-0.04, 0.55, 0.04]];\n  const en = (u: number): V3 => {\n    const s = u * (ruta.length - 1);\n    const i = Math.min(ruta.length - 2, Math.floor(s));\n    const k = s - i;\n    return [0, 1, 2].map((j) => ruta[i][j] + (ruta[i + 1][j] - ruta[i][j]) * k) as V3;\n  };\n  const color = res(p, AGUA);\n  return (\n    <EnMundo>\n      {[0, 1, 2, 3, 4, 5].map((i) => (\n        <Brillo key={i} posicion={en((((f / 40 + i / 6) % 1) + 1) % 1)} color={color} radio={0.022} />\n      ))}\n      <Efecto tipo=\"ondas\" posicion={[0.12, 0.51, 0.02]} rotacion={[-Math.PI / 2, 0, 0]} tam={0.36} color={color} frame={f} fps={FPS} />\n    </EnMundo>\n  );\n};\n\n// ---------- el baño (fondo fijo) ----------\nconst Bano: React.FC<{frame: number}> = ({frame}) => (\n  <EnMundo>\n    {/* tarima de azulejo */}\n    <Pieza forma=\"caja\" medidas={[2.5, 0.08, 1.7]} color=\"#E4D8C3\" posicion={[-0.1, -0.04, 0.0]} />\n    <Pieza forma=\"caja\" medidas={[2.52, 0.03, 0.03]} color=\"#C89B6D\" posicion={[-0.1, -0.065, 0.85]} />\n    {[-0.6, 0.0, 0.6].map((x) => (\n      <Pieza key={x} forma=\"caja\" medidas={[0.012, 0.002, 1.6]} color={JUNTA} posicion={[x, 0.001, 0]} contorno={false} />\n    ))}\n    {[-0.3, 0.3].map((z) => (\n      <Pieza key={z} forma=\"caja\" medidas={[2.4, 0.002, 0.012]} color={JUNTA} posicion={[-0.1, 0.001, z]} contorno={false} />\n    ))}\n    {/* pared del fondo: azulejo abajo, pintura arriba, ventana con luz */}\n    <Pieza forma=\"caja\" medidas={[2.5, 1.15, 0.08]} color={AZULEJO} posicion={[-0.1, 0.575, -0.86]} />\n    <Pieza forma=\"caja\" medidas={[2.5, 0.7, 0.07]} color=\"#F6E7CC\" posicion={[-0.1, 1.5, -0.865]} />\n    <Pieza forma=\"caja\" medidas={[2.52, 0.05, 0.1]} color={MADERA} posicion={[-0.1, 1.15, -0.85]} />\n    {[0.3, 0.6, 0.9].map((y) => (\n      <Pieza key={y} forma=\"caja\" medidas={[2.5, 0.012, 0.01]} color={JUNTA} posicion={[-0.1, y, -0.815]} contorno={false} />\n    ))}\n    {[-0.8, -0.4, 0.0, 0.4, 0.8].map((x) => (\n      <Pieza key={x} forma=\"caja\" medidas={[0.012, 1.12, 0.01]} color={JUNTA} posicion={[x, 0.56, -0.815]} contorno={false} />\n    ))}\n    <Pieza forma=\"caja\" medidas={[0.62, 0.48, 0.05]} color={MADERA} posicion={[0.45, 1.52, -0.82]} />\n    <Pieza forma=\"caja\" medidas={[0.52, 0.38, 0.03]} color=\"#FFF3D6\" brillo=\"#FFE6B0\" posicion={[0.45, 1.52, -0.8]} />\n    <Pieza forma=\"caja\" medidas={[0.02, 0.38, 0.04]} color={MADERA} posicion={[0.45, 1.52, -0.79]} />\n    <Pieza forma=\"caja\" medidas={[0.52, 0.02, 0.04]} color={MADERA} posicion={[0.45, 1.52, -0.79]} />\n    {/* portarrollos */}\n    <Pieza forma=\"caja\" medidas={[0.04, 0.04, 0.08]} color={CROMO} posicion={[0.85, 0.72, -0.78]} />\n    <Pieza forma=\"cilindro\" medidas={[0.065, 0.065, 0.12]} color=\"#FFFFFF\" posicion={[0.85, 0.66, -0.72]} rotacion={[0, 0, Math.PI / 2]} />\n    {/* pared izquierda con el corte abajo que deja ver el tubo de cobre */}\n    <Pieza forma=\"caja\" medidas={[0.12, 1.35, 0.8]} color={AZULEJO} posicion={[-1.22, 1.175, -0.46]} />\n    <Pieza forma=\"caja\" medidas={[0.12, 0.5, 0.6]} color={AZULEJO} posicion={[-1.22, 0.25, -0.56]} />\n    <Pieza forma=\"caja\" medidas={[0.12, 0.5, 0.02]} color=\"#9C7A5A\" posicion={[-1.22, 0.25, -0.25]} />\n    <Pieza forma=\"caja\" medidas={[0.13, 0.05, 0.82]} color={MADERA} posicion={[-1.22, 1.15, -0.45]} />\n    {/* planta en la esquina delantera */}\n    <Sombra posicion={[1.0, 0, 0.45]} radio={0.25} />\n    <Pieza forma=\"cilindro\" medidas={[0.11, 0.08, 0.16]} color={MADERA} posicion={[1.0, 0.08, 0.45]} />\n    <Planta posicion={[1.0, 0.14, 0.46]} alto={0.42} frame={frame} fps={FPS} />\n  </EnMundo>\n);\n\n// ---------- mundo completo ----------\nexport const Mundo: React.FC<MundoProps> = ({paso, frame, paleta, ocultar = [], resaltar = []}) => {\n  const ver = (n: string) => !ocultar.includes(n);\n  const r = (n: string) => resaltar.includes(n);\n  const nivel = nivelTanque(paso);\n  const chorro = paso >= 5 && paso <= 7 ? Math.max(0, Math.sin(frame / 25)) * 0.5 : 0;\n  const base = {paleta, frame};\n  return (\n    <group>\n      <Bano frame={frame} />\n      {ver('inodoro') ? <Inodoro {...base} resaltado={r('inodoro')} /> : null}\n      {ver('tanque') ? <Tanque {...base} resaltado={r('tanque')} /> : null}\n      {ver('tapa') ? <Tapa {...base} resaltado={r('tapa')} quitada={tapaQuitada(paso)} /> : null}\n      {ver('aguataza') ? <AguaTaza {...base} resaltado={r('aguataza')} tenida={tazaTenida(paso)} /> : null}\n      {ver('desague') ? <Desague {...base} resaltado={r('desague')} /> : null}\n      {ver('rebose') ? <Rebose {...base} resaltado={r('rebose')} /> : null}\n      {ver('aleta') && paso <= 8 ? <Aleta {...base} resaltado={r('aleta')} deformada={aletaDeformada(paso)} /> : null}\n      {ver('aletanueva') && paso >= 10 ? <AletaNueva {...base} resaltado={r('aletanueva')} /> : null}\n      {ver('palanca') ? <Palanca {...base} resaltado={r('palanca')} /> : null}\n      {ver('cadena') ? <Cadena {...base} resaltado={r('cadena')} modo={modoCadena(paso)} /> : null}\n      {ver('valvula') ? <Valvula {...base} resaltado={r('valvula')} chorro={chorro} /> : null}\n      {ver('flotador') ? <Flotador {...base} resaltado={r('flotador')} nivel={nivel} /> : null}\n      {ver('llave') ? <Llave {...base} resaltado={r('llave')} giro={giroLlave(paso)} /> : null}\n      {ver('tubo') ? <Tubo {...base} resaltado={r('tubo')} flujo={chorro > 0.05 ? 1 : 0} /> : null}\n      {ver('fuga') && hayFuga(paso) ? <Fuga {...base} resaltado={r('fuga')} /> : null}\n      {ver('agua') ? <Agua {...base} resaltado={r('agua')} nivel={nivel} tenida={tanqueTenido(paso)} fuga={hayFuga(paso)} /> : null}\n    </group>\n  );\n};\n",
+    "Escena1": "import React from 'react';\nimport {interpolate, Easing} from 'remotion';\nimport {EscenaProps, Pieza, Etiqueta, Flecha, Linea, Aro, caer, aparecer, rebote, flotar, mover, momento} from '../lib3d';\nimport type {V3} from '../lib3d';\nimport {Mano, Sombra, Efecto} from '../lib25d';\nimport {Mundo, PUNTOS} from './Mundo';\n\nconst O: V3 = [0.1, 0.08, 0];\nconst Z = -0.15;\nconst BLANCO = '#FBF8F1';\nconst lerp = (a: number, b: number, k: number) => a + (b - a) * k;\nconst suave = (frame: number, a: number, b: number) =>\n  interpolate(frame, [a, b], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic)});\n\n/** Llave inglesa naranja (la herramienta del plomero que no hace falta). */\nconst LlaveInglesa: React.FC<{color: string}> = ({color}) => (\n  <group>\n    <Pieza forma=\"caja\" medidas={[0.42, 0.05, 0.03]} color={color} posicion={[0, 0, 0]} />\n    <Pieza forma=\"caja\" medidas={[0.16, 0.06, 0.035]} color=\"#2B241D\" posicion={[-0.14, 0, 0.002]} />\n    <Pieza forma=\"cilindro\" medidas={[0.07, 0.07, 0.035]} color={color} posicion={[0.23, 0, 0]} rotacion={[Math.PI / 2, 0, 0]} />\n    <Pieza forma=\"caja\" medidas={[0.05, 0.1, 0.035]} color={color} posicion={[0.29, 0.06, 0]} />\n    <Pieza forma=\"caja\" medidas={[0.05, 0.08, 0.035]} color=\"#C9CED6\" posicion={[0.29, -0.06, 0]} />\n    <Pieza forma=\"cilindro\" medidas={[0.018, 0.018, 0.05]} color=\"#C9CED6\" posicion={[0.2, -0.03, 0]} rotacion={[0, 0, Math.PI / 2]} />\n  </group>\n);\n\nexport const Escena1: React.FC<EscenaProps> = ({frame, fps, palabras, paleta}) => {\n  const [naranja, , resalte] = paleta.acentos;\n\n  // Golpes sincronizados con la voz\n  const tDanado = momento(palabras, fps, 'dañado', 14);\n  const tNecesitas = momento(palabras, fps, 'necesitas', 45);\n  const tPlomero = momento(palabras, fps, 'plomero', 64);\n  const tAbre = momento(palabras, fps, 'abre', 105);\n  const tTanque = momento(palabras, fps, 'tanque', 118);\n  const tMira = momento(palabras, fps, 'mira', 133);\n  const tFondo = momento(palabras, fps, 'fondo', 146);\n\n  // ---- \"no está dañado\": aro y resalte breve del inodoro ----\n  const aroSano = Math.min(aparecer(frame, 2, 14), 1 - aparecer(frame, tDanado + 34, 10));\n  const sanoResaltado = frame >= tDanado && frame < tDanado + 36;\n  const etiquetaSano = Math.min(aparecer(frame, tDanado, 8), 1 - aparecer(frame, tPlomero - 4, 8));\n\n  // ---- \"no necesitas plomero\": la llave inglesa cae y sale volando ----\n  const cae = caer(frame, fps, tNecesitas, 1.4);\n  const vuela = suave(frame, tPlomero, tPlomero + 20);\n  const llaveVisible = frame < tPlomero + 22;\n  const llavePos: V3 = [0.55 + vuela * 1.6, 0.11 + cae.y + Math.sin(Math.PI * Math.min(1, vuela * 1.3)) * 0.9, 0.6 - vuela * 0.3];\n  const llaveEsc = cae.escala * (1 - Math.max(0, vuela - 0.75) * 4);\n\n  // ---- \"abre el tanque\": la mano levanta la tapa y la apoya en la pared ----\n  const tLevanta = tAbre;\n  const tSuelta = tLevanta + 37;\n  const p = suave(frame, tLevanta, tSuelta);\n  const tiembla = frame >= tAbre - 6 && frame < tLevanta + 3 ? Math.sin(frame * 2.2) * 0.02 : 0;\n  const ini: V3 = [-0.64, 1.64, Z];\n  const fin: V3 = [0.75, 0.28, -0.74];\n  const tapaLocal: V3 = [lerp(ini[0], fin[0], p), lerp(ini[1], fin[1], p) + Math.sin(Math.PI * p) * 0.18, lerp(ini[2], fin[2], p)];\n  const tapaRot: V3 = [lerp(0, -Math.PI / 2 + 0.12, Math.min(1, p * 1.15)), 0, tiembla + Math.sin(Math.PI * p) * -0.15];\n  const tapaMundo: V3 = [tapaLocal[0] + O[0], tapaLocal[1] + O[1], tapaLocal[2] + O[2]];\n  const asentada = aparecer(frame, tSuelta - 4, 6);\n\n  // Mano: entra, agarra el borde derecho de la tapa, la lleva, suelta y se va.\n  const agarre: V3 = [tapaMundo[0] + 0.28, tapaMundo[1] + 0.1 - p * 0.05, tapaMundo[2] + 0.32 + p * 0.1];\n  const entra = suave(frame, tAbre - 14, tLevanta);\n  const sale = suave(frame, tSuelta + 2, tSuelta + 16);\n  const manoPos: V3 =\n    frame < tLevanta\n      ? [lerp(1.3, agarre[0], entra), lerp(1.9, agarre[1], entra), agarre[2]]\n      : [agarre[0] + sale * 0.9, agarre[1] + sale * 0.9, agarre[2]];\n  const manoEsc = Math.min(entra, 1 - sale);\n  const manoGiro = -0.25 + Math.sin(Math.PI * p) * 0.2;\n\n  // Resaltes\n  const resaltar: string[] = [];\n  if (sanoResaltado) resaltar.push('inodoro');\n  if (frame >= tTanque && frame < tTanque + 34) resaltar.push('tanque');\n  if (frame >= tFondo && frame < 158) resaltar.push('aleta');\n\n  // ---- \"mira al fondo\": flecha que baja hasta el hueco ----\n  const cierre = 1 - aparecer(frame, 151, 7);\n  const flecha = Math.min(mover(frame, [tMira, tMira + 12], [0, 1]), cierre);\n  const fondoPulso = Math.min(aparecer(frame, tFondo, 8), cierre);\n  const bote = rebote(frame, fps, tFondo);\n  const des = PUNTOS.desague;\n\n  return (\n    <group>\n      <Mundo paso={1} frame={frame} fps={fps} paleta={paleta} ocultar={['tapa']} resaltar={resaltar} />\n\n      {/* Tapa animada (al terminar queda igual que en el paso 2) */}\n      <group position={O}>\n        <Sombra posicion={[0.75, 0, -0.62]} radio={0.4} fuerza={asentada} />\n        <Pieza forma=\"caja\" medidas={[0.68, 0.06, 0.56]} color={BLANCO} posicion={tapaLocal} rotacion={tapaRot} />\n      </group>\n      {/* Mano 2D delante de la tapa */}\n      {manoEsc > 0.01 ? (\n        <Mano pose=\"agarra\" ancho={0.5} posicion={manoPos} rotacion={[0, 0, manoGiro]} escala={manoEsc} espejo frame={frame} fps={fps} />\n      ) : null}\n      {/* Gotitas que caen del borde de la tapa al levantarla */}\n      {frame > tLevanta && frame < tLevanta + 22 ? (\n        <Efecto tipo=\"gotas\" posicion={[tapaMundo[0], tapaMundo[1] - 0.15, tapaMundo[2] + 0.25]} tam={0.25} color=\"#5DBBEE\" frame={frame} fps={fps} />\n      ) : null}\n\n      {/* \"No está dañado\" */}\n      <Aro posicion={[-0.15, 0.08, -0.1]} radio={0.95} color={resalte} progreso={aroSano} grosor={0.018} />\n      <Etiqueta texto=\"sin daños\" punto={[0.55, 0.55, 0.15]} desplazamiento={[0.3, 0.55, 0.2]} escala={etiquetaSano} />\n\n      {/* \"No necesitas plomero\": la herramienta cae y sale despedida */}\n      {llaveVisible ? (\n        <group>\n          <Sombra posicion={[0.55, 0.085, 0.6]} radio={0.28} fuerza={cae.escala * (1 - vuela)} />\n          <group position={llavePos} rotation={[-Math.PI / 2 + cae.giro, 0, 0.5 + vuela * 9]} scale={Math.max(0.001, llaveEsc)}>\n            <LlaveInglesa color={naranja} />\n          </group>\n        </group>\n      ) : null}\n      {vuela > 0.02 && vuela < 0.9 ? (\n        <Linea desde={[0.55, 0.2, 0.6]} hasta={[llavePos[0] - 0.15, llavePos[1] - 0.05, llavePos[2]]} discontinua grosor={0.008} color=\"#2B241D\" />\n      ) : null}\n\n      {/* \"Mira al fondo\": flecha que baja al desagüe y pulso en el hueco */}\n      <Flecha desde={[des[0] + 0.02, 1.95, 0.12]} hasta={[des[0], des[1] + 0.12, des[2] + 0.05]} color={resalte} grosor={0.022} progreso={flecha} />\n      <Aro posicion={[des[0], des[1] + 0.02, des[2]]} radio={0.12 + 0.03 * bote + flotar(frame, 0.01, 12)} color={naranja} progreso={fondoPulso} grosor={0.012} />\n\n      {/* Capa delantera: frasco de colorante y repuesto de papel */}\n      <group position={[-0.95, 0.08, 0.62]}>\n        <Sombra posicion={[0, 0.002, 0]} radio={0.12} />\n        <Pieza forma=\"cilindro\" medidas={[0.05, 0.055, 0.16]} color=\"#2338B5\" posicion={[0, 0.08, 0]} />\n        <Pieza forma=\"caja\" medidas={[0.07, 0.06, 0.01]} color=\"#E9E1D3\" posicion={[0, 0.08, 0.052]} />\n        <Pieza forma=\"cilindro\" medidas={[0.025, 0.03, 0.05]} color=\"#F2C94C\" posicion={[0, 0.185, 0]} />\n        <Pieza forma=\"cono\" medidas={[0.018, 0.04]} color=\"#F2C94C\" posicion={[0, 0.23, 0]} />\n      </group>\n      <group position={[-0.7, 0.08, 0.72]}>\n        <Sombra posicion={[0, 0.002, 0]} radio={0.1} />\n        <Pieza forma=\"cilindro\" medidas={[0.065, 0.065, 0.12]} color=\"#FFFFFF\" posicion={[0, 0.06, 0]} />\n        <Pieza forma=\"cilindro\" medidas={[0.02, 0.02, 0.122]} color=\"#C89B6D\" posicion={[0, 0.06, 0]} contorno={false} />\n      </group>\n    </group>\n  );\n};\n"
+  },
+  "tema": {
+    "tema": "El inodoro que se queda sonando o rellenándose solo después de bajarlo: la culpa es la aleta de goma del tanque que ya no sella, y se cambia en 5 minutos",
+    "angulo": "Casi todos creen que el inodoro está dañado o que hay que llamar al plomero, pero al abrir el tanque la causa real es una aleta de goma deformada por el tiempo que deja escapar agua sin parar. Prueba con colorante, cambio paso a paso y el antes y después: silencio total",
+    "subtema": "plomería por dentro (inodoro)",
+    "tendencia": "",
+    "pregunta_origen": "¿Por qué mi inodoro se queda sonando o rellenándose solo cuando nadie lo ha usado?",
+    "por_que": "Lo reconoce casi toda casa, así que la gente lo comparte con quien lo sufre. Genera curiosidad inmediata por el sonido que todos han oído, cabe en menos de 80 segundos con imágenes claras (tanque abierto, colorante, aleta vieja frente a una nueva) y encaja en el formato LO INESPERADO: un ruidito pequeño que esconde una pieza de goma como causa real. Es verificable, es un arreglo sencillo y seguro sin riesgos, y no entra en temas de salud ni de dinero. Además, el gancho de error común funciona porque casi todos le dan golpecitos a la manija o cambian todo el mecanismo cuando solo hay que cambiar la aleta."
+  },
+  "estilo": {
+    "tendencia": false,
+    "paleta": "marca",
+    "colores": {
+      "fondo": "#F1E4CF",
+      "tinta": "#2B241D",
+      "acentos": [
+        "#F28C28",
+        "#E9E1D3",
+        "#2FA4E7",
+        "#F2C94C",
+        "#C89B6D"
+      ]
+    },
+    "tipo_gancho": "error común («Casi todos limpian esto al revés»)",
+    "estructura": "LO INESPERADO: un problema que parece pequeño, se abre por dentro y aparece la causa real que nadie esperaba, el arreglo paso a paso y el antes y después"
+  },
+  "guion": {
+    "titulo": "Tu inodoro se rellena solo: la causa real",
+    "descripcion": "Si tu inodoro suena o se rellena solo, no está dañado. Mira qué pieza de goma lo causa y cómo se cambia en cinco minutos.",
+    "portada": "NO CAMBIES EL INODORO",
+    "pregunta_comentarios": "¿Cuánto tiempo llevaba el tuyo sonando solo?",
+    "hashtags": [
+      "#inodoro",
+      "#plomeria",
+      "#arreglosdelhogar",
+      "#hazlotumismo",
+      "#tanquedelinodoro"
+    ],
+    "escenas": [
+      {
+        "voz": "Si tu inodoro suena solo, no cambies el inodoro: cambia esto.",
+        "visual": "Fotograma 0: la mano con camiseta gris sostiene un inodoro miniatura sobre un cartel de «comprar nuevo» y lo aparta; el tanque abierto del inodoro real tiembla y una flecha parpadea sobre una pieza roja borrosa. En el primer segundo la pieza roja se agita como a punto de soltarse.",
+        "rotulo": "CAMBIA ESTO",
+        "palabra_clave": "cambia",
+        "concepto": "CAMBIA ESTO",
+        "mundo": "Inodoro en corte, tanque lleno, agua temblando.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Un inodoro que se rellena solo suele tener una fuga del tanque a la taza.",
+            "fuente": "https://www.familyhandyman.com/article/how-to-fix-a-running-toilet/"
+          }
+        ]
+      },
+      {
+        "voz": "No está dañado, y no necesitas plomero. Abre el tanque y mira al fondo.",
+        "visual": "Una mano levanta la tapa del tanque y la deja a un lado. La cámara baja hacia el fondo del tanque.",
+        "rotulo": "",
+        "palabra_clave": "fondo",
+        "concepto": "ABRE EL TANQUE",
+        "mundo": "Tanque destapado, vista hacia el fondo.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Las fugas silenciosas se revisan abriendo el tanque.",
+            "fuente": "https://www.familyhandyman.com/article/how-to-fix-a-running-toilet/"
+          }
+        ]
+      },
+      {
+        "voz": "Ahí hay una aleta de goma. Tapa el hueco por donde sale el agua al bajarlo.",
+        "visual": "Zoom a la aleta de goma roja sobre el hueco del fondo. Una etiqueta la señala.",
+        "rotulo": "LA ALETA",
+        "palabra_clave": "aleta",
+        "concepto": "LA ALETA",
+        "mundo": "Aleta de goma roja señalada sobre el desagüe del tanque.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "El flapper o aleta es la pieza de goma que sella el desagüe del tanque.",
+            "fuente": "https://www.familyhandyman.com/article/how-to-fix-a-running-toilet/"
+          }
+        ]
+      },
+      {
+        "voz": "Con los años se deforma y ya no sella. El agua se escapa a la taza sin parar.",
+        "visual": "La aleta se ve torcida, con un hueco en el borde. Un hilo de agua se cuela hacia la taza.",
+        "rotulo": "NO SELLA",
+        "palabra_clave": "deforma",
+        "concepto": "YA NO SELLA",
+        "mundo": "Aleta deformada con fuga constante hacia la taza.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "La goma se endurece o deforma con el tiempo y deja de sellar.",
+            "fuente": "https://www.familyhandyman.com/article/how-to-fix-a-running-toilet/"
+          }
+        ]
+      },
+      {
+        "voz": "El nivel baja, el flotador cae y abre la válvula. Y el tanque se rellena otra vez.",
+        "visual": "El flotador desciende con el agua, la válvula de llenado se abre y entra un chorro. El nivel sube y vuelve a bajar.",
+        "rotulo": "EL FLOTADOR",
+        "palabra_clave": "flotador",
+        "concepto": "EL FLOTADOR",
+        "mundo": "Ciclo visible: fuga, flotador baja, válvula rellena.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Al bajar el nivel, el flotador activa la válvula de llenado.",
+            "fuente": "https://www.familyhandyman.com/article/how-to-fix-a-running-toilet/"
+          }
+        ]
+      },
+      {
+        "voz": "Compruébalo. Echa colorante en el tanque, no bajes la palanca y espera quince minutos.",
+        "visual": "Gotas de colorante azul caen en el tanque y tiñen el agua. Un reloj pequeño gira al lado.",
+        "rotulo": "QUINCE MINUTOS",
+        "palabra_clave": "colorante",
+        "concepto": "ECHA COLORANTE",
+        "mundo": "Agua del tanque teñida de azul, la taza aún clara.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "La prueba del colorante en el tanque, sin bajar el agua, detecta fugas. La EPA indica esperar unos 10 minutos y otras guías 15 minutos o más; quince minutos es un margen seguro.",
+            "fuente": "https://www.epa.gov/watersense/fix-leak-week"
+          }
+        ]
+      },
+      {
+        "voz": "¿Color en la taza? Esa es la fuga, y casi seguro la culpable es la aleta.",
+        "visual": "El agua de la taza se tiñe de azul. Una flecha apunta de la aleta a la taza.",
+        "rotulo": "FUGA",
+        "palabra_clave": "fuga",
+        "concepto": "ESA ES LA FUGA",
+        "mundo": "Taza teñida de azul, fuga confirmada.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Si aparece color en la taza, hay fuga por el sello del tanque, casi siempre en la aleta.",
+            "fuente": "https://www.epa.gov/watersense/fix-leak-week"
+          }
+        ]
+      },
+      {
+        "voz": "Cierra la llave de paso y baja la palanca para vaciar el tanque.",
+        "visual": "Una mano gira la llave junto a la pared. Se baja la palanca y el tanque se vacía.",
+        "rotulo": "LLAVE DE PASO",
+        "palabra_clave": "llave",
+        "concepto": "CIERRA LA LLAVE",
+        "mundo": "Llave cerrada, tanque vacío, aleta vieja visible.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Antes de cambiar piezas se cierra el suministro y se vacía el tanque.",
+            "fuente": "https://www.familyhandyman.com/article/how-to-fix-a-running-toilet/"
+          }
+        ]
+      },
+      {
+        "voz": "Suelta la aleta vieja de sus dos ganchitos y desconecta la cadena.",
+        "visual": "Dos manos sacan las orejas de la aleta de los pasadores laterales y quitan el gancho de la cadena.",
+        "rotulo": "LA CADENA",
+        "palabra_clave": "cadena",
+        "concepto": "SUELTA LA VIEJA",
+        "mundo": "Aleta vieja retirada; el desagüe del tanque queda descubierto.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "La aleta se sujeta con orejas a pasadores del tubo de rebose y se conecta a la cadena.",
+            "fuente": "https://www.familyhandyman.com/article/how-to-fix-a-running-toilet/"
+          }
+        ]
+      },
+      {
+        "voz": "Engancha la nueva y conecta la cadena con un poquito de holgura.",
+        "visual": "Una aleta nueva y verde encaja en los pasadores. La cadena queda con un par de eslabones flojos.",
+        "rotulo": "HOLGURA",
+        "palabra_clave": "holgura",
+        "concepto": "CON HOLGURA",
+        "mundo": "Aleta nueva instalada, cadena floja.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "La cadena debe tener algo de holgura para que la aleta cierre del todo.",
+            "fuente": "https://www.familyhandyman.com/article/how-to-fix-a-running-toilet/"
+          }
+        ]
+      },
+      {
+        "voz": "Abre la llave y mira. El tanque se llena una vez, y silencio total.",
+        "visual": "Se abre la llave, el tanque se llena, el flotador sube y corta el agua. El agua queda quieta. Una nota musical tachada.",
+        "rotulo": "SILENCIO",
+        "palabra_clave": "silencio",
+        "concepto": "SILENCIO TOTAL",
+        "mundo": "Tanque lleno, quieto y silencioso, taza clara.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Sin fuga, el flotador cierra la válvula y el tanque deja de rellenarse.",
+            "fuente": "https://www.familyhandyman.com/article/how-to-fix-a-running-toilet/"
+          }
+        ]
+      },
+      {
+        "voz": "Mándaselo a quien tenga un inodoro que suena de noche. ¿Cuánto llevaba el tuyo rellenándose solo?",
+        "visual": "El inodoro intacto, tranquilo. Una gota cae en la taza y todo vuelve a empezar con el goteo del inicio.",
+        "rotulo": "",
+        "palabra_clave": "solo",
+        "concepto": "RELLENÁNDOSE SOLO",
+        "mundo": "Inodoro reparado; una gota sugiere el bucle.",
+        "grafico": null,
+        "datos": []
+      }
+    ],
+    "direccion_arte": {
+      "protagonista": "Un inodoro blanco en corte transversal, con el tanque abierto y a la vista, estilo 3D limpio y brillante.",
+      "secundarios": "Aleta de goma roja (vieja) y verde (nueva), flotador gris, cadena metálica, colorante azul, manos con camiseta gris.",
+      "ambiente": "Baño de azulejos claros con el inodoro en corte, como maqueta.",
+      "escenario": "estudio",
+      "partes": "Aleta de goma sobre el desagüe, cadena, flotador, válvula de llenado, tubo de rebose, llave de paso.",
+      "metafora": "Un tapón de bañera gastado que deja escapar el agua sin parar."
+    },
+    "verificacion": {
+      "cambios": [
+        "Escena 7: «la culpable es la aleta» pasa a «casi seguro la culpable es la aleta». La fuga también puede venir de un asiento de válvula desgastado o de un tubo de rebose demasiado alto, así que decir que siempre es la aleta era demasiado categórico.",
+        "Escena 7 (dato): se añade «casi siempre en la aleta» para que coincida con la voz.",
+        "Escena 6 (dato): la EPA indica unos 10 minutos de espera para la prueba del colorante, no 15 a 20. Corregí la afirmación del dato. Mantuve «quince minutos» en la voz porque cubre ese margen y es habitual en otras guías. Esto lo recuerdo de memoria, no lo comprobé con una búsqueda."
+      ],
+      "confianza": "media"
+    }
+  }
+}
