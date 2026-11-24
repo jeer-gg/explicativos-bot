@@ -200,5 +200,25 @@
     "duracion": 54.59,
     "video_fb": "1465698849022275",
     "metricas": {}
+  },
+  {
+    "id": "20261124-0141",
+    "fecha": "2026-11-24",
+    "publicado_en": "2026-11-25T00:00:00+00:00",
+    "programado": true,
+    "titulo": "Qué significa de verdad el 60% de lluvia",
+    "tema": "Si tu app dice '60% de lluvia', NO pienses que lloverá el 60% del día: el camino de un pronóstico, del globo sonda a tu celular",
+    "tendencia": "El 'Súper Niño' 2026-27 domina las noticias del clima en Latinoamérica y Europa. Hay lluvias récord en Chile, sequías y calor en otras regiones, y el Ideam de Colombia lo declaró oficialmente el 8 de octubre.",
+    "serie": null,
+    "subtema": "tecnología que usamos sin entender",
+    "estructura": "SIGUE EL CAMINO: se recorre un sistema cotidiano de principio a fin en un solo mundo en corte (el agua desde la calle hasta tu llave, la luz desde el poste hasta el foco); cada tramo agrega una pieza con su nombre y lo que pasaría sin ella",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "advertencia directa («si te pasa X, NO hagas Y»)",
+    "gancho": "Cancelaste tu plan por un sesenta por ciento. Quizá fue un error.",
+    "nota_revisor": 4.9,
+    "duracion": 66.34,
+    "video_fb": "4111431792323766",
+    "metricas": {}
   }
 ]

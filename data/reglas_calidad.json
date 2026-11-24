@@ -3,8 +3,8 @@
     {
       "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
       "area": "voz",
-      "veces": 6,
-      "ultima": "2026-11-23T15:11:48+00:00",
+      "veces": 7,
+      "ultima": "2026-11-24T02:09:48+00:00",
       "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
       "ejemplo": "1 silencio(s) largos dentro de la narración"
     },
@@ -15,6 +15,54 @@
       "ultima": "2026-11-22T19:50:12+00:00",
       "clave": "cortas dicen escritos frases fáciles números pronunciar",
       "ejemplo": "solo se entiende el 50 % del guion en el audio"
+    },
+    {
+      "regla": "Cuando la voz nombra un objeto, la escena debe dibujarlo grande, reconocible y en primer plano; no basta con flechas o etiquetas. No pongas una etiqueta que repita el título en pantalla ni que se solape con él.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T02:09:48+00:00",
+      "clave": "basta cuando dibujarlo escena etiqueta etiquetas flechas grande nombra objeto pantalla plano pongas primer reconocible repita solape título",
+      "ejemplo": "El fotograma 2 debería mostrar el globo sonda subiendo, pero no se ve ningún globo. Solo hay flechas pequeñas y una etiqueta «viento» sobre la ciudad. Además, la etiqueta «globo sonda» queda pisada por el título «EL GLOBO SONDA», así que el texto aparece duplicado y se superpone."
+    },
+    {
+      "regla": "Cada aparato que nombra la narración debe aparecer dibujado y reconocible en su fotograma, en la posición que corresponde (un satélite, arriba y mirando hacia abajo). Los símbolos abstractos como «?» no sustituyen al objeto.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T02:09:48+00:00",
+      "clave": "abajo abstractos aparato aparecer arriba corresponde dibujado fotograma hacia mirando narración nombra objeto posición reconocible satélite sustituyen símbolos",
+      "ejemplo": "El fotograma 3 debería mostrar el satélite vigilando las nubes desde arriba, pero no hay ningún satélite. Muestra una losa negra con nubes oscuras y un signo «?» sobre la ciudad, lo que desconcierta."
+    },
+    {
+      "regla": "Para un concepto abstracto, como un cálculo o una simulación, dibuja un objeto concreto que lo represente, como una máquina con una rejilla de cubos. Los títulos en pantalla deben coincidir con lo que dice la voz y tener contraste suficiente para leerse.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T02:09:48+00:00",
+      "clave": "abstracto coincidir concepto concreto contraste cubos cálculo deben dibuja leerse máquina objeto pantalla rejilla represente simulación suficiente tener títulos",
+      "ejemplo": "En el fotograma 5 la voz habla de una supercomputadora que divide el aire en cubos, pero la imagen es la ciudad con un edificio oscuro. No hay ninguna computadora ni cubos, y el título «EL AIRE» casi no se lee (poco contraste, texto desvaído)."
+    },
+    {
+      "regla": "El título y los subtítulos deben sincronizarse con la frase que se dice en ese momento, no con una posterior. Los textos de datos clave deben tener un tamaño legible en móvil.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T02:09:48+00:00",
+      "clave": "clave datos deben frase legible momento móvil posterior sincronizarse subtítulos tamaño tener textos título",
+      "ejemplo": "En el fotograma 8 la voz dice que el porcentaje no son horas de lluvia y que puede ser diez minutos o toda la tarde. La imagen muestra una X roja sobre una nube y el subtítulo «CUÁNTOS PLANES», que corresponde a la frase final. El título va por delante de la narración y no se ve ninguna duración. El texto «toda la tarde» es diminuto e ilegible."
+    },
+    {
+      "regla": "Las tarjetas de datos no deben cubrir ni cortar otros elementos con información, y ningún texto o cifra puede quedar cortado en el borde. Coloca cada tarjeta cuando se dice su dato, no antes.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-24T02:09:48+00:00",
+      "clave": "antes borde cifra coloca cortado cortar cuando cubrir datos deben elementos información ningún otros puede quedar tarjeta tarjetas texto",
+      "ejemplo": "En el fotograma 7 la tarjeta de barras tapa parte del medidor, y el texto «80%» del medidor queda cortado. La voz en ese momento dice «La app lo vuelve porcentaje», pero el título muestra «CONFIANZA POR ZONA», que corresponde a la frase siguiente. El panel del «60» queda cortado en el borde derecho en varios fotogramas."
+    },
+    {
+      "regla": "Mantén el texto y las cifras clave del gancho dentro de la zona segura, lejos de los bordes, y encuadra el objeto principal completo.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-24T02:09:48+00:00",
+      "clave": "bordes cifras clave completo dentro encuadra gancho lejos mantén objeto principal segura texto",
+      "ejemplo": "En el fotograma 1 (el gancho) el texto «¿error?» queda cortado por el borde superior. El panel con el «60%» queda cortado en el borde derecho, por lo que la cifra clave del gancho no se ve entera."
     },
     {
       "regla": "La imagen de cada frase debe mostrar el objeto y la acción que la voz nombra en ese momento. No se adelanta un elemento de una sección posterior, como el refrigerador del mito uno. Para explicar por dónde sale el calor se dibuja el objeto con flechas de calor saliendo por las partes citadas.",
@@ -191,54 +239,6 @@
       "ultima": "2026-11-23T00:52:03+00:00",
       "clave": "central charco claramente distinto escala frase gancho mostrar objeto reconocible sustituirlo",
       "ejemplo": "En el fotograma 1 la voz dice que el sol no se bebe los charcos, pero no hay sol ni charco que se entienda. Se ve una piscina grande con una cara y un charco azul diminuto abajo a la izquierda."
-    },
-    {
-      "regla": "No mostrar a la vez un título o tarjeta y un subtítulo con las mismas palabras. Si el título ya resume la frase, se oculta el subtítulo o se usa otro texto.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T23:41:35+00:00",
-      "clave": "frase mismas mostrar oculta palabras resume subtítulo tarjeta texto título",
-      "ejemplo": "Fotograma 1: el título de portada «ROBANDO PLATA» y el subtítulo «robando plata» dicen lo mismo y se apilan en la parte superior. Queda redundante y tapa la escena."
-    },
-    {
-      "regla": "Cada escena debe mostrar solo el estado que la voz describe en ese momento. Si la frase presenta el objeto intacto, se dibuja intacto y sin la acción siguiente.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-22T23:41:35+00:00",
-      "clave": "acción describe dibuja escena estado frase intacto momento mostrar objeto presenta siguiente",
-      "ejemplo": "Fotograma 2: la voz dice que el canto de la moneda es liso. La imagen ya muestra una mano rascando la moneda con un cincel, y no se ve un borde liso y limpio."
-    },
-    {
-      "regla": "Los títulos y tarjetas deben aparecer en el momento en que la voz dice ese concepto, no antes. La escena debe ilustrar la frase que suena, por ejemplo una balanza o una moneda más ligera, y no la siguiente.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T23:41:35+00:00",
-      "clave": "antes aparecer balanza concepto deben ejemplo escena frase ilustrar ligera momento moneda siguiente suena tarjetas títulos",
-      "ejemplo": "Fotograma 5: la voz dice que cada moneda pesaba un poco menos. La imagen es una prensa marcando el borde, con el título «MARCAR EL BORDE», que corresponde a la frase siguiente. El texto y la imagen van adelantados respecto a la voz."
-    },
-    {
-      "regla": "Mantener sincronizadas las escenas con la narración. No mostrar al personaje o dato de la frase siguiente, y dibujar la acción exacta de la frase actual, por ejemplo ranuras que se borran al raspar.",
-      "area": "escenas",
-      "veces": 1,
-      "ultima": "2026-11-22T23:41:35+00:00",
-      "clave": "acción actual borran dibujar ejemplo escenas exacta frase mantener mostrar narración personaje ranuras raspar siguiente sincronizadas",
-      "ejemplo": "Fotograma 6: la voz dice que si raspas, las rayas se borran y la trampa se nota. La imagen muestra a Newton, la tarjeta «1699» y una moneda verde, sin ranuras ni raspado. Esa escena corresponde a la frase de Newton, que llega después."
-    },
-    {
-      "regla": "Las tarjetas de datos deben mostrar una frase completa y legible, y su cifra debe aparecer en la narración o coincidir con ella. Si no cabe el texto, se acorta o se agranda la tarjeta.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T23:41:35+00:00",
-      "clave": "acorta agranda aparecer cifra coincidir completa datos deben frase legible mostrar narración tarjeta tarjetas texto",
-      "ejemplo": "Fotograma 6: la tarjeta «1699 año en que dirige la» está cortada y le falta el final de la frase. La voz tampoco menciona ese año."
-    },
-    {
-      "regla": "Los subtítulos deben caber siempre dentro del ancho seguro de la pantalla, con ajuste de línea y sin cortar palabras. Tampoco se repite en el subtítulo lo que ya dice el título.",
-      "area": "edicion",
-      "veces": 1,
-      "ultima": "2026-11-22T23:41:35+00:00",
-      "clave": "ajuste ancho caber cortar deben dentro línea palabras pantalla repite seguro siempre subtítulo subtítulos tampoco título",
-      "ejemplo": "Fotograma 7: el subtítulo «la recuñac» está cortado por el borde derecho. También se duplica con el título «GRAN RECUÑACIÓN»."
     }
   ]
 }
