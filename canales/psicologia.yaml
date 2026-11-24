@@ -1,0 +1,177 @@
+# Página de PSICOLOGÍA DEL DÍA A DÍA: por qué la mente hace lo que hace.
+# Solo va aquí lo que cambia respecto a config.yaml (lo demás se toma de ahí).
+# Sus datos viven en data/psicologia/ y usa los secretos META_PAGE_ID_PSICOLOGIA y
+# META_PAGE_TOKEN_PSICOLOGIA. Claude, Gemini y Telegram son los mismos que las otras páginas.
+
+canal:
+  etiqueta: "Pensan2"
+  formato: "explicativo"
+  rol: "videos de psicología del día a día: por qué la mente hace lo que hace"
+  nombre: "Pensan2"
+  idioma: "español latino neutro, cálido y cercano, como una amiga que te cuenta algo que te va a hacer pensar"
+  publico: "adultos de 20 a 50 años en Latinoamérica y los hispanos de Estados Unidos y España"
+  ejemplo_tema: >-
+    "por qué se te olvida a qué entraste en cuanto cruzas la puerta" en vez de "la memoria"
+  subtemas:
+    - "trucos de la memoria del día a día (olvidos, recuerdos que cambian, canciones pegadas)"
+    - "sesgos y atajos de la mente al decidir (por qué elegimos lo que elegimos)"
+    - "cómo nos influyen los demás sin darnos cuenta (grupos, primeras impresiones, imitación)"
+    - "comportamientos curiosos de todos los días (bostezar contagiado, hablar solos, procrastinar)"
+    - "cómo percibimos el mundo (ilusiones, el tiempo que vuela, ver caras en las cosas)"
+    - "experimentos famosos de psicología que de verdad se hicieron y lo que mostraron"
+    - "hábitos: por qué cuesta empezar y por qué cuesta dejar algo"
+  tendencias:
+    activo: false   # la psicología no depende de lo que está en tendencia hoy
+  # Lo de config.yaml más lo que en esta página es fácil de pisar (Facebook lo trata como salud):
+  prohibidos:
+    - "consejos médicos, dosis o tratamientos"
+    - "política partidista"
+    - "tragedias, muertes, crímenes o desastres con víctimas"
+    - "religión"
+    - "consejos de inversión concretos"
+    - "salud: lo que es bueno o malo para el cuerpo, comida y bacterias, dietas, enfermedades, riesgos"
+    - "dinero: precios, ofertas, compras, inflación, intereses, inversiones, bolsa, criptomonedas"
+    - "salud mental: ansiedad, depresión, trastornos, traumas, terapia, «señales de que tienes X», diagnósticos o pruebas de personalidad"
+    - "manipulación o «psicología oscura»: cómo controlar, engañar o seducir a alguien"
+    - "afirmaciones sobre qué dice algo de tu personalidad o inteligencia («la gente que hace X es más inteligente»)"
+    - "datos de psicología que no salgan de un estudio o experimento real y conocido"
+
+  # Receta del nicho (investigación de noviembre de 2026 sobre los videos con más vistas).
+  receta:
+    - "Gancho en segunda persona sobre algo que le pasa al espectador («Si una canción se te pega, tu cerebro está intentando terminarla»)."
+    - "Orden: el momento cotidiano que reconoces, lo que casi todos creen que lo causa, el nombre real del efecto (y quién lo estudió y cuándo), cómo funciona en uno o dos pasos, qué significa para ti o un truco que ayuda, y una última frase tranquila."
+    - "Una figurita protagonista vive la situación de principio a fin: el video es una pequeña historia animada."
+    - "Siempre «tu cerebro», «tú sientes»; nunca «la gente que hace X es más inteligente»."
+    - "Voz calmada y pausada: deja respirar cada idea."
+    - "Final tranquilo, sin pedir que sigan la página ni preguntas forzadas; se comparte porque la gente se ve reflejada."
+  # Guía del nicho (investigación de noviembre de 2026): qué temas, ganchos, ritmo y estilo funcionan.
+  guia:
+    emocion_objetivo: identificación ('¡eso me pasa a mí!') y sorpresa al descubrir que tiene nombre y explicación
+    temas_virales:
+    - experiencias que TODOS viven y nadie sabe por qué (olvidar a qué entraste, canción pegada, el bostezo
+      contagioso)
+    - efectos con nombre y experimento real detrás (Zeigarnik, Baader-Meinhof, efecto de mera exposición)
+    - cosas que hacemos sin darnos cuenta frente a otros (imitar gestos, primeras impresiones)
+    - trucos de la mente para el día a día (cómo recordar mejor, cómo dejar de procrastinar) explicados
+      por su mecanismo
+    - experimentos famosos y sorprendentes contados como historia
+    temas_flojos:
+    - afirmaciones sobre la personalidad ('la gente que hace X es…')
+    - salud mental o diagnósticos
+    - frases motivacionales sin mecanismo
+    gancho:
+    - segunda persona y una situación que el espectador reconoce al instante
+    - la figurita protagonista ya está viviendo esa situación en la primera imagen
+    - promete el nombre y la explicación ('esto tiene nombre')
+    retencion:
+    - 'mecanismo antes que consejo: explicar cómo funciona da más que motivar'
+    - una sola situación de principio a fin, vivida por la misma figurita
+    - el nombre del efecto y el experimento aparecen como revelación a mitad del video
+    - 'cierre tranquilo con un truco útil: se comparte porque la gente se ve reflejada'
+    ritmo: 'pausado y cálido: frases cortas, pausas para que la idea se asiente, cámara suave'
+    evitar:
+    - diagnosticar o hablar de trastornos
+    - datos sin estudio real
+    - manipulación o 'psicología oscura'
+    estilos_por_tema:
+      memoria: cabeza en corte con cajones o estantes de recuerdos que se abren, se vacían o se ordenan
+      decision: balanza o engranajes dentro de la cabeza que se inclinan; dos caminos para la figurita
+      social: varias figuritas en una escena cotidiana, hilos o burbujas que muestran lo que se contagian
+      percepcion: lo que ve la figurita vs. lo que es en realidad, con una revelación visual
+  pesos_virales:
+    curiosidad: 2
+    emocion: 2
+    compartir: 3
+    utilidad: 2
+    universal: 3
+    visual: 2
+    verificable: 2
+produccion:
+  palabras_por_segundo: 2.2   # ritmo de la voz en esta página
+  duracion_min: 35
+  duracion_max: 70
+  voz: "es-MX-DaliaNeural"   # voz de respaldo (Edge), femenina
+  velocidad_voz: "+2%"
+  voz_marca:
+    activa: true
+    nombre: "Narradora de la mente"
+    genero: "female"
+    tono: "medium"
+    idioma: "es-419"
+    acento: "Latin American neutral Spanish, soft and warm, no strong regional accent"
+    persona: "Curious psychology explainer in her late twenties, like a close friend"
+    contexto: "Narration for short viral videos about everyday psychology"
+    elegir_escuchando: true   # te manda muestras por Telegram y eliges la que más te guste
+    ronda_muestras: 1
+    descripcion: >
+      A low, calm and intimate female voice in her late twenties speaking neutral Latin
+      American Spanish. Sounds like someone quietly revealing a secret about how your mind
+      works: a little mysterious and magnetic, confident, never a lecture, never spooky. Relaxed, natural pace with real pauses
+      after each idea, gentle rise of curiosity in questions, a knowing smile in the voice before
+      each reveal. Clear diction, never rushed, never theatrical.
+
+estilo:
+  # Estilo de animación: dibujo con contorno casi negro, estética de "psicología oscura".
+  acabado: "dibujo"
+  color_contorno: "#0A0506"
+  descripcion_3d: >
+    Estilo de marca de la página: ilustración 2.5D oscura y elegante, como si el espectador estuviera
+    descubriendo algo prohibido. El lugar cambia con cada tema (un cuarto en penumbra, una oficina de
+    noche, una calle, el interior de una cabeza), pero siempre con la misma paleta, construida
+    alrededor del rojo oscuro: rojo vino como color principal, azul petróleo profundo como su
+    contraste, dorado viejo para lo que brilla, marfil para los detalles claros y carbón para las
+    sombras. Luz cálida y puntual (como una lámpara dorada en la penumbra), sombras profundas y
+    contornos casi negros. Lo único que brilla es lo importante, en dorado viejo (la idea, el
+    recuerdo, el momento clave). Las personas son siluetas 2D sin cara, sobrias, que se mueven poco
+    y con naturalidad. Lo que pasa DENTRO de la cabeza se ve hecho objeto: la cabeza en corte,
+    cajones de recuerdos, engranajes, hilos que unen ideas, una balanza. Ambiente de misterio, nunca
+    de terror: nada de sangre, armas ni violencia. Cada fotograma limpio y con atmósfera; cámara
+    cercana que se mueve despacio. Sin emojis, sin ojos ni caras.
+  # Colores de cada escenario: rojo vino, azul petróleo, carbón y luz dorada.
+  escenarios:
+    cielo:    {fondo: "#1E1A24", suelo: "#1F2A2C", foco: "#FFCF8A", tinta: "#F2E8DC",
+               degradado: "linear-gradient(180deg, #0E1A1F 0%, #1E1A24 45%, #3A1218 100%)"}
+    exterior: {fondo: "#201820", suelo: "#26262B", foco: "#FFCF8A", tinta: "#F2E8DC",
+               degradado: "linear-gradient(180deg, #14181F 0%, #24182A 50%, #4A1A1E 100%)"}
+    interior: {fondo: "#2B1013", suelo: "#3A2220", foco: "#FFCF8A", tinta: "#F2E8DC",
+               degradado: "radial-gradient(ellipse 75% 60% at 45% 30%, #5A2026 0%, #2B1013 55%, #0F0607 100%)"}
+    oscuro:   {fondo: "#0F0809", suelo: "#1A1214", foco: "#D9A441", tinta: "#F2E8DC",
+               degradado: "radial-gradient(ellipse 80% 60% at 50% 40%, #2E1418 0%, #0F0809 60%, #050303 100%)"}
+    estudio:  {fondo: "#1C1A1E", suelo: "#26222A", foco: "#FFCF8A", tinta: "#F2E8DC",
+               degradado: "radial-gradient(ellipse 90% 70% at 50% 35%, #3A1E24 0%, #1C1A1E 60%, #0B0A0C 100%)"}
+  guia_escenas: >
+    Esta página explica PSICOLOGÍA DEL DÍA A DÍA con estética de "psicología oscura". Paleta: rojo
+    vino para el protagonista y lo principal (acentos[0]), azul petróleo para los demás personajes y
+    objetos secundarios (acentos[1]), dorado viejo SOLO para lo que se resalta y brilla
+    (acentos[2]), y un rosa terracota apagado como extra (acentos[3]); marfil para detalles claros.
+    Las personas son siluetas 2D sin cara (Persona2D) con movimientos sobrios: casi siempre de pie,
+    pensando o señalando; caminan solo trayectos cortos. La cabeza en corte es Cabeza2D (su cerebro
+    se enciende en dorado con fuerza). La mente se muestra como objetos físicos que se mueven:
+    cajones de recuerdos que se abren, una puerta que «borra» lo que llevabas, engranajes, una
+    balanza, hilos que unen ideas. Misterio, nunca terror: nada de sangre, armas, violencia,
+    hospitales ni pastillas.
+  paletas_3d:
+    marca: ["#1A0A0C", "#F2E8DC", "#8E1B23", "#2F4F56", "#D9A441", "#C46A5A", "#2A1618"]
+
+ganchos:
+  tipos:
+    - "lo que no te enseñan («Esto que hace tu cerebro nadie te lo explicó»)"
+    - "el secreto de tu mente («Tu cerebro guarda un secreto cada vez que cruzas una puerta»)"
+    - "te pasa a ti («Entras a la cocina… y se te olvida a qué ibas»)"
+    - "tu cerebro te engaña («Tu cerebro te está mintiendo ahora mismo»)"
+    - "experimento real con año («En 1951, un experimento demostró que mentimos para encajar»)"
+    - "pregunta que todos se han hecho («¿Por qué una canción se te pega todo el día?»)"
+    - "mándaselo a alguien («Mándale esto al amigo que siempre llega tarde»)"
+    - "no es culpa tuya («Si dejas todo para mañana, no es pereza»)"
+    - "lo que crees vs. lo que es («Crees que es pereza. Tu cerebro piensa otra cosa»)"
+  estructuras:
+    - "TE PASA A TI: una situación cotidiana que todos viven, se muestra cómo es, se abre la cabeza en corte para ver qué pasa adentro, y al final un truco sencillo para aprovecharlo"
+    - "EL EXPERIMENTO: un experimento real y famoso contado paso a paso (qué hicieron, qué esperaban, qué pasó de verdad) y lo que dice de todos nosotros hoy"
+    - "TU CEREBRO TE ENGAÑA: un atajo de la mente que casi siempre ayuda pero a veces falla; se muestra cuándo ayuda, cuándo falla con un ejemplo, y cómo darte cuenta"
+    - "POR QUÉ LO HACEMOS: un comportamiento curioso de todos los días explicado desde su origen hasta hoy, con lo que se sabe y lo que todavía no"
+    - "HAZ LA PRUEBA: el video le propone al espectador una pequeña prueba en pantalla (una ilusión, una pregunta rápida), revela el resultado y explica por qué casi todos caen"
+    - "¿MITO O VERDAD?: una creencia popular sobre la mente; aparece el sello MITO o VERDAD, luego la tarjeta LO QUE ENCONTRÓ EL ESTUDIO con el experimento real, y lo que significa para ti"
+
+publicacion:
+  horarios: ["14:00"]   # almuerzo en México y Colombia (12:00 y 13:00): se ve y se comparte por mensaje
+  hashtags: ["#psicologia", "#mente", "#curiosidades", "#sabiasque"]

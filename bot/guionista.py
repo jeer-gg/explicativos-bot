@@ -3,6 +3,7 @@ import json
 
 from . import aprendizaje
 from .claude import Claude
+from .equipo import profesional
 
 
 def _reglas_guion() -> str:
@@ -72,8 +73,9 @@ REGLAS_MUNDO_HISTORIA = """- HECHOS REALES: la historia pasó de verdad (fechas,
   · Remate que deje pensando o que invite a comentar qué habrían hecho.
 - Narra como un narrador de misterio: frases cortas, presente narrativo en los momentos de
   tensión («la puerta se abre… y no hay nadie»), sin exagerar lo que pasó.
-- UN SOLO ESCENARIO QUE EVOLUCIONA: toda la historia pasa en un escenario de teatro en miniatura,
-  oscuro y con un foco de luz cálida, donde la escena va cambiando: entran y salen figuras, aparece
+- UN SOLO ESCENARIO QUE EVOLUCIONA: toda la historia pasa en un escenario de teatro en miniatura
+  (el lugar que va con ESTA historia: un barco, un laboratorio, un pueblo, el espacio), con luz de
+  cine y un foco cálido sobre el protagonista, donde la escena va cambiando: entran y salen figuras, aparece
   el objeto clave, cambia la luz. En cada escena escribe en "mundo" cómo queda el escenario al
   terminarla (quién está, qué objeto hay, qué cambió).
 """
@@ -87,13 +89,35 @@ REGLAS_VISUAL_HISTORIA = """- Lo visual cuenta la historia como una obra de teat
 """
 
 
+
+def _estilos(cfg: dict) -> dict:
+    return ((cfg["canal"].get("guia") or {}).get("estilos_por_tema") or {})
+
+
+def guia_del_nicho(cfg: dict) -> str:
+    """Lo que la investigación dice que funciona en este nicho y para cualquier Reel."""
+    g = cfg["canal"].get("guia") or {}
+    general = cfg.get("guia_general") or []
+    if not g and not general:
+        return ""
+    partes = ["GUÍA DE CALIDAD (investigación de los videos que más funcionan; cúmplela):"]
+    if g.get("emocion_objetivo"):
+        partes.append(f"- Emoción que debe dejar el video: {g['emocion_objetivo']}.")
+    for titulo, clave in (("Gancho", "gancho"), ("Retención", "retencion"), ("Evitar", "evitar")):
+        for x in g.get(clave) or []:
+            partes.append(f"- {titulo}: {x}")
+    if g.get("ritmo"):
+        partes.append(f"- Ritmo: {g['ritmo']}")
+    partes += [f"- {x}" for x in general]
+    return "\n".join(partes) + "\n\n"
+
 def escribir_guion(claude: Claude, cfg: dict, tema: dict, estilo: dict) -> dict:
     p = cfg["produccion"]
     canal = cfg["canal"]
     historia = canal.get("formato") == "historia"
     if historia:
         system = (
-            "Eres guionista de historias reales de suspenso para Facebook Reels en "
+            profesional("guionista_historias") + "Eres guionista de historias reales de suspenso para Facebook Reels en "
             f"{canal['idioma']}. Cuentas como un gran narrador de misterio: frases cortas, tensión "
             "que sube, giros y un desenlace que se paga. Todo lo que cuentas pasó de verdad y tiene "
             "fuente confiable: investiga con la búsqueda web antes de escribir y nunca inventes.")
@@ -101,20 +125,27 @@ def escribir_guion(claude: Claude, cfg: dict, tema: dict, estilo: dict) -> dict:
         cierre_salud = "Cuenta lo que pasó, sin dar consejos."
     else:
         system = (
-            "Eres guionista de videos explicativos animados cortos para Facebook Reels en "
+            profesional("guionista") + "Eres guionista de videos explicativos animados cortos para Facebook Reels en "
             f"{canal['idioma']}. Escribes como se habla, con frases cortas, ritmo ágil y natural y humor ligero. "
             "Cada dato que afirmas debe ser cierto y tener fuente confiable. Investiga antes de escribir."
         )
         reglas_mundo, reglas_visual = REGLAS_MUNDO_EXPLICATIVO, REGLAS_VISUAL_EXPLICATIVO
         cierre_salud = "Explica cómo funcionan las cosas, no qué le conviene a la gente."
-    palabras_max = int(p["duracion_max"] * 2.6)
-    palabras_min = int(p["duracion_min"] * 2.4)
+    ritmo = float(p.get("palabras_por_segundo", 2.5))
+    palabras_max = int(p["duracion_max"] * (ritmo + 0.1))
+    palabras_min = int(p["duracion_min"] * (ritmo - 0.1))
+    receta = canal.get("receta") or []
+    bloque_receta = ("RECETA DEL NICHO (sacada de los videos que más vistas tienen hoy en este nicho; "
+                     "en forma, orden y ritmo manda sobre las reglas generales de abajo, pero nunca sobre "
+                     "las prohibiciones ni la verdad de los datos):\n"
+                     + "".join(f"- {x.strip()}\n" for x in receta) + "\n") if receta else ""
+    bloque_guia = guia_del_nicho(cfg)
     usuario = f"""Tema: {tema['tema']}
-Ángulo: {tema['angulo']}{(chr(10) + "Tendencia del momento que lo inspira: " + tema['tendencia'] + " (menciónala en la primera frase para enganchar, sin inventar detalles: verifica con la búsqueda web)") if tema.get('tendencia') else ""}
+Ángulo: {tema['angulo']}{(chr(10) + "Gancho propuesto por el director (úsalo o mejóralo, sin perder la idea): «" + tema['gancho'] + "»") if tema.get('gancho') else ""}{(chr(10) + "Tendencia del momento que lo inspira: " + tema['tendencia'] + " (menciónala en la primera frase para enganchar, sin inventar detalles: verifica con la búsqueda web)") if tema.get('tendencia') else ""}
 Tipo de gancho: {estilo['tipo_gancho']}
 Formato ganador: {estilo['estructura']}
 {_bloque_serie(tema, estilo)}{aprendizaje.texto_lecciones()}{_reglas_guion()}
-Reglas:
+{bloque_receta}{bloque_guia}Reglas:
 - La voz arranca en el segundo 0: la primera frase ES el gancho, de 6 a 12 palabras.
 - Entre {palabras_min} y {palabras_max} palabras en total, en {p['escenas_min']} a {p['escenas_max']} escenas.
 - En "visual" pide UNA acción principal por escena, con el mundo que ya existe y como mucho
@@ -124,8 +155,8 @@ Reglas:
   cortas mantienen la atención mejor que pocas largas.
 - Ritmo NATURAL, como alguien que te cuenta algo fascinante en persona: ágil pero sin
   atropellarse. Usa puntuación normal: punto al terminar cada idea y coma donde se respira,
-  porque esas pausas son las que hacen que se entienda. Calcula unas 2,5 palabras por segundo
-  de video (40 segundos ≈ 100 palabras). Nada de frases de relleno.
+  porque esas pausas son las que hacen que se entienda. Calcula unas {str(ritmo).replace(".", ",")} palabras por segundo
+  de video (40 segundos ≈ {int(40 * ritmo)} palabras). Nada de frases de relleno.
 - Retención: en los primeros 5 segundos promete algo concreto que se revela al final ("y lo
   más raro es lo que pasa al final"), mete una vuelta de tuerca o dato inesperado cada 2 o 3
   escenas, y termina con un remate que haga querer verlo otra vez o comentar.
@@ -185,12 +216,21 @@ Devuelve JSON:
    "protagonista": "aspecto exacto del personaje o objeto que guía el video (forma, colores, ropa, rasgos) para dibujarlo igual en todas las escenas",
    "secundarios": "otros personajes u objetos que se repiten, con su aspecto",
    "ambiente": "el único lugar donde pasa todo el video (si es grande, como maqueta en corte)",
-   "escenario": "cielo | exterior | oscuro | estudio (cielo: cosas que vuelan o al aire libre con pasto; exterior: casa, azotea, calle, de día; oscuro: el cuerpo, la mente, personas, sistemas por dentro o vistos en corte; estudio: objetos pequeños de la casa)",
+   "escenario": "cielo | exterior | interior | oscuro | estudio (el que mejor va con ESTE tema; cielo: cosas que vuelan o al aire libre con pasto; exterior: fachada, azotea, calle, de día; interior: dentro de un cuarto, la cocina, el baño, una oficina; oscuro: el cuerpo, la mente, sistemas por dentro, la noche o el suspenso; estudio: objetos pequeños sobre un fondo limpio). Los colores los pone la página: tú solo eliges el lugar",
    "partes": "las piezas del protagonista que se agregan, cambian o se señalan, con su aspecto",
-   "metafora": "la metáfora visual central que explica el tema"
+   "metafora": "la metáfora visual central que explica el tema",
+   "tono_visual": "uno de: {", ".join(_estilos(cfg).keys()) or "libre"} (el tratamiento visual que mejor va con ESTE tema{(": " + tema['tono_visual']) if tema.get('tono_visual') else ""})"
  }}
 }}"""
-    return claude.json(system, usuario, max_tokens=6000, web=True)
+    guion = claude.json(system, usuario, max_tokens=6000, web=True)
+    # El tono visual elegido viaja con su descripción a cada escena (va en la dirección de arte).
+    arte = guion.get("direccion_arte")
+    estilos = _estilos(cfg)
+    if isinstance(arte, dict) and estilos:
+        clave = str(arte.get("tono_visual") or tema.get("tono_visual") or "").split(":")[0].strip().lower()
+        if clave in estilos:
+            arte["tono_visual"] = f"{clave}: {estilos[clave]}"
+    return guion
 
 
 def pulir_gancho(claude: Claude, cfg: dict, guion: dict) -> dict:
@@ -199,7 +239,7 @@ def pulir_gancho(claude: Claude, cfg: dict, guion: dict) -> dict:
     El primer segundo decide si la gente se detiene: se juzga la imagen inicial (que también
     es la miniatura), el título de portada y la primera frase que se oye.
     """
-    system = ("Eres editor de Reels virales en español. Sabes que el 70 % de la gente decide en el "
+    system = (profesional("editor_ganchos") + "Eres editor de Reels virales en español. Sabes que el 70 % de la gente decide en el "
               "primer segundo si se queda. Juzgas ganchos con frialdad, por lo que hace detenerse "
               "a alguien que está haciendo scroll con el sonido apagado o encendido.")
     usuario = f"""Guion actual (JSON):
@@ -247,7 +287,7 @@ Devuelve JSON: {{"candidatos": [{{"voz": "...", "portada": "...", "visual": "...
 def verificar_guion(claude: Claude, guion: dict) -> dict:
     """Revisa cada afirmación. Corrige o elimina lo que no se pueda sostener."""
     system = (
-        "Eres verificador de datos. Revisas guiones de divulgación antes de publicarse. "
+        profesional("verificador") + "Eres verificador de datos. Revisas guiones de divulgación antes de publicarse. "
         "Compruebas cada afirmación con fuentes confiables y corriges lo exagerado o falso, "
         "manteniendo el mismo tono, ritmo y longitud aproximada."
     )

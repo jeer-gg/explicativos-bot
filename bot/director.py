@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from .claude import Claude
 from . import aprendizaje
 from .memoria import guardar_recuento, memoria, recuento, resumen_para_director
+from .equipo import profesional
 
 
 def sortear_estilo(cfg: dict) -> dict:
@@ -102,7 +103,7 @@ def recuento_del_dia(claude: Claude, cfg: dict) -> dict:
     if datos.get("fecha") == hoy and datos.get("tendencias"):
         return datos
     t = cfg["canal"]["tendencias"]
-    system = ("Eres investigador de tendencias para una página de videos explicativos de la vida "
+    system = (profesional("investigador") + "Eres investigador de tendencias para una página de videos explicativos de la vida "
               f"cotidiana en {cfg['canal']['idioma']}. Encuentras de qué habla la gente HOY y lo "
               "conviertes en preguntas curiosas que se pueden explicar con ciencia y datos.")
     usuario = f"""Fecha de hoy: {hoy}.
@@ -164,15 +165,53 @@ la pregunta exacta de la lista y en "tendencia" la tendencia entre corchetes.
 """
 
 
+CRITERIOS_VIRALES = ("curiosidad", "emocion", "compartir", "utilidad", "universal", "visual", "verificable")
+
+
+def _lista(items) -> str:
+    return "".join(f"- {x}\n" for x in (items or []))
+
+
+def puntaje_viral(candidato: dict, pesos: dict) -> float:
+    """Suma ponderada de los puntos del candidato (los pesos dependen del nicho)."""
+    puntos = candidato.get("puntos") or {}
+    total = 0.0
+    for c in CRITERIOS_VIRALES:
+        try:
+            v = max(0.0, min(5.0, float(puntos.get(c, 0))))
+        except (TypeError, ValueError):
+            v = 0.0
+        total += v * float(pesos.get(c, 1))
+    return total
+
+
+def mejor_candidato(datos: dict, canal: dict) -> dict:
+    """Elige el candidato con más potencial viral según los pesos del nicho. Los que no se pueden
+    verificar (menos de 3) quedan fuera salvo que no haya otro."""
+    candidatos = [c for c in (datos.get("candidatos") or []) if isinstance(c, dict) and c.get("tema")]
+    if not candidatos:
+        return datos["elegido"]  # formato viejo
+    pesos = canal.get("pesos_virales") or {}
+    seguros = [c for c in candidatos if float((c.get("puntos") or {}).get("verificable", 0) or 0) >= 3] or candidatos
+    elegido = max(seguros, key=lambda c: puntaje_viral(c, pesos))
+    elegido = dict(elegido)
+    elegido["puntaje_viral"] = round(puntaje_viral(elegido, pesos), 1)
+    elegido.setdefault("angulo", "")
+    elegido.setdefault("subtema", "")
+    elegido.setdefault("tendencia", "")
+    return elegido
+
+
 def elegir_tema(claude: Claude, cfg: dict, estilo: dict) -> dict:
     canal = cfg["canal"]
+    guia = canal.get("guia") or {}
     datos_tendencias = recuento_del_dia(claude, cfg) if estilo.get("tendencia") else {}
     bloque = _bloque_tendencias(datos_tendencias) if datos_tendencias else ""
     usados = [m.get("tema", "") for m in memoria()]
     system = (
-        f"Eres el director creativo de una página de Facebook de {canal.get('rol', 'videos explicativos animados')} "
+        profesional("director_creativo") + f"Eres el director creativo de una página de Facebook de {canal.get('rol', 'videos explicativos animados')} "
         f"en {canal['idioma']}. Público: {canal['publico']}. Tu trabajo es elegir el próximo "
-        "tema con más potencial de retención y de compartirse, que sea verificable y nuevo."
+        "tema con más potencial de hacerse viral: que retenga hasta el final, que se comparta y que sea verificable y nuevo."
     )
     usuario = f"""Canal: {canal['nombre']}
 Subtemas posibles: {", ".join(canal['subtemas'])}
@@ -191,16 +230,29 @@ Para este video ya se sorteó:
 - Tipo de gancho: {estilo['tipo_gancho']}
 - Formato ganador (el tema DEBE encajar en él): {estilo['estructura']}
 
-Propón 3 temas candidatos concretos (no genéricos: {canal.get('ejemplo_tema', '"por qué el pan se pone duro y no blando como las galletas" en vez de "la ciencia del pan"')}), cada uno con su ángulo sorprendente, y elige
-el mejor según: ganas de enviárselo a alguien (lo que más reparte Facebook), curiosidad inmediata, que se pueda explicar visualmente en menos de 80 segundos,
-que los datos sean verificables, y lo aprendido de las métricas.
+Qué temas tienen más potencial en ESTE nicho (investigación):
+{_lista(guia.get('temas_virales'))}Temas que rinden poco aquí (evítalos): {", ".join(guia.get('temas_flojos') or []) or "ninguno"}
+Emoción que buscamos: {guia.get('emocion_objetivo', 'asombro y curiosidad')}
+
+Propón 6 temas candidatos concretos (no genéricos: {canal.get('ejemplo_tema', '"por qué el pan se pone duro y no blando como las galletas" en vez de "la ciencia del pan"')}), cada uno con su ángulo sorprendente
+y la frase gancho exacta con la que abriría el video (máximo 12 palabras, que se entienda en 3 segundos).
+Puntúa cada candidato del 1 al 5, con honestidad (casi nada merece 5 en todo):
+- curiosidad: ¿abre una pregunta que el espectador NECESITA ver resuelta?
+- emocion: ¿provoca asombro, sorpresa, intriga o diversión (emociones que se comparten), no algo neutro?
+- compartir: ¿dan ganas de mandárselo a alguien o decir «eso me pasa»? (lo que más reparte Facebook)
+- utilidad: ¿sirve para algo en la vida real, dan ganas de guardarlo?
+- universal: ¿le pasa o le interesa a casi todo el público latino, no a un grupo pequeño?
+- visual: ¿se puede MOSTRAR con animación (algo que se mueve, se abre o cambia), no solo decir?
+- verificable: ¿los datos se pueden confirmar con fuentes serias?
 
 Devuelve JSON:
-{{"candidatos": [{{"tema": "...", "angulo": "...", "subtema": "...", "tendencia": "de qué se está hablando o vacío"}}],
-  "elegido": {{"tema": "...", "angulo": "...", "subtema": "...", "tendencia": "...", "pregunta_origen": "...", "por_que": "..."}}}}"""
+{{"candidatos": [{{"tema": "...", "angulo": "...", "subtema": "...", "tendencia": "de qué se está hablando o vacío",
+  "pregunta_origen": "...", "gancho": "frase de apertura", "tono_visual": "uno de: {", ".join((guia.get('estilos_por_tema') or {}).keys()) or "libre"}",
+  "puntos": {{"curiosidad": 1, "emocion": 1, "compartir": 1, "utilidad": 1, "universal": 1, "visual": 1, "verificable": 1}},
+  "por_que": "..."}}]}}"""
     # Con lista de tendencias no hace falta buscar en internet otra vez (ahorra uso de Claude).
-    datos = claude.json(system, usuario, max_tokens=2000, web=not bloque)
-    elegido = datos["elegido"]
+    datos = claude.json(system, usuario, max_tokens=3500, web=not bloque)
+    elegido = mejor_candidato(datos, canal)
     if bloque and elegido.get("pregunta_origen"):
         datos_tendencias.setdefault("usadas", []).append(elegido["pregunta_origen"])
         guardar_recuento(datos_tendencias)

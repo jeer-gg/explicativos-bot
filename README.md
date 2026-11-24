@@ -168,16 +168,52 @@ pruebas/simulacion.py    prueba completa sin internet
 
 ## Varias páginas con el mismo bot
 
-El bot maneja dos páginas con un solo Claude, un solo Gemini y un solo Telegram:
+El bot maneja cuatro páginas con un solo Claude, un solo Gemini y un solo Telegram. Cada una tiene
+su estética (paleta de colores y estilo de animación), su voz y su hora (1 video al día). El
+escenario (cielo, exterior, interior, oscuro, estudio) cambia según el tema de cada video, pero
+siempre pintado con los colores de la página (`estilo.escenarios` en su archivo):
 
-- **Explicativos** (página principal): `config.yaml`, datos en `data/`, secretos `META_PAGE_ID` y `META_PAGE_TOKEN`.
-- **Historias** (historias reales de suspenso, sin víctimas): `canales/historias.yaml` (solo lo que cambia),
-  datos en `data/historias/`, secretos `META_PAGE_ID_HISTORIAS` y `META_PAGE_TOKEN_HISTORIAS`.
+| Página | Archivo | Paleta y animación | Voz | Hora (RD) | Secretos |
+|---|---|---|---|---|---|
+| Explicativos | `config.yaml` | neutra con un resalte rojo; dibujo con contorno negro | mujer | 19:00 | `META_PAGE_ID`, `META_PAGE_TOKEN` |
+| Historias | `canales/historias.yaml` | tonos de noche y cine, foco cálido; dibujo con contorno | hombre grave | 21:00 | `..._HISTORIAS` |
+| Psicología | `canales/psicologia.yaml` | pastel (lavanda, durazno, menta); plastilina sin contorno | mujer cálida | 13:00 | `..._PSICOLOGIA` |
+| Casa | `canales/casa.yaml` | cálida de día (crema, madera); maqueta en corte con contorno café | hombre práctico | 09:00 | `..._CASA` |
 
 Producción continua (`produccion.modo_cadena: "continuo"`): el bot hace videos sin parar cada vez
 que hay uso de Claude disponible (también de madrugada), siempre para la página con menos videos en
-cola, y los deja programados en Facebook para el siguiente horario libre de esa página (3 por página).
-Descansa cuando todas las páginas tienen `cola_maxima` videos programados por delante. Si la página
-de historias no tiene sus secretos, el bot trabaja solo para la principal.
-Cada aviso de Telegram dice de qué página es. Para agregar otra página: copia
-`canales/historias.yaml` con otro nombre, ajústalo, añade sus turnos y sus dos secretos.
+cola, y los deja programados en Facebook para la siguiente hora libre de esa página. Descansa cuando
+todas tienen `cola_maxima` (2) videos programados por delante. Una página sin sus dos secretos no
+trabaja; las demás siguen igual. Cada aviso de Telegram dice de qué página es.
+Para darle 2 videos al día a la página que despegue: agrega otra hora a `publicacion.horarios` en su
+archivo. Para otra página: copia uno de `canales/` con otro nombre y crea sus dos secretos.
+
+
+## Técnica 2.5D (3D + 2D en el mismo mundo)
+
+Cada figura se hace con la técnica que mejor le queda y todo se ve como un solo dibujo:
+
+- **3D** (`remotion/src/lib25d.tsx` y `lib3d.tsx`): lo que gira, se abre o se ve por dentro.
+  Piezas listas: `Inodoro`, `Grifo`, `Tuberia`, `Engranaje`, `Bombillo`, `Enchufe`, `Cajon`.
+- **2D** (`remotion/src/dibujos2d.ts`, dibujado con curvas): manos, personas sin cara, agua,
+  chorro, gotas, burbujas, vapor, fuego, chispas, ondas, destellos, plantas, nubes de
+  pensamiento y la cabeza en corte. Se ponen como recortes dentro del mundo 3D (`Recorte`,
+  `Mano`, `Persona2D`, `Agua`, `Efecto`...).
+- Mismo contorno, misma paleta de la página y una `Sombra` suave en el suelo para todo. En
+  psicología (plastilina) el 2D también va sin contorno.
+
+La escena de referencia que ve Claude es `remotion/src/escenas/Ejemplo25D.tsx`.
+
+
+## El equipo del estudio y la guía de cada nicho
+
+Cada parte del video la hace un profesional con su oficio (`bot/equipo.py`): investigador de
+tendencias, director creativo, guionista (o guionista de historias reales), editor de ganchos,
+verificador de datos, director de arte y animación, supervisor de animación, productor de calidad
+y analista de audiencia.
+
+- **Temas por potencial viral:** el director creativo propone 6 temas y los puntúa en curiosidad,
+  emoción, ganas de compartir, utilidad, alcance, potencial visual y verificabilidad. El bot elige el
+  de más puntos con los pesos de cada nicho (`canal.pesos_virales`). Los temas dudosos quedan fuera.
+- **Guía del nicho** (`canal.guia` en cada archivo): temas que funcionan, gancho, retención, ritmo,
+  qué evitar y el estilo visual según el tipo de tema. Más `guia_general` para todos los Reels.

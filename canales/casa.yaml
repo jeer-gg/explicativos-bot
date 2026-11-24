@@ -1,0 +1,152 @@
+# Página LA CASA POR DENTRO: por qué fallan las cosas de la casa y cómo se arreglan.
+# Solo va aquí lo que cambia respecto a config.yaml (lo demás se toma de ahí).
+# Sus datos viven en data/casa/ y usa los secretos META_PAGE_ID_CASA y META_PAGE_TOKEN_CASA.
+# Claude, Gemini y Telegram son los mismos que las otras páginas.
+
+canal:
+  etiqueta: "Curioso"
+  formato: "explicativo"
+  rol: "videos que explican por dentro por qué fallan las cosas de la casa y cómo se arreglan"
+  nombre: "Curioso"
+  idioma: "español latino neutro, práctico y de confianza, como el vecino que sabe arreglarlo todo"
+  publico: "adultos de 25 a 60 años en Latinoamérica y los hispanos de Estados Unidos"
+  ejemplo_tema: >-
+    "por qué el inodoro se queda sonando después de bajarlo y cómo se arregla en 5 minutos" en
+    vez de "reparaciones del baño"
+  subtemas:
+    - "plomería por dentro (inodoro, llaves que gotean, desagües tapados, presión del agua)"
+    - "electricidad de la casa explicada (por qué salta el breaker, enchufes, focos) sin trabajos peligrosos"
+    - "humedad, moho, paredes y pintura (por qué sale y cómo se quita)"
+    - "electrodomésticos por dentro (nevera, lavadora, aire acondicionado, abanico) y fallas comunes"
+    - "limpieza con ciencia (manchas, olores, sarro) y por qué funciona cada truco"
+    - "herramientas y trucos de maestro que casi nadie conoce"
+    - "el carro por dentro en lo básico (qué es lo que dice el mecánico)"
+  tendencias:
+    activo: false   # lo de la casa no depende de lo que está en tendencia hoy
+
+  # Receta del nicho (investigación de noviembre de 2026 sobre los videos con más vistas).
+  receta:
+    - "Arranca con el problema VISIBLE en pantalla y el gancho que lo nombra («Si tu inodoro se queda sonando, mira esto»)."
+    - "Problemas comunes que la gente tiene hoy en su casa y que quiere resolver ya."
+    - "Muestra por dentro por qué pasa (corte o transparente) y luego el arreglo en pasos claros, con la herramienta grande."
+    - "El clímax es el resultado visible: el antes y el después lado a lado, que se sienta satisfactorio."
+    - "Termina con todo funcionando y una frase práctica para guardarlo («guárdalo para cuando te pase»)."
+  # Guía del nicho (investigación de noviembre de 2026): qué temas, ganchos, ritmo y estilo funcionan.
+  guia:
+    emocion_objetivo: alivio y satisfacción ('¡así se arregla!'), con la ganas de guardarlo para cuando
+      pase
+    temas_virales:
+    - 'problemas que todos tienen en casa y quieren arreglar ya: inodoro que sigue sonando, puerta que chilla
+      o no cierra, llave que gotea, desagüe tapado'
+    - por qué falla algo por dentro y cómo se arregla en minutos sin llamar a nadie
+    - errores comunes que empeoran las cosas ('no hagas esto')
+    - trucos de limpieza con su ciencia (sarro, moho, manchas, olores) y antes y después
+    - trucos de maestro que casi nadie conoce, con herramientas comunes
+    temas_flojos:
+    - remodelaciones grandes o costosas
+    - trabajos de electricidad o gas peligrosos
+    - productos o marcas concretas
+    gancho:
+    - el problema se ve y se oye en la primera imagen (agua que corre, puerta que chilla)
+    - '''si te pasa esto, mira'': nombra el problema en la primera frase'
+    - promete un arreglo rápido y concreto
+    retencion:
+    - 'mostrar por dentro POR QUÉ pasa antes del arreglo: entender el porqué retiene'
+    - el arreglo en pasos claros, una acción por escena, con la herramienta grande
+    - el antes y después al final es el momento más satisfactorio y lo que más se guarda
+    - terminar con 'guárdalo para cuando te pase'
+    ritmo: 'práctico y directo: sin rodeos, un paso cada 3 a 4 segundos, tono amable de vecino que sabe'
+    evitar:
+    - arreglos peligrosos sin advertir cortar la corriente o el agua
+    - pasos imposibles de seguir
+    - terminar sin mostrar el resultado
+    estilos_por_tema:
+      plomeria: pared o aparato en corte con el agua 2D moviéndose; flechas azules del flujo; la pieza que
+        falla en naranja
+      limpieza: superficie sucia que se limpia con una pasada satisfactoria; antes y después lado a lado
+      mecanismo: el aparato (puerta, cerradura, nevera) desarmado pieza por pieza y vuelto a armar
+      error: la forma equivocada con una cruz roja y la correcta con su resultado
+  pesos_virales:
+    curiosidad: 2
+    emocion: 1
+    compartir: 2
+    utilidad: 3
+    universal: 3
+    visual: 2
+    verificable: 2
+produccion:
+  palabras_por_segundo: 2.5   # ritmo de la voz en esta página
+  duracion_min: 35
+  duracion_max: 65
+  voz: "es-US-AlonsoNeural"   # voz de respaldo (Edge), masculina
+  velocidad_voz: "+4%"
+  voz_marca:
+    activa: true
+    nombre: "El maestro de la casa"
+    genero: "male"
+    tono: "medium"
+    idioma: "es-419"
+    acento: "Latin American neutral Spanish, friendly Caribbean warmth, no strong regional accent"
+    persona: "Friendly handyman in his late forties who explains things clearly"
+    contexto: "Narration for short viral videos about home repairs and how things work inside the house"
+    descripcion: >
+      A friendly, confident and trustworthy male voice in his late forties speaking neutral Latin
+      American Spanish, like the neighbor who can fix anything and explains it with a smile.
+      Practical and relaxed, a little humor, never a salesman. Natural pace with clear pauses
+      between steps, a satisfied tone when the problem is solved. Clear diction, never rushed.
+
+estilo:
+  # Estilo de animación: dibujo con contorno café oscuro (más cálido que el negro), tipo maqueta.
+  acabado: "dibujo"
+  color_contorno: "#3A2A1E"
+  descripcion_3d: >
+    Estilo de marca de la página: maqueta 3D en corte, como una casa de muñecas vista por
+    dentro. El lugar cambia con cada tema (el baño, la cocina, el patio, la fachada, el carro),
+    pero siempre con la misma paleta cálida de día: crema, madera, luz de ventana, con
+    contornos finos café oscuro y sombreado de caricatura. Lo que nunca se ve queda a la
+    vista: la pared en corte con sus tubos y cables, el tanque del inodoro transparente, la
+    nevera abierta por detrás. Agua en azul brillante, electricidad en amarillo, el objeto o la
+    herramienta protagonista en naranja. Siempre un ANTES (lo roto, con el problema bien
+    visible) y un DESPUÉS (arreglado, limpio y funcionando) que se sienta satisfactorio. Cada
+    fotograma lleno y nítido; cámara cercana que se mueve. Sin emojis, sin ojos ni caras.
+  # Colores de cada escenario en esta página: todo cálido y de día.
+  escenarios:
+    cielo:    {fondo: "#A9D0EE", suelo: "#8CC063", foco: "#FFE9C4",
+               degradado: "linear-gradient(180deg, #6FAEE3 0%, #A9D0EE 45%, #EAE6D2 80%, #F6E7C8 100%)"}
+    exterior: {fondo: "#CFE2EE", suelo: "#CBBBA5", foco: "#FFE9C4",
+               degradado: "linear-gradient(180deg, #9CC6E8 0%, #CFE2EE 45%, #F1ECDF 80%, #F3E8D6 100%)"}
+    interior: {fondo: "#F1E4CF", suelo: "#C89B6D", foco: "#FFE9C4",
+               degradado: "radial-gradient(ellipse 70% 55% at 30% 25%, #FFF6E3 0%, #F1E4CF 45%, #E2CFB2 85%, #D2BC9A 100%)"}
+    oscuro:   {fondo: "#1D1A16", suelo: "#2E2720", foco: "#FFF2CC", tinta: "#F4EDE2"}
+    estudio:  {fondo: "#F1E4CF", suelo: "#D9C7A8", foco: "#FFE9C4"}
+  guia_escenas: >
+    Esta página explica LA CASA POR DENTRO. Lo importante es VER lo que pasa adentro: la pared,
+    el tubo o el aparato en corte o transparente, con flechas del agua (azul, acentos[2]) o de la
+    corriente (amarillo, acentos[3]). La pieza que falla y la herramienta van en naranja
+    (acentos[0]) y grandes. Las personas, si salen, son solo unas manos 2D (Mano) o una figura 2D (Persona2D) sin
+    cara. El arreglo se muestra paso a paso y termina con el antes y el después lado a lado.
+    Para electricidad y gas: solo explicar y decir que se corta la corriente o se llama a un
+    técnico; nunca mostrar a alguien metiendo la mano en el panel o una conexión de gas.
+  paletas_3d:
+    marca: ["#F1E4CF", "#2B241D", "#F28C28", "#E9E1D3", "#2FA4E7", "#F2C94C", "#C89B6D"]
+
+ganchos:
+  tipos:
+    - "esto te pasa («Si tu inodoro se queda sonando, mira esto»)"
+    - "no lo hagas («NO le eches cloro a esto»)"
+    - "el truco del maestro («Los plomeros no te dicen este truco»)"
+    - "lo que hay dentro («Así se ve por dentro la pared de tu baño»)"
+    - "arreglo con tiempo («Esto se arregla en 5 minutos y sin llamar a nadie»)"
+    - "error común («Casi todos limpian esto al revés»)"
+    - "el problema inesperado («Parecía una gotera normal… hasta que abrimos la pared»)"
+  estructuras:
+    - "EL PROBLEMA POR DENTRO: un problema común de la casa; se abre en corte para ver por qué pasa, y luego el arreglo paso a paso hasta el antes y después"
+    - "NO HAGAS ESTO: lo que casi todos hacen mal con algo de la casa, por qué lo empeora (se ve por dentro) y lo que sí funciona"
+    - "PIEZA POR PIEZA: se arma un aparato o sistema de la casa desde cero, pieza por pieza, explicando para qué sirve cada una y cuál es la que suele fallar"
+    - "EL TRUCO Y SU CIENCIA: un truco casero de limpieza o arreglo, se prueba en pantalla y se explica por qué funciona de verdad"
+    - "SIGUE EL CAMINO: se recorre un sistema de la casa de principio a fin (el agua desde la calle hasta la ducha, la luz desde el poste hasta el foco) y dónde suele fallar cada tramo"
+    - "LO INESPERADO: un problema que parece pequeño, se abre por dentro y aparece la causa real que nadie esperaba, el arreglo paso a paso y el antes y después"
+
+publicacion:
+  horarios: ["10:00"]   # mañana (8:00 en México, 9:00 en Colombia): la gente resuelve las cosas de la casa
+  hashtags: ["#hogar", "#trucos", "#reparaciones", "#sabiasque"]

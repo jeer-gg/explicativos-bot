@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, timezone
 
 from .config import DATOS
 from .memoria import _guardar, _leer, memoria
+from .equipo import profesional
 
 LECCIONES = DATOS / "aprendizajes.json"
 
@@ -104,7 +105,7 @@ def actualizar_lecciones(claude, cfg: dict, forzar: bool = False):
             "nota_revisor": m.get("nota_revisor"),
         })
     from .config import rol
-    system = (f"Eres analista de datos de una página de Reels de {rol()}. Sacas conclusiones "
+    system = (profesional("analista") + f"Eres analista de datos de una página de Reels de {rol()}. Sacas conclusiones "
               "concretas y accionables de los resultados reales, sin inventar ni exagerar.")
     usuario = f"""Resultados de los videos publicados (vistas, cuántas veces lo normal, % visto):
 {json.dumps(filas, ensure_ascii=False)}

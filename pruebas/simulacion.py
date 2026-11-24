@@ -19,7 +19,10 @@ TMP = Path(tempfile.mkdtemp(prefix="sim-bot-"))
 REPO = TMP / "repo"
 shutil.copytree(ORIGEN, REPO, ignore=shutil.ignore_patterns(".git", "salida", "node_modules", "__pycache__"))
 # Primero se prueba el modo con aprobación por Telegram; al final, el modo automático.
-_cfg = (REPO / "config.yaml").read_text()
+# El config real publica 1 video al día por página; para probar los horarios se usan 3 al día.
+_cfg = (REPO / "config.yaml").read_text().replace('horarios: ["20:00"]', 'horarios: ["09:00", "13:00", "20:00"]')
+assert 'horarios: ["09:00", "13:00", "20:00"]' in _cfg
+(REPO / "config.yaml").write_text(_cfg)
 assert "activa: false" in _cfg
 (REPO / "config.yaml").write_text(_cfg.replace("activa: false", "activa: true", 1))
 sys.path.insert(0, str(REPO))
@@ -72,7 +75,18 @@ GRAVE = {"n": 0}
 
 def responder(system: str, contenido) -> str:
     texto = " ".join(c.get("text", "") for c in contenido if c.get("type") == "text")
+    # Cada paso empieza con la ficha de su profesional; se registra quién trabajó y se quita para seguir.
+    from bot.equipo import EQUIPO, profesional as _prof
+    for _k in EQUIPO:
+        if system.startswith(_prof(_k)):
+            REGISTRO.setdefault("equipo", []).append(_k)
+            system = system[len(_prof(_k)):]
+            break
     REGISTRO["claude"].append(system[:40])
+    if "Contrato técnico" in system:
+        REGISTRO["sistema_escena"] = system
+    if system.startswith("Eres guionista"):
+        REGISTRO["guion_pedido"] = texto
     if "director creativo" in system:
         return json.dumps({"candidatos": [], "elegido": {"tema": "Por qué el pan se pone duro",
                                                           "angulo": "es agua que se mueve", "subtema": "cocina",
@@ -855,7 +869,8 @@ assert "la voz dice" in REGISTRO.get("control_texto", ""), REGISTRO.get("control
 print("== Segunda página: historias ==")
 from bot import config as _config  # noqa: E402
 _vg.sintetizar, _vg.escuchar_palabras, _vg._ffmpeg, _vg.duracion = _sint_orig, _esc_orig, _ff_orig, _dur_orig
-assert _config.canales() == ["explicativos", "historias"]
+assert _config.canales() == ["explicativos", "casa", "historias", "psicologia"], _config.canales()
+assert not _config.canal_listo("psicologia") and not _config.canal_listo("casa"), "sin secretos no trabajan"
 assert not _config.canal_listo("historias"), "sin sus secretos, la página no trabaja"
 cfg_p = prod.cargar_config("explicativos")
 solo = {prod.turno_actual(cfg_p, _dt(2026, 11, 23, h, 30, tzinfo=_tz.utc))[2] for h in range(24)}
@@ -873,15 +888,16 @@ assert len(ids) == 2 and any(i.startswith("historias@") for i in ids)
 memoria_explicativos = (REPO / "data" / "memoria.json").read_text()
 _config.usar_canal("historias")
 cfg_h = prod.cargar_config()
-assert cfg_h["canal"]["formato"] == "historia" and cfg_h["estilo"]["escenario_fijo"] == "oscuro"
+assert cfg_h["canal"]["formato"] == "historia" and cfg_h["estilo"]["acabado"] == "dibujo"
+assert not cfg_h["estilo"].get("escenario_fijo"), "el escenario cambia con cada historia"
 assert cfg_h["claude"]["modelo"] == cfg_p["claude"]["modelo"], "hereda lo que no cambia"
-assert cfg_h["publicacion"]["horarios"] == ["08:00", "12:30", "21:00"]
+assert cfg_h["publicacion"]["horarios"] == ["22:00"]
 assert any("muertes" in x for x in cfg_h["canal"]["prohibidos"]), "sin víctimas"
 assert _config.secreto("META_PAGE_ID") == "pagina_historias" and _config.secreto("TELEGRAM_CHAT_ID") == "123"
 from bot import voz_gemini as _vz  # noqa: E402
 assert _vz.VOZ == REPO / "data" / "historias" / "voz.json", "cada página tiene su propia voz"
 from bot import telegram as _tg_mod  # noqa: E402
-assert _tg_mod._pagina() == "[Historias] ", _tg_mod._pagina()
+assert _tg_mod._pagina() == "[History Time] ", _tg_mod._pagina()
 llamadas_antes = len(REGISTRO["claude"])
 antes = len(REGISTRO["meta"])
 prod.producir()
@@ -889,7 +905,8 @@ assert len(REGISTRO["meta"]) == antes + 1, "publica en la página de historias"
 nuevos = REGISTRO["claude"][llamadas_antes:]
 assert any(x.startswith("Eres guionista de historias reales") for x in nuevos), nuevos[:6]
 plan_h = json.loads((REPO / "remotion" / "plan_A.json").read_text())
-assert plan_h["escenario"] == "oscuro" and plan_h["paleta"]["fondo"] == "#121318"
+assert plan_h["paleta"]["fondo"] == prod.escenarios(cfg_h)[plan_h["escenario"]]["fondo"], "con los colores de la página"
+assert plan_h["foco"] and plan_h["paleta"]["tinta"] == "#F2EFE9", "luz de cine"
 mem_h = json.loads((REPO / "data" / "historias" / "memoria.json").read_text())
 assert len(mem_h) == 1, "la memoria de historias es aparte"
 assert (REPO / "data" / "memoria.json").read_text() == memoria_explicativos, "no toca la otra página"
@@ -974,5 +991,88 @@ assert _vg2.voz_de_marca({"produccion": {"voz_marca": {"activa": True, "descripc
 _config.usar_canal("historias")
 assert not _voces.ofrecer_si_toca(prod.cargar_config())
 _config.usar_canal("explicativos")
+
+# ---------- 15) Cuatro páginas, cada una con su estética, su voz y su hora ----------
+print("== Cuatro páginas ==")
+(REPO / "config.yaml").write_text((ORIGEN / "config.yaml").read_text())  # el config real
+_cfgs = {c: prod.cargar_config(c) for c in _config.canales()}
+_horas = [h for c in _cfgs.values() for h in c["publicacion"]["horarios"]]
+assert len(_horas) == 4 and len(set(_horas)) == 4, ("1 al día por página, a horas distintas", _horas)
+_marcas = {c: tuple(v["estilo"]["paletas_3d"]["marca"]) for c, v in _cfgs.items()}
+assert len(set(_marcas.values())) == 4 and all(len(m) == 7 for m in _marcas.values()), _marcas
+# El escenario lo elige el tema (no está fijo); los colores y el estilo de animación, la página
+for _n in ("cielo", "exterior", "interior"):
+    assert {prod.escenario_de({"direccion_arte": {"escenario": _n}}, v) for v in _cfgs.values()} == {_n}
+    _fondos = {c: prod.paleta_con_escenario({"fondo": "#000000", "tinta": "#111111", "acentos": list(v["estilo"]["paletas_3d"]["marca"][2:])}, _n, v)["fondo"] for c, v in _cfgs.items()}
+    assert len(set(_fondos.values())) == 4, ("mismo lugar, distinta paleta en cada página", _n, _fondos)
+_acab = {c: prod.acabado_de(v)["acabado"] for c, v in _cfgs.items()}
+assert _acab == {"explicativos": "dibujo", "historias": "dibujo", "psicologia": "dibujo", "casa": "dibujo"}, _acab
+assert prod.acabado_de(_cfgs["psicologia"])["color_contorno"] == "#0A0506" and prod.escenarios(_cfgs["psicologia"])["interior"]["fondo"] == "#2B1013", "Pensan2: paleta alrededor del rojo oscuro"
+assert prod.acabado_de(_cfgs["casa"])["color_contorno"] == "#3A2A1E"
+assert prod.escenarios(_cfgs["explicativos"]) == prod.ESCENARIOS, "la principal queda igual"
+assert _cfgs["psicologia"]["produccion"]["voz_marca"]["genero"] == "female"
+assert _cfgs["casa"]["produccion"]["voz_marca"]["genero"] == "male"
+assert any("salud mental" in x for x in _cfgs["psicologia"]["canal"]["prohibidos"])
+assert any("dinero" in x for x in _cfgs["casa"]["canal"]["prohibidos"]), "hereda los prohibidos"
+assert not any("psicolog" in s for s in _cfgs["explicativos"]["canal"]["subtemas"]), "no pisa a la página de psicología"
+for c in ("psicologia", "casa"):
+    os.environ[f"META_PAGE_ID_{c.upper()}"] = f"pagina_{c}"
+    os.environ[f"META_PAGE_TOKEN_{c.upper()}"] = f"token_{c}"
+    _config.usar_canal(c)
+    assert _config.secreto("META_PAGE_ID") == f"pagina_{c}"
+    assert _tg_mod._pagina() == f"[{_cfgs[c]['canal']['etiqueta']}] ", _tg_mod._pagina()
+    antes = len(REGISTRO["meta"])
+    prod.producir()
+    assert len(REGISTRO["meta"]) == antes + 1, f"publica en la página {c}"
+    plan_c = json.loads((REPO / "remotion" / "plan_A.json").read_text())
+    assert plan_c["acabado"] == _acab[c] and plan_c["paleta"]["fondo"] == prod.escenarios(_cfgs[c])[plan_c["escenario"]]["fondo"], plan_c
+    assert json.loads((REPO / "data" / c / "memoria.json").read_text()), "memoria propia"
+    _sis = REGISTRO.get("sistema_escena", "")
+    assert "Técnica 2.5D" in _sis and "<Inodoro" in _sis and "Persona2D" in _sis and "Ejemplo25D" in _sis, "las escenas usan la técnica 2.5D"
+    _pedido = REGISTRO.get("guion_pedido", "")
+    assert "RECETA DEL NICHO" in _pedido and _cfgs[c]["canal"]["receta"][0][:40] in _pedido, "la receta de su nicho llega al guion"
+    _ritmo = str(_cfgs[c]["produccion"]["palabras_por_segundo"]).replace(".", ",")
+    assert f"unas {_ritmo} palabras por segundo" in _pedido, "su propio ritmo"
+_config.usar_canal("explicativos")
+# Las 4 activas: la producción continua elige la que tiene menos cola
+for c in _config.canales():
+    (_config.ruta_datos(c) / "memoria.json").write_text(json.dumps([{"tema": "q", "publicado_en": futuro(5)}] if c != "casa" else []))
+eleccion = prod._esperar_trabajo(esperar_falso, __import__("time").monotonic(), 340, 170, cfg_c)
+assert eleccion[0] == "casa", eleccion
+
+# ---------- 16) Equipo profesional, temas por potencial viral y guía de cada nicho ----------
+print("== Equipo y guía de nichos ==")
+_eq = set(REGISTRO.get("equipo", []))
+for _k in ("director_creativo", "guionista", "director_arte"):
+    assert _k in _eq, ("cada parte tiene su profesional", _k, _eq)
+import bot.director as _dir
+_cands = {"candidatos": [
+    {"tema": "tibio", "puntos": {c: 3 for c in _dir.CRITERIOS_VIRALES}},
+    {"tema": "viral", "gancho": "Tu cerebro te miente", "tono_visual": "memoria", "puntos": {**{c: 5 for c in _dir.CRITERIOS_VIRALES}, "verificable": 4}},
+    {"tema": "inventado", "puntos": {**{c: 5 for c in _dir.CRITERIOS_VIRALES}, "verificable": 1}},
+]}
+_g = _dir.mejor_candidato(_cands, _cfgs["psicologia"]["canal"])
+assert _g["tema"] == "viral" and _g["puntaje_viral"] > 0, _g
+_solo_malos = {"candidatos": [{"tema": "a", "puntos": {"verificable": 1, "curiosidad": 5}}, {"tema": "b", "puntos": {"verificable": 2}}]}
+assert _dir.mejor_candidato(_solo_malos, _cfgs["casa"]["canal"])["tema"] == "a", "si todos son dudosos, igual elige el de más puntos"
+# pesos distintos por nicho: lo útil pesa más en casa que en historias
+_util = {"tema": "u", "puntos": {"utilidad": 5}}
+assert _dir.puntaje_viral(_util, _cfgs["casa"]["canal"]["pesos_virales"]) > _dir.puntaje_viral(_util, _cfgs["historias"]["canal"]["pesos_virales"])
+# cada página tiene su propia guía (no se mezcla con la de C MAMUD)
+assert set(_cfgs["psicologia"]["canal"]["guia"]["estilos_por_tema"]) == {"memoria", "decision", "social", "percepcion"}
+import bot.guionista as _gui
+for c in _config.canales():
+    _txt = _gui.guia_del_nicho(_cfgs[c])
+    assert "GUÍA DE CALIDAD" in _txt and _cfgs[c]["canal"]["guia"]["ritmo"][:30] in _txt and "segundo 0" in _txt, c
+assert "GUÍA DE CALIDAD" in REGISTRO.get("guion_pedido", ""), "la guía llega al guionista"
+
+# ---------- 17) La voz no se descarta por cómo escribe Whisper los números o las tildes ----------
+print("== Voz tolerante ==")
+from bot.voz_gemini import cobertura_flexible as _cf
+_g = "El 60% de lluvia no significa lo que crees: el guión cambia".split()
+_o = [{"w": w} for w in "el sesenta por ciento de lluvia no significa lo que crees el guion cambia".split()]
+assert _cf(_g, _o) >= 0.9, _cf(_g, _o)
+_otra = [{"w": w} for w in "hoy vamos a hablar de un tema muy distinto para todos".split()]
+assert _cf(_g, _otra) < 0.3, "si la voz dice otra cosa, se nota"
 
 print("\nSIMULACIÓN CORRECTA. Archivos en", TMP)

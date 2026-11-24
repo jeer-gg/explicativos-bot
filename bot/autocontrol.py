@@ -19,6 +19,7 @@ from pathlib import Path
 
 from .config import DATOS
 from .memoria import _guardar, _leer
+from .equipo import profesional
 
 REGLAS = DATOS / "reglas_calidad.json"
 ESTADO_VIDEO = {"cobertura_voz": None, "respaldos": []}  # lo rellenan voz y estudio
@@ -56,7 +57,7 @@ def chequeos_tecnicos(voz: Path, duracion: float) -> list[dict]:
         n = len(ESTADO_VIDEO["respaldos"])
         problemas.append({"grave": False, "area": "escenas",
                           "problema": f"{n} escena(s) fallaron y se cambiaron por una genérica",
-                          "regla": "Código de escena simple y robusto: solo las piezas de ../lib3d, sin trucos raros de three.js."})
+                          "regla": "Código de escena simple y robusto: solo las piezas de ../lib3d y ../lib25d, sin trucos raros de three.js."})
     if duracion > 88:
         problemas.append({"grave": False, "area": "guion", "problema": f"el video dura {duracion:.0f} s, al límite",
                           "regla": "Guion más compacto: una sola idea, sin repetir."})
@@ -116,7 +117,7 @@ def revision_final(claude, guion: dict, hoja: Path, momentos: list | None = None
     ]
     try:
         from .config import rol
-        datos = claude.json(f"Eres el jefe de control de calidad de una página de {rol()}. "
+        datos = claude.json(profesional("productor") + f"Eres el jefe de control de calidad de una página de {rol()}. "
                             "Eres exigente y concreto.", contenido, max_tokens=2000)
     except Exception as e:  # noqa: BLE001
         print("No se pudo hacer la revisión final:", e)

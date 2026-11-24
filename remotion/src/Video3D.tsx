@@ -10,6 +10,7 @@ import {useThree} from '@react-three/fiber';
 import * as THREE from 'three';
 import {ANCHO, ALTO} from './lib';
 import {ASPECTO, EscenaRespaldo3D, FUENTE, V3} from './lib3d';
+import {ESTILO25D, oscurecer} from './lib25d';
 import {DURACION_PORTADA, Portada, TarjetaDatos} from './Tarjetas';
 import {ESCENAS} from './escenas';
 import {Conceptos, Subtitulos} from './Subtitulos';
@@ -235,22 +236,39 @@ export const Video3D: React.FC<PlanVideo> = (plan) => {
   const conceptos = plan.estilo_subtitulos === 'concepto';
   const cielo = new THREE.Color(plan.paleta.fondo);
   const dia = cielo.getHSL({h: 0, s: 0, l: 0}).l > 0.45;
-  ASPECTO.dibujo = dia;
+  // Estilo de animación de la página: dibujo (contorno + caricatura) o plastilina (mate, sin contorno)
+  const plastilina = plan.acabado === 'plastilina';
+  ASPECTO.dibujo = dia && !plastilina;
+  ASPECTO.contorno = !plastilina;
+  ASPECTO.colorContorno = plan.color_contorno || '#1B1B1F';
+  ASPECTO.rugosidad = plastilina ? 0.92 : 0;
+  // Técnica 2.5D: los recortes 2D usan la misma paleta y el mismo contorno que el 3D
+  const [ac0, ac1, ac2, , ac4] = plan.paleta.acentos;
+  ESTILO25D.contorno = !plastilina;
+  ESTILO25D.colores.contorno = ASPECTO.colorContorno;
+  ESTILO25D.colores.ropa = ac0 || ESTILO25D.colores.ropa;
+  ESTILO25D.colores.ropaSombra = oscurecer(ESTILO25D.colores.ropa, 0.72);
+  ESTILO25D.colores.principal = ac0 || ESTILO25D.colores.principal;
+  ESTILO25D.colores.resalte = ac2 || ESTILO25D.colores.resalte;
+  ESTILO25D.pared = plan.paleta.fondo;
+  ESTILO25D.piso = ac4 || ac1 || ESTILO25D.piso;
+  ESTILO25D.luz = dia ? '#FFF8EC' : oscurecer(plan.paleta.fondo, 1.25);
   const [, , luz] = plan.paleta.acentos;
   const colorSuelo = plan.paleta.acentos[4] ?? cielo.clone().lerp(new THREE.Color('#ffffff'), 0.07).getStyle();
   const horizonte = cielo.clone().lerp(new THREE.Color('#ffffff'), 0.3).getStyle();
   const oscuro = cielo.clone().multiplyScalar(0.78).getStyle();
   // Fondo según el escenario del tema
   const fondoCss =
-    plan.escenario === 'cielo'
+    plan.fondo_css ||
+    (plan.escenario === 'cielo'
       ? 'linear-gradient(180deg, #3C8DDE 0%, #6FB2EC 38%, #B9DDF7 72%, #D9EEFB 100%)'
       : plan.escenario === 'exterior'
         ? 'linear-gradient(180deg, #8FC0E6 0%, #C4DEEF 45%, #EAF1F2 80%, #F1EEE6 100%)'
         : dia
           ? `radial-gradient(ellipse 90% 70% at 50% 40%, ${horizonte} 0%, ${plan.paleta.fondo} 55%, ${oscuro} 100%)`
-          : `radial-gradient(ellipse 80% 55% at 50% 42%, #2A2B33 0%, ${plan.paleta.fondo} 62%, #07070A 100%)`;
-  // En el escenario oscuro el foco es de luz cálida (como un escenario de teatro)
-  const colorFoco = plan.escenario === 'oscuro' ? '#FFE0B0' : luz;
+          : `radial-gradient(ellipse 80% 55% at 50% 42%, #2A2B33 0%, ${plan.paleta.fondo} 62%, #07070A 100%)`);
+  // La luz principal: la de la página para ese escenario (en el oscuro, cálida como un teatro)
+  const colorFoco = plan.foco || (plan.escenario === 'oscuro' ? '#FFE0B0' : luz);
   const derivaNubes = (frame / fps) * 6;
 
   return (

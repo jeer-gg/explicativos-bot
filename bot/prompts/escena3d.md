@@ -13,8 +13,8 @@ partes, cotas de medida, flechas). El toque propio de este canal: objetos fieles
 (sin ojos ni caras en objetos reales, y sin mascotas), la paleta sorteada y movimiento constante.
 
 ## El mundo (ya lo pone el video, no lo repitas)
-- El video pone el escenario del tema: cielo con nubes y pasto, exterior de día (azotea,
-  calle), escenario oscuro con foco cálido, o estudio limpio. El suelo está en y = 0.
+- El video pone el escenario del tema (cielo con nubes y pasto, exterior de día, interior de
+  un cuarto, oscuro con foco, o estudio limpio) con los colores de la página. El suelo está en y = 0.
 - NO añadas cielo, suelo general ni luces principales. Sí puedes (y conviene) poner lo que
   completa el lugar y llena el cuadro: un trozo de pared, un borde de azotea, una mesa, una
   encimera, árboles o postes al fondo, una base bajo el objeto.
@@ -69,7 +69,7 @@ partes, cotas de medida, flechas). El toque propio de este canal: objetos fieles
     con su valor correcto desde que aparecen: nada de etiquetas o cifras adelantadas o con
     valores provisionales al inicio de la escena.
   Los textos miran solos a la cámara: no les pongas `rotacion` (si no, se ven acostados).
-- Personajes (`Muneco`) solo si la idea los necesita; el protagonista suele ser el objeto.
+- Personas (`Persona2D`, dibujadas en 2D) solo si la idea las necesita; el protagonista suele ser el objeto.
 - Personajes: solo los que son parte de la historia que cuenta el video (quien usa el
   objeto, quien comete el error, quien descubre la respuesta). Los objetos, sin ojos ni caras.
   Nada de mascotas ni personajes decorativos que no tengan que ver.
@@ -89,10 +89,34 @@ partes, cotas de medida, flechas). El toque propio de este canal: objetos fieles
 - Arriba de la pantalla el video escribe en grande el concepto que dice la voz («EL FLOTADOR»):
   no lo repitas como texto 3D; señala la parte con el resalte o una flecha.
 
+## Técnica 2.5D (obligatoria): 3D y 2D en el mismo mundo
+Cada figura se hace con la técnica que mejor le queda, y todo se ve como UN solo dibujo:
+- En 3D (volumen, sombreado de caricatura y contorno): lo que gira, se abre, se ve por dentro o
+  tiene forma rígida: máquinas, aparatos, muebles, tuberías, engranajes, edificios, recipientes.
+  Usa primero las piezas listas de `../lib25d` (Inodoro, Grifo, Tuberia, Engranaje, Bombillo,
+  Enchufe, Cajon) y `Pieza` de `../lib3d` para lo demás.
+- En 2D (recortes dibujados con curvas, de `../lib25d`): todo lo vivo, blando o líquido, que en
+  3D con cajas y esferas sale tosco: manos (`Mano`), personas (`Persona2D`), agua (`Agua`, y
+  `Efecto` chorro/gotas/burbujas), vapor, humo, fuego, chispas, ondas, destellos, plantas, nubes
+  de pensamiento y la cabeza en corte (`Cabeza2D`). NUNCA armes una mano, una persona o agua
+  con piezas 3D (en lugar de `Muneco`, usa `Persona2D`).
+- Los recortes 2D van de frente a la cámara, a distintas profundidades (z) para dar
+  profundidad: delante del objeto lo que lo toca (la mano), detrás lo que está dentro (el agua
+  en un tanque abierto).
+- Personas que se mueven con naturalidad: `Persona2D` con pose "camina" SOLO mientras se desplaza,
+  y a paso de caminar (entre 0,6 y 0,9 unidades por segundo, hacia donde mira; usa `espejo` para ir
+  a la izquierda). Si no se desplaza, usa "parado", "piensa", "senala" o "sorprendida": nunca
+  deslices a una persona quieta ni la hagas caminar en el sitio. Trayectos cortos (no más de 3
+  segundos caminando); para ir lejos, mejor que viaje la cámara.
+- Todo lo que se apoya en el suelo lleva su `<Sombra />` suave debajo.
+- Interior de una casa o un cuarto: pon `<Habitacion />` como fondo.
+- Ejemplo: una mano 2D (`<Mano pose="agarra" ... />`) levanta la tapa de un `<Inodoro tapa={...} />`
+  3D, el frente del tanque se corta (`corte`) y adentro se ve el `Agua` 2D bajando por la fuga.
+
 ## Contrato técnico (obligatorio)
 - Archivo TSX que exporta exactamente: `export const {nombre}: React.FC<EscenaProps> = (...) => ...`
 - Imports permitidos SOLO de `react`, `remotion` (interpolate, spring, Easing), `three`
-  (solo si hace falta: `import * as THREE from 'three'`) y `../lib3d`.
+  (solo si hace falta: `import * as THREE from 'three'`), `../lib3d` y `../lib25d`.
 - Devuelve un `<group>`. Construye sobre todo con `Pieza` (lleva contorno y sombras). Si
   necesitas otra forma, `<mesh castShadow>` con geometrías de three y `<Mat color=... />`.
 - Usa la prop `frame` (fotograma local). Prohibido: `useFrame`, `useThree`, `useState`,
@@ -101,7 +125,7 @@ partes, cotas de medida, flechas). El toque propio de este canal: objetos fieles
 - Ángulos en radianes. Posiciones como `[x, y, z]`.
 - Máximo 400 líneas. Código limpio que compile.
 
-## Herramientas de ../lib3d
+## Herramientas de ../lib3d y ../lib25d
 ```tsx
 {lib}
 ```

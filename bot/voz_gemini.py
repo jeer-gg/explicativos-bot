@@ -277,12 +277,31 @@ def inicios_seguros(inicios: list[float], total: float, minimo: float = 1.2) -> 
     return [round(x, 3) for x in r]
 
 
+def cobertura_flexible(tokens: list[str], oidas: list[dict]) -> float:
+    """Como cobertura(), pero tolera lo que Whisper escribe distinto sin que la voz se haya
+    equivocado: palabras parecidas («haz» / «has», «guión» / «guion»), números y porcentajes
+    («60%», «sesenta por ciento») y palabras en inglés. Sirve para decidir si la voz dijo el guion."""
+    a = [_normal(t) for t in tokens]
+    b = [_normal(o["w"]) for o in oidas]
+    j = aciertos = total = 0
+    for w in a:
+        if not w or any(c.isdigit() for c in w):
+            continue  # los números se oyen y se escriben de mil formas: no cuentan
+        total += 1
+        for k in range(j, min(len(b), j + 6)):
+            if _parecidas(b[k], w):
+                aciertos += 1
+                j = k + 1
+                break
+    return aciertos / max(1, total)
+
+
 def _cobertura_inicio(tokens: list[str], oidas: list[dict], n: int = 12) -> float:
     """Qué parte de las primeras palabras del guion se oye al principio del audio."""
     primeras = tokens[:n]
     if not primeras:
         return 1.0
-    return cobertura(primeras, oidas[: max(len(primeras) * 3, 20)])
+    return cobertura_flexible(primeras, oidas[: max(len(primeras) * 3, 20)])
 
 
 def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, nombre: str) -> dict:
@@ -297,6 +316,7 @@ def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, 
 
     # Se intenta hasta 3 veces conseguir una narración que diga el guion completo desde el principio
     mejor = None
+    respaldo = None  # el mejor intento aunque no pase el control del comienzo
     for intento in range(3):
         crudo = sintetizar(texto, cfg, carpeta / f"gemini_{nombre}_{intento}.wav")
         oidas = escuchar_palabras(crudo, cfg, texto)
@@ -315,21 +335,29 @@ def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, 
         _ffmpeg("-i", str(crudo), "-ss", f"{corte:.3f}", "-af",
                 f"adelay={int(AIRE_INICIAL * 1000)}:all=1", "-ar", "24000", "-ac", "1", str(limpio))
         oidas = escuchar_palabras(limpio, cfg, texto)  # se vuelve a escuchar el audio ya recortado
-        cob = cobertura(tokens, oidas)
+        cob = cobertura_flexible(tokens, oidas)
         cob_ini = _cobertura_inicio(tokens, oidas)
         print(f"Voz intento {intento + 1}: se oye el {round(cob * 100)} % del guion "
               f"(comienzo: {round(cob_ini * 100)} %)")
+        if respaldo is None or cob > respaldo[0]:
+            respaldo = (cob, limpio, oidas, cob, cob_ini)
         # El audio tiene que empezar con las primeras palabras del guion. Si no (se leyó otra
         # cosa al principio o el corte quedó tarde), este intento no sirve y se repite.
-        if cob_ini < 0.6:
+        if cob_ini < 0.5:
             print("El audio no empieza con el guion; se repite la voz.")
             continue
         if mejor is None or cob > mejor[0]:
             mejor = (cob, limpio, oidas, cob)
         if cob >= 0.8:
             break
+    if mejor is None and respaldo and respaldo[0] >= 0.7 and respaldo[4] >= 0.35:
+        # Ningún intento pasó el control estricto, pero uno dice casi todo el guion y su comienzo
+        # se parece: es mejor que la voz de respaldo (lo más probable es que Whisper oyera mal).
+        print(f"Se usa el mejor intento ({round(respaldo[0] * 100)} % del guion).")
+        mejor = respaldo[:4]
     if mejor is None:
-        raise RuntimeError("La voz no dijo el guion en ninguno de los intentos")
+        detalle = f" (el mejor intento dijo el {round(respaldo[0] * 100)} % del guion)" if respaldo else ""
+        raise RuntimeError("La voz no dijo el guion en ninguno de los intentos" + detalle)
     _, limpio, oidas, cob_final = mejor
     from .autocontrol import ESTADO_VIDEO
     ESTADO_VIDEO["cobertura_voz"] = cob_final
@@ -343,8 +371,10 @@ def narrar_variante(textos: list[str], cfg: dict, carpeta: Path, publico: Path, 
     habla = max(1.0, tiempos[-1][1] - tiempos[0][0])
     por_segundo = len(tokens) / habla
     factor = 1.0
-    if por_segundo > 2.8:
-        factor = max(0.9, 2.6 / por_segundo)
+    # Cada página tiene su ritmo (psicología más pausada, explicativos más ágil)
+    ritmo = float(cfg["produccion"].get("palabras_por_segundo", 2.5))
+    if por_segundo > ritmo + 0.3:
+        factor = max(0.9, (ritmo + 0.1) / por_segundo)
         print(f"La voz va a {por_segundo:.1f} palabras por segundo: se frena a {factor:.2f}")
     if total / factor > 88:  # Facebook acepta hasta 90 s: se acelera un poco si hace falta
         factor = min(1.25, total / 86)

@@ -1,5 +1,6 @@
 """El revisor: Claude mira fotogramas reales del video y puntúa cada escena."""
 from .claude import Claude, imagen
+from .equipo import profesional
 
 
 ULTIMO_COMENTARIO = ""
@@ -22,7 +23,13 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
         "solares 3D detallados en una azotea soleada, con cables y medidores; figuras grises en "
         "un escenario oscuro con un foco cálido sobre la figura roja protagonista, con tarjetas "
         "de datos grandes. Todos: fotograma lleno y bonito, protagonista que contrasta con el "
-        "fondo, buena luz, colores limpios, un solo mundo que va cambiando.\n"
+        "fondo, buena luz, colores limpios, un solo mundo que va cambiando. Esas son referencias "
+        "de calidad, no de estilo: juzga con la paleta y el estilo de animación de ESTA página "
+        "(descritos arriba); por ejemplo, si la página es de plastilina, que no haya contornos "
+        "está bien. Técnica 2.5D: manos, personas, agua, humo y plantas van dibujados en 2D con "
+        "curvas; si alguno de esos está armado con cajas y esferas 3D, es un error real. "
+        "Retención: en la escena del gancho algo llamativo pasa desde el primer fotograma y la imagen "
+        "cambia antes del segundo 3; en las demás, nada se queda quieto más de 3 segundos.\n"
         "Puntúa así: 1) estética (riqueza, luz, color, contraste del protagonista, cuadro lleno, "
         "aspecto profesional): es lo que más cuenta; 2) que se entienda la idea de la voz y sea "
         "fiel a la realidad; 3) que haya movimiento o cambio entre los dos fotogramas; 4) que la "
@@ -55,7 +62,7 @@ def revisar(claude: Claude, cfg: dict, guion: dict, fotos: list[dict]) -> dict:
     global ULTIMO_COMENTARIO
     from .config import rol
     resultado = claude.json(
-        f"Eres director de arte de videos 3D virales de {rol()}. Lo que más te importa es que el "
+        profesional("supervisor_animacion") + f"Eres director de arte de videos 3D virales de {rol()}. Lo que más te importa es que el "
         "video se vea hermoso y profesional. Eres exigente con la estética y justo: no castigas los "
         "recursos que usan los Reels ganadores.",
         contenido, max_tokens=3000)
