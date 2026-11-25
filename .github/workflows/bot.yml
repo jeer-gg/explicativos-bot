@@ -47,6 +47,8 @@ jobs:
           origen=/tmp/bot/explicativos-bot
           test -d "$origen" || origen=/tmp/bot
           rm -rf "$origen/.github"
+          # Se borra el código viejo (no la memoria: data/ se queda) para que no queden restos
+          rm -rf bot canales pruebas remotion lienzo
           cp -a "$origen"/. ./
           rm -f explicativos-bot.zip inicio.txt
           git config user.name "bot-explicativos"
@@ -79,6 +81,9 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
       - name: Instalar dependencias de Python
         run: pip install -r requirements.txt
+      - name: Navegador para el motor de lienzo
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then echo "Chrome ya está instalado"; else python -m playwright install --with-deps chromium; fi
       - name: Recuperar caché de Remotion
         uses: actions/cache@v4
         with:
