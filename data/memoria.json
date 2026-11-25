@@ -220,5 +220,25 @@
     "duracion": 66.34,
     "video_fb": "4111431792323766",
     "metricas": {}
+  },
+  {
+    "id": "20261125-0136",
+    "fecha": "2026-11-25",
+    "publicado_en": "2026-11-26T00:00:00+00:00",
+    "programado": true,
+    "titulo": "Tu aire acondicionado no fabrica frío",
+    "tema": "Cómo hace un aire acondicionado para sacar el calor de tu cuarto sin crear frío",
+    "tendencia": "Récord de calor y mensajes de emergencia climática; verano en el sur y invierno en el norte",
+    "serie": null,
+    "subtema": "ciencia de cosas cotidianas",
+    "estructura": "POR DENTRO: vista en corte de algo cotidiano para ver lo que pasa adentro (aire, agua, fuerzas, calor) con flechas que lo muestran",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "comparación imposible con número («va más lento que un tren»)",
+    "gancho": "Hay un camión de mudanzas escondido dentro de tu aire.",
+    "nota_revisor": 4.6,
+    "duracion": 59.14,
+    "video_fb": "1005971635340069",
+    "metricas": {}
   }
 ]
