@@ -9,6 +9,62 @@
       "ejemplo": "9 silencio(s) largos dentro de la narración"
     },
     {
+      "regla": "Cada cifra, fecha o dato de una tarjeta debe copiarse literalmente de la narración y verificarse contra ella antes de renderizar. El texto del gancho debe reflejar la frase que se dice en ese momento, y las tarjetas no deben tapar el objeto principal.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-25T18:26:44+00:00",
+      "clave": "antes cifra contra copiarse deben fecha frase gancho literalmente momento narración objeto principal reflejar renderizar tapar tarjeta tarjetas texto verificarse",
+      "ejemplo": "En el gancho (fotograma 1) la tarjeta de datos dice «1666 año», pero la narración dice 1964. Es un dato falso y visible en los primeros segundos. Además el título «NUEVA JERSEY» no corresponde a la frase «No limpies esa antena» y la tarjeta tapa buena parte de la antena."
+    },
+    {
+      "regla": "Sincroniza cada título y subtítulo con el tramo exacto de audio en que se pronuncia esa frase. Nunca muestres el texto de la frase siguiente mientras la voz sigue en la anterior.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-25T18:26:44+00:00",
+      "clave": "anterior audio exacto frase mientras muestres nunca pronuncia sigue siguiente sincroniza subtítulo texto tramo título",
+      "ejemplo": "En el fotograma 2 la voz dice «Nueva Jersey, 1964. Arno Penzias y Robert Wilson…», pero el subtítulo en pantalla es «UN SISEO», que es de la frase siguiente. El título «NUEVA JERSEY» ya se había mostrado en el fotograma 1, así que el texto va adelantado respecto de la voz."
+    },
+    {
+      "regla": "Cuando la narración nombra un objeto o animal concreto, la escena debe mostrarlo grande, claro y reconocible en ese momento. Las tarjetas y rótulos se muestran solo mientras se dice su contenido, y el texto debe quedar dentro de márgenes seguros.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-25T18:26:44+00:00",
+      "clave": "animal claro concreto contenido cuando dentro escena grande mientras momento mostrarlo muestran márgenes narración nombra objeto quedar reconocible rótulos seguros tarjetas texto",
+      "ejemplo": "En el fotograma 4 la voz habla de palomas anidadas y de limpiar excrementos, pero la pantalla muestra «NO ERA LA CIUDAD» con tres cruces (ciudad, sol, galaxia), que pertenece a la frase siguiente. Las palomas no se distinguen: solo hay una mancha pequeña sobre la antena. El título rojo también queda pegado a los bordes y las tarjetas colgantes de arriba lo recortan."
+    },
+    {
+      "regla": "Cada idea nueva de la narración necesita un elemento visual propio (personaje, lugar o gesto) que la represente. Retira los elementos decorativos de escenas anteriores cuando ya no vienen al caso para que la imagen no parezca congelada.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-25T18:26:44+00:00",
+      "clave": "anteriores congelada cuando decorativos elemento elementos escenas gesto imagen lugar narración necesita nueva parezca personaje propio represente retira vienen visual",
+      "ejemplo": "En el fotograma 5 la voz cuenta que un colega habla de los físicos de Princeton y su búsqueda del calor del Big Bang, pero el subtítulo es «UNA LLAMADA» (frase posterior). La escena no muestra nada de Princeton ni de físicos: es la misma antena con las mismas figuras, y las tarjetas con cruces de la escena anterior siguen colgando arriba."
+    },
+    {
+      "regla": "El texto de las tarjetas debe caber entero dentro de su caja, sin cortes, y debe medirse antes de renderizar. Los subtítulos deben ir sobre un fondo despejado, sin objetos de la escena encima.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-25T18:26:44+00:00",
+      "clave": "antes caber cortes deben dentro despejado encima entero escena fondo medirse objetos renderizar sobre subtítulos tarjetas texto",
+      "ejemplo": "En el fotograma 6 la tarjeta «380.000 años después del Big» queda cortada («Big Bang» incompleto) y tapa la antena. El subtítulo «LA LUZ MÁS ANTIGUA» se superpone con el reloj y el halo, y la palabra «ANTIGUA» se lee mal."
+    },
+    {
+      "regla": "Los datos numéricos clave (como una temperatura) deben aparecer en una tarjeta legible mientras se pronuncian. El subtítulo debe corresponder a lo que se dice en ese momento y no puede quedar tapado por objetos decorativos.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-25T18:26:44+00:00",
+      "clave": "aparecer clave corresponder datos deben decorativos legible mientras momento numéricos objetos pronuncian puede quedar subtítulo tapado tarjeta temperatura",
+      "ejemplo": "En el fotograma 7 la voz dice «dos coma siete grados sobre el cero absoluto… llega de todo el cielo», pero el subtítulo es «ESTÁTICA DE TELE» (frase posterior) y no aparece ninguna tarjeta con la temperatura ni la tele. El reloj y la moneda decorativos tapan parte del rótulo y de la escena."
+    },
+    {
+      "regla": "Cada hito de la narración (premio, fecha, descubrimiento) debe tener su propio símbolo visual claro en pantalla durante esa frase, y debe haber un subtítulo o tarjeta con el dato. No reutilices la imagen de la frase anterior.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-25T18:26:44+00:00",
+      "clave": "anterior claro descubrimiento durante fecha frase haber imagen narración pantalla premio propio reutilices subtítulo símbolo tarjeta tener visual",
+      "ejemplo": "En el fotograma 8 la voz habla del Nobel de Física de 1978, pero lo único que se ve es la antena con una tele antigua en la esquina, que corresponde a la frase anterior. No hay medalla ni diploma, y no hay subtítulo ni tarjeta que indique «Nobel 1978». La imagen desconcierta porque ilustra otra frase."
+    },
+    {
       "regla": "Toda cifra de una tarjeta de datos debe copiarse literalmente de la narración y coincidir con el resto del texto en pantalla. Antes de renderizar, validar automáticamente que cada número de la tarjeta aparezca en el guion de ese tramo.",
       "area": "edicion",
       "veces": 1,

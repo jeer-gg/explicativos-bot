@@ -18,5 +18,25 @@
     "duracion": 53.43,
     "video_fb": "1156724723392290",
     "metricas": {}
+  },
+  {
+    "id": "20261125-1717",
+    "fecha": "2026-11-25",
+    "publicado_en": "2026-11-26T02:00:00+00:00",
+    "programado": true,
+    "titulo": "El zumbido que no podían borrar era el Big Bang",
+    "tema": "El descubrimiento del fondo cósmico de microondas en 1964: dos ingenieros de Bell Labs intentaron eliminar un ruido de su antena y resultó ser el eco del Big Bang",
+    "tendencia": "",
+    "serie": null,
+    "subtema": "misterios científicos reales / descubrimientos por accidente",
+    "estructura": "EL ACCIDENTE QUE SALIÓ BIEN: un error o descuido real que terminó en un invento o descubrimiento enorme; del momento del error al resultado",
+    "paleta": "marca",
+    "variante": "A",
+    "tipo_gancho": "pregunta que no te deja ir («¿Cómo sobrevive alguien 76 días solo en el mar?»)",
+    "gancho": "No limpies esa antena: lo que oyes no es basura.",
+    "nota_revisor": 4.6,
+    "duracion": 84.46,
+    "video_fb": "1460513040484923",
+    "metricas": {}
   }
 ]
