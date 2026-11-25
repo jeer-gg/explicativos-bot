@@ -3,10 +3,58 @@
     {
       "regla": "Frases encadenadas sin puntos ni pausas largas; la voz no se detiene más de medio segundo.",
       "area": "voz",
-      "veces": 1,
-      "ultima": "2026-11-24T10:53:32+00:00",
+      "veces": 2,
+      "ultima": "2026-11-25T12:46:38+00:00",
       "clave": "detiene encadenadas frases largas medio pausas puntos segundo",
       "ejemplo": "9 silencio(s) largos dentro de la narración"
+    },
+    {
+      "regla": "Toda cifra de una tarjeta de datos debe copiarse literalmente de la narración y coincidir con el resto del texto en pantalla. Antes de renderizar, validar automáticamente que cada número de la tarjeta aparezca en el guion de ese tramo.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-25T12:46:38+00:00",
+      "clave": "antes aparezca automáticamente cifra coincidir copiarse datos guion literalmente narración número pantalla renderizar resto tarjeta texto tramo validar",
+      "ejemplo": "En el fotograma 2 la tarjeta de datos dice «1963 año», pero la narración dice 1964. El dato es falso y contradice el título «1964» que aparece justo encima. La tarjeta también tapa parte de la antena."
+    },
+    {
+      "regla": "Si la narración nombra un objeto o animal clave, como palomas, cables o equipos, la escena debe dibujarlo con claridad y a tamaño legible, y mostrar la acción nombrada. No basta un bulto ambiguo.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-25T12:46:38+00:00",
+      "clave": "acción ambiguo animal basta bulto cables claridad clave dibujarlo equipos escena legible mostrar narración nombra nombrada objeto palomas tamaño",
+      "ejemplo": "En el fotograma 4 (palomas y excrementos) no se ve ninguna paloma. La imagen muestra una antena con un objeto marrón borroso, que no se entiende. Tampoco se ve a nadie limpiando. El fotograma 3 (revisan cables y apagan equipos) muestra una antena dorada con ese mismo objeto, sin cables ni equipos apagándose."
+    },
+    {
+      "regla": "El título en pantalla no debe superponerse a elementos decorativos del mismo color y debe tener contraste suficiente. Las tarjetas y los textos deben aparecer cuando la voz menciona ese contenido, no antes ni después.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-25T12:46:38+00:00",
+      "clave": "antes aparecer color contenido contraste cuando deben decorativos después elementos menciona mismo pantalla suficiente superponerse tarjetas tener textos título",
+      "ejemplo": "En el fotograma 4 el título rojo «NO ERA LA CIUDAD» se pierde sobre las tarjetas colgantes con X rojas, y tiene muy poco contraste. Los iconos CIUDAD/SOL/GALAXIA son diminutos. Además, esta imagen aparece cuando la voz habla de las palomas, no de la ciudad, el Sol o la galaxia, así que el texto va desfasado de la narración."
+    },
+    {
+      "regla": "Los textos y tarjetas deben caber completos dentro del cuadro, con margen de seguridad. No se deben superponer dos capas de texto ni dejar textos truncados. Si no cabe, se acorta la frase o se reduce el tamaño.",
+      "area": "edicion",
+      "veces": 1,
+      "ultima": "2026-11-25T12:46:38+00:00",
+      "clave": "acorta caber capas completos cuadro deben dejar dentro frase margen reduce seguridad superponer tamaño tarjetas texto textos truncados",
+      "ejemplo": "En el fotograma 6 el subtítulo «LA LUZ MÁS ANTIGUA» se solapa con un texto residual «luz antig» cortado por el borde. La tarjeta «380.000 años después del Big» está truncada, le falta «Bang», y tapa la imagen principal."
+    },
+    {
+      "regla": "Cada escena debe tener un elemento visual propio que represente el concepto central de su frase: personajes, objeto o símbolo. No se debe reutilizar el mismo plano de la antena para frases con contenidos distintos.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-25T12:46:38+00:00",
+      "clave": "antena central concepto contenidos distintos elemento escena frase frases mismo objeto personajes plano propio represente reutilizar símbolo tener visual",
+      "ejemplo": "Los fotogramas 1, 3, 4, 5 y 6 repiten casi la misma imagen de la antena con el mismo encuadre, y no ilustran lo que dice la voz. En el 5 (colega de Princeton, físicos, calor sobrante del Big Bang) y en el 7 (temperatura de 2,7 grados) no aparece ningún físico, ni Princeton, ni un termómetro o el cielo. En el fotograma 8 (Nobel de Física) no hay premio, medalla ni celebración."
+    },
+    {
+      "regla": "El elemento visual del fotograma debe corresponder a la frase que se está diciendo en ese segundo, sin arrastrar el objeto de la frase anterior. Los objetos secundarios deben ser lo bastante grandes para entenderse.",
+      "area": "escenas",
+      "veces": 1,
+      "ultima": "2026-11-25T12:46:38+00:00",
+      "clave": "anterior arrastrar bastante corresponder deben diciendo elemento entenderse fotograma frase grandes objeto objetos secundarios segundo visual",
+      "ejemplo": "En el fotograma 8 (Nobel) la imagen no refleja el premio. Se ve una antena con un reloj y círculos dorados de fondo, y un televisor diminuto y pixelado en una esquina, que corresponde a la frase anterior sobre la estática. Además, los personajes son pequeños y tienen poca expresión."
     },
     {
       "regla": "El subtítulo del gancho debe tener opacidad total y contraste alto sobre cualquier fondo. Las tarjetas de datos no deben tapar al protagonista ni la acción, y solo deben aparecer cuando la voz menciona ese dato.",
