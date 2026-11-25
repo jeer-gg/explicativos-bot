@@ -1,0 +1,273 @@
+{
+  "inicio": "2026-11-25T20:28:12+00:00",
+  "escenas": {
+    "Mundo": "// Mundo compartido: «Una palabra cambió lo que recordaron del choque».\n// Maqueta en corte de una salita de cine oscura: pantalla al fondo, dos filas de butacas, Mía (roja) en el centro.\n// paso 0: sala vacía; sobre Mía, su cabeza en corte con un cajón de recuerdo dorado medio abierto.\n// paso 1: pantalla vacía, Mía en su butaca, la palabra «estrellaron» flota sobre ella.\n// paso 2: la pantalla muestra los dos autitos ya chocados.\n// paso 3: + dos investigadores a la izquierda de la pantalla y el rótulo «1974» arriba.\n// paso 4: + estudiantes en las butacas; la investigadora alza la tarjeta del velocímetro.\n// paso 5: la sala se divide en dos mitades, cada una con su burbuja de pregunta.\n// paso 6: + tarjeta de barras de velocidad (41 vs 32 mph).\n// paso 7: mitades juntas, sello «IGUAL» en la pantalla, palabra otra vez sobre Mía.\n// paso 8: sala más oscura, calendario «+7 días», la investigadora se acerca con la tarjeta de vidrios rotos.\n// paso 9: la tarjeta de vidrios aparece tachada.\n// paso 10: tarjeta de barras «sí vi vidrios» sobre la pantalla; cabeza de Mía con rompecabezas incompleto.\n// paso 11: rompecabezas completo con la pieza-palabra dorada.\nimport React from 'react';\nimport {Pieza, Cartel, Linea, Brillo, flotar} from '../lib3d';\nimport type {Paleta, V3} from '../lib3d';\nimport {Persona2D, Cabeza2D, Nube, Efecto, Sombra, Cajon, oscurecer} from '../lib25d';\n\nexport const PARTES = [\n  'sala', 'pantalla', 'autos', 'butacas', 'mia', 'palabra', 'cabeza', 'cajon', 'investigadores', 'rotulo',\n  'estudiantes', 'tarjeta', 'burbujas', 'barras', 'sello', 'calendario', 'vidrios', 'tachado', 'barrasvidrios',\n  'rompecabezas', 'pieza',\n] as const;\n\nexport type ParteProps = {paleta: Paleta; resaltado?: boolean; frame?: number};\nexport type MundoProps = {paso: number; frame: number; fps: number; paleta: Paleta; ocultar?: string[]; resaltar?: string[]};\n\nconst col = (p: Paleta) => ({\n  prota: p.acentos[0], sec: p.acentos[1], oro: p.acentos[2], extra: p.acentos[3], suelo: p.acentos[4] ?? '#2A1618',\n  marfil: p.tinta, carbon: '#141012',\n});\n\n// ---------- estados por paso (la escena anima entre uno y otro) ----------\n/** Separación de las dos mitades de la sala (m a cada lado). */\nexport const division = (paso: number) => (paso === 5 || paso === 6 ? 0.16 : 0);\n/** Luz de los apliques de la sala (1 normal, menos = más oscuro). */\nexport const penumbra = (paso: number) => (paso === 8 || paso === 9 ? 0.45 : 1);\n/** Avance de los autos en la pantalla: 0 = separados en los bordes, 1 = chocados en el centro. */\nexport const avanceAutos = (paso: number) => (paso >= 2 ? 1 : 0);\n/** Dónde está la investigadora de la carpeta (se acerca al público en el paso 8). */\nexport const posInvestigadora = (paso: number): V3 => (paso >= 8 ? [-0.62, 0, -0.18] : [-0.86, 0, -0.55]);\n/** Altura de las barras (0..1) en las tarjetas de datos. */\nexport const crecerBarras = (paso: number, desde: number) => (paso >= desde ? 1 : 0);\n\n// Geometría de la sala\nconst PANT_Y = 1.06;\nconst PANT_Z = -0.86;\nconst FILAS = [{z: 0.12, y: 0}, {z: 0.6, y: 0.12}];\nconst COLS = [-0.62, -0.31, 0, 0.31, 0.62];\nconst asiento = (fila: number, c: number, sep: number): V3 => {\n  const x = COLS[c];\n  return [x + (x < 0 ? -sep : x > 0 ? sep : 0), FILAS[fila].y, FILAS[fila].z];\n};\nexport const POS_MIA: V3 = [0, 0, 0.12];\nexport const POS_CABEZA: V3 = [0, 0.84, 0.24];\nexport const POS_PALABRA: V3 = [0, 0.86, 0.3];\n\n// ---------- partes ----------\nexport const Sala: React.FC<ParteProps & {luz?: number}> = ({paleta, luz = 1}) => {\n  const c = col(paleta);\n  const pared = oscurecer(c.prota, 0.32);\n  return (\n    <group>\n      <Pieza forma=\"caja\" medidas={[2.3, 0.08, 2.0]} color={c.suelo} posicion={[0, -0.04, 0]} />\n      <Pieza forma=\"caja\" medidas={[2.3, 0.06, 0.06]} color={c.oro} posicion={[0, -0.01, 1.0]} />\n      <Pieza forma=\"caja\" medidas={[2.3, 1.9, 0.06]} color={pared} posicion={[0, 0.95, -0.97]} />\n      <Pieza forma=\"caja\" medidas={[0.06, 1.9, 1.4]} color={oscurecer(pared, 0.85)} posicion={[-1.15, 0.95, -0.3]} />\n      <Pieza forma=\"caja\" medidas={[0.06, 1.9, 1.4]} color={oscurecer(pared, 0.85)} posicion={[1.15, 0.95, -0.3]} />\n      {/* escenario y tarima de la fila de atrás */}\n      <Pieza forma=\"caja\" medidas={[1.9, 0.14, 0.3]} color={oscurecer(c.suelo, 0.8)} posicion={[0, 0.07, -0.78]} />\n      <Pieza forma=\"caja\" medidas={[2.2, 0.12, 0.55]} color={oscurecer(c.suelo, 1.15)} posicion={[0, 0.06, 0.62]} />\n      {/* cortinas a los lados de la pantalla */}\n      {[-1, 1].map((l) =>\n        [0, 1, 2].map((i) => (\n          <Pieza key={`${l}${i}`} forma=\"cilindro\" medidas={[0.055, 0.07, 1.62, 12]} color={i === 1 ? oscurecer(c.prota, 0.8) : c.prota}\n            posicion={[l * (0.84 + i * 0.09), 0.95, -0.9 + i * 0.012]} />\n        )),\n      )}\n      <Pieza forma=\"caja\" medidas={[2.0, 0.14, 0.12]} color={c.prota} posicion={[0, 1.83, -0.9]} />\n      {/* apliques dorados: la única luz de la sala */}\n      {[-1, 1].map((l) => (\n        <group key={l} position={[l * 1.1, 1.2, -0.35]}>\n          <Pieza forma=\"cono\" medidas={[0.07, 0.12]} color={c.oro} rotacion={[0, 0, Math.PI]} brillo={c.oro} />\n          <Brillo posicion={[0, -0.09, 0]} color={c.oro} radio={0.03} luz={0.9 * luz} />\n        </group>\n      ))}\n    </group>\n  );\n};\n\nexport const Pantalla: React.FC<ParteProps> = ({paleta, resaltado}) => {\n  const c = col(paleta);\n  return (\n    <group position={[0, PANT_Y, PANT_Z]}>\n      <Pieza forma=\"caja\" medidas={[1.52, 0.9, 0.05]} color={resaltado ? c.oro : c.carbon} posicion={[0, 0, -0.03]} />\n      <Pieza forma=\"caja\" medidas={[1.4, 0.78, 0.01]} color=\"#4A3A38\" brillo=\"#3B2C28\" contorno={false} />\n      {/* suelo de la carretera dibujada en la pantalla */}\n      <Pieza forma=\"caja\" medidas={[1.3, 0.03, 0.006]} color={c.marfil} posicion={[0, -0.24, 0.01]} contorno={false} opacidad={0.5} />\n    </group>\n  );\n};\n\nconst Autito: React.FC<{color: string; x: number; espejo?: boolean; inclina?: number}> = ({color, x, espejo, inclina = 0}) => (\n  <group position={[x, -0.16, 0.03]} rotation={[0, 0, inclina]} scale={[espejo ? -1 : 1, 1, 1]}>\n    <Pieza forma=\"caja\" medidas={[0.24, 0.07, 0.03]} color={color} />\n    <Pieza forma=\"caja\" medidas={[0.12, 0.06, 0.028]} color={color} posicion={[-0.02, 0.06, 0]} />\n    <Pieza forma=\"caja\" medidas={[0.05, 0.035, 0.03]} color=\"#CFE3E6\" posicion={[0.015, 0.06, 0.002]} contorno={false} />\n    {[-0.07, 0.07].map((r) => (\n      <Pieza key={r} forma=\"cilindro\" medidas={[0.032, 0.032, 0.035, 16]} color=\"#141012\" posicion={[r, -0.04, 0.004]} rotacion={[Math.PI / 2, 0, 0]} />\n    ))}\n  </group>\n);\n\n/** Autos rojo y azul en la pantalla. avance 0..1 los lleva de los bordes al choque. */\nexport const Autos: React.FC<ParteProps & {avance?: number}> = ({paleta, resaltado, avance = 1}) => {\n  const c = col(paleta);\n  const x = 0.52 - 0.39 * avance;\n  const golpe = avance >= 1 ? 0.06 : 0;\n  return (\n    <group position={[0, PANT_Y, PANT_Z]}>\n      <Autito color={resaltado ? c.oro : '#B8343C'} x={-x} inclina={golpe} />\n      <Autito color={resaltado ? c.oro : '#3E7A86'} x={x} espejo inclina={-golpe} />\n    </group>\n  );\n};\n\nexport const Butacas: React.FC<ParteProps & {sep?: number}> = ({paleta, resaltado, sep = 0}) => {\n  const c = col(paleta);\n  const tela = resaltado ? c.oro : oscurecer(c.prota, 0.7);\n  return (\n    <group>\n      {FILAS.map((_, f) =>\n        COLS.map((__, i) => {\n          const p = asiento(f, i, sep);\n          return (\n            <group key={`${f}-${i}`} position={p}>\n              <Pieza forma=\"caja\" medidas={[0.25, 0.14, 0.22]} color={tela} posicion={[0, 0.07, 0]} />\n              <Pieza forma=\"caja\" medidas={[0.25, 0.3, 0.05]} color={tela} posicion={[0, 0.2, 0.12]} rotacion={[0.08, 0, 0]} />\n            </group>\n          );\n        }),\n      )}\n    </group>\n  );\n};\n\nexport const Mia: React.FC<ParteProps & {pose?: string; fps?: number}> = ({paleta, resaltado, frame = 0, fps = 30, pose = 'parado'}) => {\n  const c = col(paleta);\n  return (\n    <group>\n      <Persona2D pose={pose} color={resaltado ? c.oro : c.prota} alto={0.5} posicion={[POS_MIA[0], 0.06, POS_MIA[2] + 0.02]} frame={frame} fps={fps} />\n      <Sombra posicion={[0, 0, 0.12]} radio={0.16} />\n    </group>\n  );\n};\n\nexport const Palabra: React.FC<ParteProps & {fps?: number}> = ({paleta, frame = 0, fps = 30}) => {\n  const c = col(paleta);\n  const y = POS_PALABRA[1] + flotar(frame, 0.025, 70);\n  return (\n    <group position={[POS_PALABRA[0], y, POS_PALABRA[2]]}>\n      <Efecto tipo=\"destello\" tam={0.5} color={c.oro} posicion={[0, 0, -0.02]} frame={frame} fps={fps} opacidad={0.6} />\n      <Cartel texto=\"estrellaron\" posicion={[0, 0, 0]} alto={0.13} fondo=\"transparent\" colorTexto={c.oro} borde=\"#1B1B1F\" />\n    </group>\n  );\n};\n\nexport const Cabeza: React.FC<ParteProps & {fps?: number}> = ({paleta, resaltado, frame = 0, fps = 30}) => {\n  const c = col(paleta);\n  return (\n    <Cabeza2D alto={0.62} fuerza={resaltado ? 1 : 0.35} color={oscurecer(c.extra, 1.1)} posicion={POS_CABEZA} opacidad={0.92} frame={frame} fps={fps} />\n  );\n};\n\n/** Cajón de recuerdo dentro de la cabeza. abierto 0..1. */\nexport const CajonRecuerdo: React.FC<ParteProps & {abierto?: number}> = ({paleta, resaltado, abierto = 0.45}) => {\n  const c = col(paleta);\n  return (\n    <group position={[POS_CABEZA[0] + 0.01, POS_CABEZA[1] + 0.08, POS_CABEZA[2] + 0.05]}>\n      <Cajon abierto={abierto} color={resaltado ? c.oro : c.sec} ancho={0.17} alto={0.1} fondo={0.12} rotacion={[0.25, 0.5, 0]} />\n      <Brillo posicion={[0, 0.02, 0.05]} color={c.oro} radio={0.022} />\n    </group>\n  );\n};\n\nexport const Investigadores: React.FC<ParteProps & {paso?: number; fps?: number}> = ({paleta, resaltado, frame = 0, fps = 30, paso = 3}) => {\n  const c = col(paleta);\n  const a = posInvestigadora(paso);\n  const bata = resaltado ? c.oro : c.marfil;\n  return (\n    <group>\n      <Persona2D pose={paso === 4 || paso >= 8 ? 'senala' : 'parado'} color={bata} alto={0.8} posicion={[a[0], 0.14, a[2]]} frame={frame} fps={fps} />\n      {/* carpeta */}\n      <Pieza forma=\"caja\" medidas={[0.09, 0.12, 0.015]} color={c.sec} posicion={[a[0] - 0.12, 0.6, a[2] + 0.04]} rotacion={[0, 0, 0.2]} />\n      <Persona2D pose=\"parado\" color={bata} alto={0.84} posicion={[-1.02, 0.14, -0.4]} frame={frame} fps={fps} />\n      {/* cronómetro */}\n      <group position={[-0.9, 0.62, -0.36]}>\n        <Pieza forma=\"cilindro\" medidas={[0.035, 0.035, 0.015, 20]} color={c.oro} rotacion={[Math.PI / 2, 0, 0]} />\n        <Pieza forma=\"caja\" medidas={[0.012, 0.02, 0.012]} color={c.oro} posicion={[0, 0.045, 0]} />\n      </group>\n      <Sombra posicion={[a[0], 0.14, a[2]]} radio={0.2} />\n      <Sombra posicion={[-1.02, 0.14, -0.4]} radio={0.2} />\n    </group>\n  );\n};\n\nexport const Rotulo: React.FC<ParteProps> = ({paleta, resaltado}) => {\n  const c = col(paleta);\n  return (\n    <group position={[0, 1.66, -0.84]}>\n      <Pieza forma=\"caja\" medidas={[0.46, 0.17, 0.03]} color={c.carbon} />\n      <Cartel texto=\"1974\" posicion={[0, 0, 0.02]} alto={0.15} fondo=\"transparent\" colorTexto={resaltado ? c.marfil : c.oro} borde=\"#1B1B1F\" rotacion={[0, 0, 0.0001]} />\n    </group>\n  );\n};\n\nconst Estudiante: React.FC<{color: string; p: V3; frame: number; fps: number}> = ({color, p, frame, fps}) => (\n  <Persona2D pose=\"parado\" color={color} alto={0.44} posicion={[p[0], p[1] + 0.06, p[2] + 0.02]} frame={frame} fps={fps} />\n);\n\nexport const Estudiantes: React.FC<ParteProps & {sep?: number; fps?: number}> = ({paleta, resaltado, frame = 0, fps = 30, sep = 0}) => {\n  const c = col(paleta);\n  const tonos = [c.sec, c.extra, oscurecer(c.sec, 1.35), oscurecer(c.extra, 0.8)];\n  const items: React.ReactNode[] = [];\n  FILAS.forEach((_, f) =>\n    COLS.forEach((__, i) => {\n      if (f === 0 && i === 2) return; // butaca de Mía\n      items.push(<Estudiante key={`${f}-${i}`} color={resaltado ? c.oro : tonos[(f * 2 + i) % 4]} p={asiento(f, i, sep)} frame={frame} fps={fps} />);\n    }),\n  );\n  return <group>{items}</group>;\n};\n\n/** Tarjeta con signo de pregunta y velocímetro, en alto en la mano de la investigadora. */\nexport const Tarjeta: React.FC<ParteProps> = ({paleta, resaltado}) => {\n  const c = col(paleta);\n  return (\n    <group position={[-0.72, 1.02, -0.5]} rotation={[0, 0, -0.08]}>\n      <Pieza forma=\"caja\" medidas={[0.34, 0.24, 0.012]} color={resaltado ? c.oro : c.marfil} />\n      <Pieza forma=\"toro\" medidas={[0.07, 0.01, Math.PI]} color={c.sec} posicion={[0.05, -0.05, 0.01]} />\n      <Linea desde={[0.05, -0.05, 0.012]} hasta={[0.1, 0.0, 0.012]} grosor={0.007} color={c.prota} />\n      <Cartel texto=\"?\" posicion={[-0.1, 0.0, 0.012]} alto={0.16} fondo=\"transparent\" colorTexto={c.prota} rotacion={[0, 0, 0.0001]} />\n    </group>\n  );\n};\n\n/** Burbujas de pregunta sobre cada mitad: izquierda «estrellaron» (fuerte), derecha «tocaron» (suave). */\nexport const Burbujas: React.FC<ParteProps & {fps?: number}> = ({paleta, resaltado, frame = 0, fps = 30}) => {\n  const c = col(paleta);\n  const f = flotar(frame, 0.02, 80);\n  return (\n    <group>\n      <group position={[-0.58, 1.02 + f, 0.42]}>\n        <Nube ancho={0.62} color={c.marfil} frame={frame} fps={fps} />\n        <Cartel texto={'¿se\\nESTRELLARON?'} posicion={[0, 0.0, 0.02]} alto={0.12} fondo=\"transparent\" colorTexto={c.prota} />\n        <Efecto tipo=\"chispa\" tam={0.25} color={c.oro} posicion={[0.28, 0.18, 0.03]} frame={frame} fps={fps} />\n      </group>\n      <group position={[0.58, 1.0 - f, 0.42]}>\n        <Nube ancho={0.58} color={resaltado ? c.oro : oscurecer(c.marfil, 0.85)} frame={frame} fps={fps} />\n        <Cartel texto={'¿se\\ntocaron?'} posicion={[0, 0.0, 0.02]} alto={0.1} fondo=\"transparent\" colorTexto={c.sec} />\n      </group>\n    </group>\n  );\n};\n\n/** Tablero con barras sobre un caballete a la derecha: altura 0..1. */\nexport const Barras: React.FC<ParteProps & {altura?: number}> = ({paleta, resaltado, altura = 1}) => {\n  const c = col(paleta);\n  const b = (h: number) => Math.max(0.001, h * altura);\n  return (\n    <group position={[0.86, 0.14, -0.45]}>\n      <Linea desde={[-0.14, 0, 0.05]} hasta={[-0.08, 0.6, 0]} grosor={0.012} color={c.suelo} />\n      <Linea desde={[0.14, 0, 0.05]} hasta={[0.08, 0.6, 0]} grosor={0.012} color={c.suelo} />\n      <group position={[0, 0.78, 0.01]}>\n        <Pieza forma=\"caja\" medidas={[0.42, 0.46, 0.02]} color={c.marfil} />\n        <Pieza forma=\"caja\" medidas={[0.1, b(0.3), 0.02]} color={c.oro} brillo={resaltado ? c.oro : undefined} posicion={[-0.08, -0.17 + b(0.3) / 2, 0.015]} />\n        <Pieza forma=\"caja\" medidas={[0.1, b(0.23), 0.02]} color={c.sec} posicion={[0.08, -0.17 + b(0.23) / 2, 0.015]} />\n        <Cartel texto=\"41\" posicion={[-0.08, -0.15 + b(0.3) + 0.04, 0.03]} alto={0.06} fondo=\"transparent\" colorTexto={c.prota} rotacion={[0, 0, 0.0001]} />\n        <Cartel texto=\"32\" posicion={[0.08, -0.15 + b(0.23) + 0.04, 0.03]} alto={0.06} fondo=\"transparent\" colorTexto={c.sec} rotacion={[0, 0, 0.0001]} />\n        <Cartel texto=\"estrellaron\" posicion={[-0.08, -0.2, 0.03]} alto={0.03} fondo=\"transparent\" colorTexto={c.carbon} rotacion={[0, 0, 0.0001]} />\n        <Cartel texto=\"tocaron\" posicion={[0.08, -0.2, 0.03]} alto={0.03} fondo=\"transparent\" colorTexto={c.carbon} rotacion={[0, 0, 0.0001]} />\n      </group>\n      <Sombra posicion={[0, 0, 0]} radio={0.18} />\n    </group>\n  );\n};\n\nexport const Sello: React.FC<ParteProps> = ({paleta, resaltado}) => {\n  const c = col(paleta);\n  return (\n    <Cartel texto=\"IGUAL\" posicion={[0.42, PANT_Y + 0.2, PANT_Z + 0.04]} alto={0.15} fondo={resaltado ? c.oro : c.prota} colorTexto={c.marfil} rotacion={[0, 0, -0.18]} />\n  );\n};\n\n/** Calendario sobre la pantalla: hojas pasadas 0..7. */\nexport const Calendario: React.FC<ParteProps & {hojas?: number}> = ({paleta, resaltado, hojas = 7}) => {\n  const c = col(paleta);\n  return (\n    <group position={[0, 1.66, -0.82]}>\n      <Pieza forma=\"caja\" medidas={[0.3, 0.26, 0.03]} color={c.marfil} />\n      <Pieza forma=\"caja\" medidas={[0.3, 0.07, 0.035]} color={resaltado ? c.oro : c.prota} posicion={[0, 0.1, 0.004]} />\n      {[-0.08, 0.08].map((x) => (\n        <Pieza key={x} forma=\"toro\" medidas={[0.018, 0.005]} color={c.oro} posicion={[x, 0.135, 0.02]} />\n      ))}\n      <Cartel texto={`+${Math.round(hojas)}`} posicion={[0, -0.03, 0.02]} alto={0.12} fondo=\"transparent\" colorTexto={c.carbon} rotacion={[0, 0, 0.0001]} />\n      <Cartel texto=\"días\" posicion={[0, -0.1, 0.02]} alto={0.04} fondo=\"transparent\" colorTexto={c.carbon} rotacion={[0, 0, 0.0001]} />\n    </group>\n  );\n};\n\n/** Tarjeta con un vidrio roto dibujado (en la mano de la investigadora ya acercada). */\nexport const POS_VIDRIOS: V3 = [-0.48, 0.92, -0.1];\nexport const Vidrios: React.FC<ParteProps> = ({paleta, resaltado}) => {\n  const c = col(paleta);\n  const grieta: [number, number][] = [[0.1, 0.06], [-0.09, 0.07], [-0.11, -0.05], [0.07, -0.08], [0.0, 0.1], [0.12, -0.01]];\n  return (\n    <group position={POS_VIDRIOS} rotation={[0, 0, 0.06]}>\n      <Pieza forma=\"caja\" medidas={[0.3, 0.24, 0.012]} color={resaltado ? c.oro : c.marfil} />\n      <Pieza forma=\"caja\" medidas={[0.22, 0.16, 0.006]} color=\"#9CC3C8\" posicion={[0, 0, 0.008]} opacidad={0.8} />\n      {grieta.map(([x, y], i) => (\n        <Linea key={i} desde={[0.01, 0.0, 0.014]} hasta={[x * 0.9, y * 0.9, 0.014]} grosor={0.004} color={c.sec} />\n      ))}\n    </group>\n  );\n};\n\nexport const Tachado: React.FC<ParteProps> = ({paleta, resaltado}) => {\n  const c = col(paleta);\n  const k = resaltado ? c.oro : c.prota;\n  const [x, y, z] = POS_VIDRIOS;\n  return (\n    <group position={[x, y, z + 0.03]}>\n      <Linea desde={[-0.15, -0.12, 0]} hasta={[0.15, 0.12, 0]} grosor={0.016} color={k} />\n      <Linea desde={[-0.15, 0.12, 0]} hasta={[0.15, -0.12, 0]} grosor={0.016} color={k} />\n    </group>\n  );\n};\n\n/** Barras de «sí vi vidrios» (32 %, 14 %, 12 %), sobre la pantalla. */\nexport const BarrasVidrios: React.FC<ParteProps & {altura?: number}> = ({paleta, resaltado, altura = 1}) => {\n  const c = col(paleta);\n  const datos: [string, number, string][] = [['estrellaron', 32, c.oro], ['chocaron', 14, c.sec], ['sin verbo', 12, c.sec]];\n  return (\n    <group position={[0, 1.66, -0.8]}>\n      <Pieza forma=\"caja\" medidas={[0.72, 0.3, 0.025]} color={c.marfil} />\n      {datos.map(([t, v, k], i) => {\n        const h = Math.max(0.001, (v / 32) * 0.17 * altura);\n        const x = -0.22 + i * 0.22;\n        return (\n          <group key={t} position={[x, -0.1, 0.015]}>\n            <Pieza forma=\"caja\" medidas={[0.1, h, 0.02]} color={resaltado && i === 0 ? c.prota : k} posicion={[0, h / 2, 0]} />\n            <Cartel texto={`${v}%`} posicion={[0, h + 0.03, 0.02]} alto={0.045} fondo=\"transparent\" colorTexto={i === 0 ? c.prota : c.sec} rotacion={[0, 0, 0.0001]} />\n            <Cartel texto={t} posicion={[0, -0.025, 0.02]} alto={0.028} fondo=\"transparent\" colorTexto={c.carbon} rotacion={[0, 0, 0.0001]} />\n          </group>\n        );\n      })}\n    </group>\n  );\n};\n\n// Rompecabezas del recuerdo dentro de la cabeza: 3 x 2 piezas, falta la de arriba a la derecha.\nconst T = 0.068;\nconst CENTRO_PUZ: V3 = [POS_CABEZA[0] + 0.01, POS_CABEZA[1] + 0.07, POS_CABEZA[2] + 0.04];\nconst celda = (i: number, j: number): V3 => [CENTRO_PUZ[0] + (i - 1) * T, CENTRO_PUZ[1] + (0.5 - j) * T, CENTRO_PUZ[2]];\nexport const POS_PIEZA: V3 = celda(2, 0);\n\nexport const Rompecabezas: React.FC<ParteProps> = ({paleta, resaltado}) => {\n  const c = col(paleta);\n  const items: React.ReactNode[] = [];\n  for (let j = 0; j < 2; j++)\n    for (let i = 0; i < 3; i++) {\n      if (i === 2 && j === 0) continue;\n      items.push(\n        <Pieza key={`${i}${j}`} forma=\"caja\" medidas={[T * 0.94, T * 0.94, 0.012]} color={resaltado ? c.oro : (i + j) % 2 ? c.marfil : c.extra}\n          posicion={celda(i, j)} opacidad={0.85} />,\n      );\n    }\n  return <group>{items}</group>;\n};\n\n/** La pieza-palabra dorada, ya encajada en el hueco del rompecabezas. */\nexport const PiezaPalabra: React.FC<ParteProps> = ({paleta}) => {\n  const c = col(paleta);\n  return (\n    <group position={POS_PIEZA}>\n      <Pieza forma=\"caja\" medidas={[T * 0.94, T * 0.94, 0.016]} color={c.oro} brillo={c.oro} />\n      <Cartel texto=\"estrellaron\" posicion={[0, 0, 0.012]} alto={0.014} fondo=\"transparent\" colorTexto={c.prota} rotacion={[0, 0, 0.0001]} />\n    </group>\n  );\n};\n\n// ---------- el mundo según el paso ----------\nexport const Mundo: React.FC<MundoProps> = ({paso, frame, fps, paleta, ocultar = [], resaltar = []}) => {\n  const ve = (n: string) => !ocultar.includes(n);\n  const r = (n: string) => resaltar.includes(n);\n  const en = (...pasos: number[]) => pasos.includes(paso);\n  const sep = division(paso);\n  const base = {paleta, frame};\n  return (\n    <group>\n      {ve('sala') ? <Sala {...base} resaltado={r('sala')} luz={penumbra(paso)} /> : null}\n      {ve('pantalla') ? <Pantalla {...base} resaltado={r('pantalla')} /> : null}\n      {ve('autos') && paso >= 2 ? <Autos {...base} resaltado={r('autos')} avance={avanceAutos(paso)} /> : null}\n      {ve('butacas') ? <Butacas {...base} resaltado={r('butacas')} sep={sep} /> : null}\n      {ve('estudiantes') && paso >= 4 ? <Estudiantes {...base} fps={fps} resaltado={r('estudiantes')} sep={sep} /> : null}\n      {ve('mia') ? <Mia {...base} fps={fps} resaltado={r('mia')} pose={paso === 10 ? 'sorprendida' : 'parado'} /> : null}\n      {ve('cabeza') && en(0, 10, 11) ? <Cabeza {...base} fps={fps} resaltado={r('cabeza')} /> : null}\n      {ve('cajon') && paso === 0 ? <CajonRecuerdo {...base} resaltado={r('cajon')} /> : null}\n      {ve('rompecabezas') && en(10, 11) ? <Rompecabezas {...base} resaltado={r('rompecabezas')} /> : null}\n      {ve('pieza') && paso === 11 ? <PiezaPalabra {...base} resaltado={r('pieza')} /> : null}\n      {ve('palabra') && en(1, 7, 8, 9, 10) ? <Palabra {...base} fps={fps} resaltado={r('palabra')} /> : null}\n      {ve('investigadores') && paso >= 3 ? <Investigadores {...base} fps={fps} paso={paso} resaltado={r('investigadores')} /> : null}\n      {ve('rotulo') && paso >= 3 && paso <= 7 ? <Rotulo {...base} resaltado={r('rotulo')} /> : null}\n      {ve('tarjeta') && paso === 4 ? <Tarjeta {...base} resaltado={r('tarjeta')} /> : null}\n      {ve('burbujas') && en(5, 6) ? <Burbujas {...base} fps={fps} resaltado={r('burbujas')} /> : null}\n      {ve('barras') && paso === 6 ? <Barras {...base} resaltado={r('barras')} altura={crecerBarras(paso, 6)} /> : null}\n      {ve('sello') && paso === 7 ? <Sello {...base} resaltado={r('sello')} /> : null}\n      {ve('calendario') && en(8, 9) ? <Calendario {...base} resaltado={r('calendario')} hojas={7} /> : null}\n      {ve('vidrios') && en(8, 9) ? <Vidrios {...base} resaltado={r('vidrios')} /> : null}\n      {ve('tachado') && paso === 9 ? <Tachado {...base} resaltado={r('tachado')} /> : null}\n      {ve('barrasvidrios') && paso >= 10 ? <BarrasVidrios {...base} resaltado={r('barrasvidrios')} altura={crecerBarras(paso, 10)} /> : null}\n    </group>\n  );\n};\n",
+    "Escena1": "// Escena 2 · «Imagina que ves un choque de autos en un video.»\n// Paso 1 → 2: la pantalla se enciende, la palabra flotante se apaga, entran los dos autitos,\n// aceleran y chocan en el centro; Mía se sobresalta y vuelve a quedarse quieta mirando.\nimport React from 'react';\nimport {Easing, interpolate} from 'remotion';\nimport {EscenaProps, Pieza, Linea, Flecha, Etiqueta, aparecer, momento} from '../lib3d';\nimport {Efecto} from '../lib25d';\nimport {Mundo, Autos, Mia, Palabra} from './Mundo';\n\nconst PY = 1.06;\nconst PZ = -0.86;\nconst CALLE_Y = PY - 0.16;\n\nexport const Escena1: React.FC<EscenaProps> = ({frame, fps, duracion, palabras, paleta}) => {\n  const [rojo, azul, oro] = paleta.acentos;\n  const marfil = paleta.tinta;\n\n  const tImagina = momento(palabras, fps, 'Imagina', 1);\n  const tVes = momento(palabras, fps, 'ves', 21);\n  const tChoque = momento(palabras, fps, 'choque', 32);\n  const tAutos = momento(palabras, fps, 'autos', 45);\n  const tVideo = momento(palabras, fps, 'video', 64);\n\n  // 1) «Imagina»: el proyector enciende la pantalla y la palabra flotante se apaga.\n  const destelloPant = interpolate(frame, [tImagina, tImagina + 3, tImagina + 12], [0, 0.45, 0], {\n    extrapolateLeft: 'clamp',\n    extrapolateRight: 'clamp',\n  });\n  const palabraSale = 1 - aparecer(frame, tImagina + 2, 10);\n\n  // 2) «ves»: los autitos aparecen en los bordes de la pantalla.\n  const entran = aparecer(frame, tVes - 4, 6);\n\n  // 3) «choque»: aceleran hacia el centro y chocan.\n  const avance = interpolate(frame, [tVes + 1, tChoque], [0, 1], {\n    extrapolateLeft: 'clamp',\n    extrapolateRight: 'clamp',\n    easing: Easing.in(Easing.quad),\n  });\n  const fc = frame - tChoque;\n  const sacudida = fc > 0 ? Math.exp(-fc / 4) * Math.sin(fc * 1.9) * 0.012 : 0;\n  const chispa = fc >= 0 && fc < 18;\n  const anda = avance > 0.02 && avance < 1 ? 1 : 0;\n  const xAuto = 0.52 - 0.39 * avance;\n\n  // Mía se sobresalta con el choque y vuelve a quedarse quieta.\n  const susto = frame >= tChoque && frame < tChoque + 30;\n\n  // 4) «autos»: los autitos se resaltan durante 1 s.\n  const resaltaAutos = frame >= tAutos && frame < tAutos + 30;\n\n  // 5) «video»: la etiqueta señala la pantalla.\n  const etiqueta = aparecer(frame, tVideo - 2, 8);\n\n  return (\n    <group>\n      <Mundo paso={1} frame={frame} fps={fps} paleta={paleta} ocultar={['palabra', 'mia']} />\n\n      {/* el proyector ilumina la pantalla un instante */}\n      {destelloPant > 0.01 ? (\n        <Pieza forma=\"caja\" medidas={[1.4, 0.78, 0.004]} color={marfil} brillo={marfil} intensidadBrillo={1}\n          posicion={[0, PY, PZ + 0.014]} opacidad={destelloPant} contorno={false} />\n      ) : null}\n\n      {/* la palabra flotante se encoge y desaparece (en el paso 2 ya no está) */}\n      {palabraSale > 0.01 ? (\n        <group position={[0, 0.86 + (1 - palabraSale) * 0.12, 0.3]} scale={palabraSale}>\n          <group position={[0, -0.86, -0.3]}>\n            <Palabra paleta={paleta} frame={frame} fps={fps} />\n          </group>\n        </group>\n      ) : null}\n\n      {/* los autitos en la pantalla: aparecen, aceleran y chocan */}\n      {entran > 0.01 ? (\n        <group position={[sacudida, CALLE_Y - 0.04, PZ]} scale={[1, entran, 1]}>\n          <group position={[0, -(CALLE_Y - 0.04), -PZ]}>\n            <Autos paleta={paleta} avance={avance} resaltado={resaltaAutos} />\n          </group>\n        </group>\n      ) : null}\n\n      {/* estelas de velocidad detrás de cada auto */}\n      {anda ? (\n        <>\n          <Linea desde={[-0.62, CALLE_Y + 0.02, PZ + 0.04]} hasta={[-xAuto - 0.14, CALLE_Y + 0.02, PZ + 0.04]}\n            grosor={0.006} color={marfil} discontinua />\n          <Linea desde={[0.62, CALLE_Y + 0.02, PZ + 0.04]} hasta={[xAuto + 0.14, CALLE_Y + 0.02, PZ + 0.04]}\n            grosor={0.006} color={marfil} discontinua />\n          <Flecha desde={[-0.5, CALLE_Y + 0.17, PZ + 0.05]} hasta={[-0.2, CALLE_Y + 0.17, PZ + 0.05]} color={rojo}\n            grosor={0.014} progreso={aparecer(frame, tVes, 6)} />\n          <Flecha desde={[0.5, CALLE_Y + 0.17, PZ + 0.05]} hasta={[0.2, CALLE_Y + 0.17, PZ + 0.05]} color={azul}\n            grosor={0.014} progreso={aparecer(frame, tVes, 6)} />\n        </>\n      ) : null}\n\n      {/* el golpe: chispas y destello dorado en el punto del choque */}\n      {chispa ? (\n        <>\n          <Efecto tipo=\"destello\" tam={0.42} color={oro} posicion={[0, CALLE_Y + 0.02, PZ + 0.06]} frame={frame} fps={fps} />\n          <Efecto tipo=\"chispa\" tam={0.34} color={oro} posicion={[0, CALLE_Y + 0.05, PZ + 0.07]} frame={frame} fps={fps} />\n        </>\n      ) : null}\n\n      {/* Mía mira la pantalla y se sobresalta con el choque */}\n      <Mia paleta={paleta} frame={frame} fps={fps} pose={susto ? 'sorprendida' : 'parado'} />\n      {susto && fc < 16 ? (\n        <Efecto tipo=\"ondas\" tam={0.22} color={marfil} posicion={[0.12, 0.58, 0.18]} frame={frame} fps={fps} />\n      ) : null}\n\n      {/* rótulo: el video */}\n      <Etiqueta texto=\"el video\" punto={[0.6, PY + 0.28, PZ + 0.03]} desplazamiento={[0.28, 0.3, 0.35]}\n        escala={etiqueta} color={marfil} alto={0.13} />\n    </group>\n  );\n};\n",
+    "Escena2": "// Escena 3 · «En 1974, Elizabeth Loftus y John Palmer hicieron justo eso.»\n// Encuadre picado_izq. Paso 2 → paso 3: cae el rótulo «1974» sobre la pantalla y aparecen,\n// uno por uno, los dos investigadores (carpeta y cronómetro) a la izquierda de la pantalla.\nimport React from 'react';\nimport {spring, interpolate} from 'remotion';\nimport {EscenaProps, Pieza, Linea, Brillo, Etiqueta, aparecer, momento, caer} from '../lib3d';\nimport {Persona2D, Sombra, Efecto} from '../lib25d';\nimport {Mundo, Rotulo, posInvestigadora} from './Mundo';\n\nconst ventana = (frame: number, t0: number, t1: number, d = 6) =>\n  Math.max(0, Math.min(aparecer(frame, t0, d), 1 - aparecer(frame, t1, d)));\n\nexport const Escena2: React.FC<EscenaProps> = ({frame, fps, duracion, palabras, paleta}) => {\n  const [prota, sec, oro] = paleta.acentos;\n  const marfil = paleta.tinta;\n\n  // golpes con la voz\n  const tEn = momento(palabras, fps, 'En', 1);\n  const tSetenta = momento(palabras, fps, 'setenta', 27);\n  const tCuatro = momento(palabras, fps, 'cuatro', 40);\n  const tEliza = momento(palabras, fps, 'Elizabeth', 60);\n  const tJohn = momento(palabras, fps, 'John', 94);\n  const tHicieron = momento(palabras, fps, 'hicieron', 114);\n  const tJusto = momento(palabras, fps, 'justo', 127);\n  const fin = duracion;\n\n  // 1) «En…»: la pantalla del video de choque se enciende en dorado (lo que «hicieron»)\n  const pantallaResalta = frame >= tEn && frame < tEn + 20;\n\n  // 2) «setenta»: el rótulo del año cae y se asienta sobre la pantalla\n  const c = caer(frame, fps, tSetenta, 1.2);\n  const destello = ventana(frame, tSetenta, tSetenta + 34, 4);\n  const pulsoAnio = frame >= tCuatro ? Math.exp(-(frame - tCuatro) / 8) : 0;\n\n  // 3) «Elizabeth»: la investigadora de la carpeta aparece con rebote\n  const sA = spring({frame: frame - tEliza, fps, config: {damping: 11, stiffness: 140}});\n  const resA = frame >= tEliza && frame < tEliza + 36;\n  const etiA = ventana(frame, tEliza + 2, tEliza + 32);\n\n  // 4) «John Palmer»: el investigador del cronómetro\n  const sB = spring({frame: frame - tJohn, fps, config: {damping: 11, stiffness: 140}});\n  const resB = frame >= tJohn && frame < tJohn + 36;\n  const etiB = ventana(frame, tJohn + 2, tJohn + 30);\n\n  // 5) «hicieron justo eso»: línea punteada de la carpeta a los autos chocados, y los autos se resaltan\n  const traza = aparecer(frame, tHicieron, 14);\n  const trazaFuera = interpolate(frame, [fin - 12, fin - 3], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});\n  const autosResalta = frame >= tJusto && frame < Math.min(tJusto + 20, fin - 3);\n  const tic = frame >= tHicieron ? Math.exp(-(frame - tHicieron) / 10) : 0;\n\n  const a = posInvestigadora(3);\n  const posB: [number, number, number] = [-1.02, 0.14, -0.4];\n  const resaltar = [...(pantallaResalta ? ['pantalla'] : []), ...(autosResalta ? ['autos'] : [])];\n\n  return (\n    <group>\n      <Mundo paso={2} frame={frame} fps={fps} paleta={paleta} resaltar={resaltar} />\n\n      {/* rótulo «1974» que cae sobre la pantalla */}\n      {c.escala > 0.001 ? (\n        <group position={[0, c.y, 0]}>\n          <Rotulo paleta={paleta} />\n        </group>\n      ) : null}\n      {destello > 0 ? (\n        <group>\n          <Efecto tipo=\"destello\" tam={0.75 * destello} color={oro} posicion={[0, 1.66, -0.88]} frame={frame} fps={fps} opacidad={0.7 * destello} />\n          <Brillo posicion={[0, 1.66, -0.8]} color={oro} radio={0.012 + 0.03 * pulsoAnio} luz={1.2 * destello} />\n        </group>\n      ) : null}\n\n      {/* investigadora con carpeta (Elizabeth Loftus) */}\n      {sA > 0.001 ? (\n        <group position={[a[0], 0.14, a[2]]} scale={[sA, sA, sA]}>\n          <Persona2D pose=\"parado\" color={resA ? oro : marfil} alto={0.8} posicion={[0, 0, 0]} frame={frame} fps={fps} />\n          <Pieza forma=\"caja\" medidas={[0.09, 0.12, 0.015]} color={sec} posicion={[-0.12, 0.46, 0.04]} rotacion={[0, 0, 0.2]}\n            brillo={traza > 0 && trazaFuera > 0 ? oro : undefined} />\n        </group>\n      ) : null}\n      {sA > 0.001 ? <Sombra posicion={[a[0], 0.14, a[2]]} radio={0.2 * Math.min(1, sA)} /> : null}\n\n      {/* investigador con cronómetro (John Palmer) */}\n      {sB > 0.001 ? (\n        <group position={posB} scale={[sB, sB, sB]}>\n          <Persona2D pose=\"parado\" color={resB ? oro : marfil} alto={0.84} posicion={[0, 0, 0]} frame={frame} fps={fps} />\n          <group position={[0.12, 0.48, 0.04]} rotation={[0, 0, Math.sin(frame * 0.9) * 0.15 * tic]}>\n            <Pieza forma=\"cilindro\" medidas={[0.035, 0.035, 0.015, 20]} color={oro} rotacion={[Math.PI / 2, 0, 0]} brillo={tic > 0.05 ? oro : undefined} />\n            <Pieza forma=\"caja\" medidas={[0.012, 0.02, 0.012]} color={oro} posicion={[0, 0.045, 0]} />\n          </group>\n        </group>\n      ) : null}\n      {sB > 0.001 ? <Sombra posicion={posB} radio={0.2 * Math.min(1, sB)} /> : null}\n\n      {/* nombres cortos, a un lado y por encima de cada uno */}\n      <Etiqueta texto=\"loftus\" punto={[a[0], 0.98, a[2] + 0.02]} desplazamiento={[0.12, 0.36, 0.3]} escala={etiA} alto={0.13} color={marfil} />\n      <Etiqueta texto=\"palmer\" punto={[posB[0], 1.02, posB[2] + 0.02]} desplazamiento={[0.16, 0.42, 0.36]} escala={etiB} alto={0.13} color={marfil} />\n\n      {/* «hicieron justo eso»: de la carpeta al video del choque */}\n      {traza > 0 && trazaFuera > 0 ? (\n        <group>\n          <Linea desde={[-0.95, 0.66, -0.48]} hasta={[-0.2, 0.92, -0.8]} grosor={0.009} color={oro} progreso={traza * trazaFuera} brillo discontinua />\n          <Brillo posicion={[-0.95 + 0.75 * traza, 0.66 + 0.26 * traza, -0.48 - 0.32 * traza]} color={oro} radio={0.022 * trazaFuera} />\n        </group>\n      ) : null}\n\n      {/* motas de polvo dorado en el haz del proyector (capa delantera, sutil) */}\n      {[0, 1, 2, 3].map((i) => {\n        const t = ((frame + i * 37) % 150) / 150;\n        return (\n          <Brillo key={i} posicion={[0.35 - i * 0.22, 1.25 + 0.3 * Math.sin(t * 6.28 + i), 0.9 - t * 0.6]} color={i % 2 ? oro : prota} radio={0.007} />\n        );\n      })}\n    </group>\n  );\n};\n"
+  },
+  "tema": {
+    "tema": "El experimento del «cerebro que completa»: Loftus y el choque de autos donde cambiar una palabra cambió el recuerdo",
+    "angulo": "En 1974 Loftus y Palmer mostraron videos de choques y preguntaron a qué velocidad iban los autos cuando «se estrellaron» o cuando «se tocaron». Con «estrellaron» dieron velocidades más altas, y una semana después más personas «recordaron» haber visto vidrios rotos que nunca hubo.",
+    "subtema": "trucos de la memoria del día a día (olvidos, recuerdos que cambian, canciones pegadas)",
+    "tendencia": "",
+    "pregunta_origen": "¿Y si un recuerdo tuyo cambió solo por cómo te hicieron la pregunta?",
+    "gancho": "Una sola palabra cambió lo que la gente recordó.",
+    "tono_visual": "memoria",
+    "puntos": {
+      "curiosidad": 5,
+      "emocion": 4,
+      "compartir": 5,
+      "utilidad": 4,
+      "universal": 5,
+      "visual": 5,
+      "verificable": 5
+    },
+    "por_que": "Es el experimento perfecto para animación: el choque, la palabra que cambia y el vidrio que aparece en el recuerdo. Genera el «¡eso me pasa!» de discutir con alguien sobre cómo pasó algo, o de recordar distinto un episodio de familia. Se comparte para mandárselo a quien siempre dice «no, eso no fue así». Es un estudio real, muy replicado, y la ficha de la fuente es sencilla de citar. Para evitar el tema de tragedias, se centra en videos de laboratorio y no en casos con víctimas.",
+    "puntaje_viral": 76.0
+  },
+  "estilo": {
+    "tendencia": false,
+    "paleta": "marca",
+    "colores": {
+      "fondo": "#1A0A0C",
+      "tinta": "#F2E8DC",
+      "acentos": [
+        "#8E1B23",
+        "#2F4F56",
+        "#D9A441",
+        "#C46A5A",
+        "#2A1618"
+      ]
+    },
+    "tipo_gancho": "te pasa a ti («Entras a la cocina… y se te olvida a qué ibas»)",
+    "estructura": "EL EXPERIMENTO: un experimento real y famoso contado paso a paso (qué hicieron, qué esperaban, qué pasó de verdad) y lo que dice de todos nosotros hoy"
+  },
+  "guion": {
+    "titulo": "Una palabra cambió lo que recordaron del choque",
+    "descripcion": "En 1974 Loftus y Palmer cambiaron una sola palabra en una pregunta, y los recuerdos de un choque cambiaron con ella. Mira lo que pasó una semana después.",
+    "portada": "¿TU RECUERDO ES TUYO?",
+    "pregunta_comentarios": "¿Te ha pasado que recordabas algo distinto a como fue de verdad?",
+    "hashtags": [
+      "#memoria",
+      "#ElizabethLoftus",
+      "#psicologia",
+      "#cerebro",
+      "#sabiasque"
+    ],
+    "escenas": [
+      {
+        "voz": "¿Y si tu recuerdo más claro ya no es tuyo?",
+        "visual": "Fotograma 0: dentro de la cabeza transparente de Mía hay un recuerdo en forma de cajón brillante, y una mano diminuta de otra persona lo está sacando. En el primer segundo el cajón se desliza y Mía mira hacia arriba, asustada.",
+        "rotulo": "YA NO ES TUYO",
+        "palabra_clave": "recuerdo",
+        "concepto": "tu recuerdo",
+        "mundo": "Sala de cine oscura con pantalla vacía, Mía sentada en la butaca y una palabra brillante flotando.",
+        "grafico": null,
+        "datos": []
+      },
+      {
+        "voz": "Imagina que ves un choque de autos en un video.",
+        "visual": "En la pantalla aparecen dos autitos de colores que avanzan y chocan suavemente. Mía mira con los ojos muy abiertos.",
+        "rotulo": "EL VIDEO",
+        "palabra_clave": "choque",
+        "concepto": "UN CHOQUE",
+        "mundo": "La pantalla muestra el choque de dos autos, Mía lo mira desde su butaca.",
+        "grafico": null,
+        "datos": []
+      },
+      {
+        "voz": "En mil novecientos setenta y cuatro, Elizabeth Loftus y John Palmer hicieron justo eso.",
+        "visual": "Junto a la pantalla aparecen dos siluetas de investigadores con bata, una con carpeta y otra con cronómetro. Sobre la pantalla se enciende un rótulo con el año.",
+        "rotulo": "1974",
+        "palabra_clave": "setenta",
+        "concepto": "LOFTUS Y PALMER",
+        "mundo": "La sala ahora tiene dos investigadores a un lado de la pantalla; el año 1974 brilla arriba.",
+        "grafico": {
+          "tipo": "contador",
+          "valor": 1974,
+          "etiqueta": "año"
+        },
+        "datos": [
+          {
+            "afirmacion": "Loftus y Palmer publicaron el estudio en 1974.",
+            "fuente": "Loftus, E. F., & Palmer, J. C. (1974). Reconstruction of automobile destruction. Journal of Verbal Learning and Verbal Behavior, 13(5), 585-589."
+          }
+        ]
+      },
+      {
+        "voz": "Mostraron videos de choques a estudiantes, y luego les preguntaron qué tan rápido iban los autos.",
+        "visual": "Las butacas se llenan de pequeñas figuritas estudiantes mirando la pantalla. Una investigadora levanta una tarjeta con un signo de interrogación y un velocímetro.",
+        "rotulo": "¿QUÉ VELOCIDAD?",
+        "palabra_clave": "rápido",
+        "concepto": "QUÉ TAN RÁPIDO",
+        "mundo": "Sala llena de estudiantes, la pantalla repite el choque y una tarjeta con velocímetro está en alto.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Se mostraron películas de accidentes de tráfico a estudiantes y se les preguntó por la velocidad de los autos.",
+            "fuente": "Loftus & Palmer (1974), Journal of Verbal Learning and Verbal Behavior."
+          }
+        ]
+      },
+      {
+        "voz": "Pero a unos les dijeron que los autos se estrellaron. A otros, que se tocaron.",
+        "visual": "La sala se divide en dos mitades. A la izquierda, una burbuja de pregunta con la palabra grande y resaltada y chispas. A la derecha, otra burbuja con la palabra suave.",
+        "rotulo": "ESTRELLARON / TOCARON",
+        "palabra_clave": "estrellaron",
+        "concepto": "ESTRELLARON O TOCARON",
+        "mundo": "Los estudiantes están en dos grupos, cada uno con su burbuja de pregunta distinta.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "La pregunta usaba verbos distintos, como 'smashed' (estrellaron) y 'contacted' (tocaron).",
+            "fuente": "Loftus & Palmer (1974)."
+          }
+        ]
+      },
+      {
+        "voz": "Los del «estrellaron» calcularon más velocidad. Casi diez millas por hora más.",
+        "visual": "Aparece una tarjeta con dos barras que crecen: una alta para el grupo de «estrellaron» y una más baja para «tocaron». Los autos de la pantalla parecen ir más rápido en la barra alta.",
+        "rotulo": "MÁS RÁPIDO",
+        "palabra_clave": "velocidad",
+        "concepto": "MÁS VELOCIDAD",
+        "mundo": "La sala muestra la tarjeta de barras con las dos velocidades estimadas.",
+        "grafico": {
+          "tipo": "barras",
+          "items": [
+            {
+              "etiqueta": "estrellaron",
+              "valor": 40.8,
+              "unidad": "mph"
+            },
+            {
+              "etiqueta": "tocaron",
+              "valor": 31.8,
+              "unidad": "mph"
+            }
+          ]
+        },
+        "datos": [
+          {
+            "afirmacion": "Con 'smashed' la velocidad estimada fue 40.8 mph y con 'contacted' 31.8 mph.",
+            "fuente": "Loftus & Palmer (1974), Experimento 1."
+          }
+        ]
+      },
+      {
+        "voz": "El video era el mismo. Lo que cambió fue una palabra.",
+        "visual": "Las dos mitades de la sala se juntan. La pantalla muestra el mismo choque con un sello de «IGUAL». La palabra brillante vuelve a flotar sobre Mía.",
+        "rotulo": "MISMO VIDEO",
+        "palabra_clave": "mismo",
+        "concepto": "EL MISMO VIDEO",
+        "mundo": "Sala unida, un solo video en pantalla y la palabra brillante sobre Mía.",
+        "grafico": null,
+        "datos": []
+      },
+      {
+        "voz": "Pero viene el giro. En otro experimento, una semana después, preguntaron a otros estudiantes: ¿viste vidrios rotos?",
+        "visual": "Un calendario sobre la pantalla pasa siete hojas. La sala se oscurece un poco, y una investigadora se acerca con una tarjeta con un vidrio roto dibujado.",
+        "rotulo": "UNA SEMANA DESPUÉS",
+        "palabra_clave": "semana",
+        "concepto": "UNA SEMANA DESPUÉS",
+        "mundo": "Sala más oscura, calendario con siete hojas pasadas y una tarjeta de vidrios rotos en la mano de la investigadora.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "En el Experimento 2, una semana después, se preguntó a los participantes si habían visto vidrios rotos.",
+            "fuente": "Loftus & Palmer (1974), Experimento 2."
+          }
+        ]
+      },
+      {
+        "voz": "No había ni un solo vidrio roto en el video.",
+        "visual": "La pantalla repite el choque en cámara lenta. Una lupa de luz recorre los autos y no encuentra nada. Aparece un cartel con una X sobre la tarjeta de vidrios.",
+        "rotulo": "CERO VIDRIOS",
+        "palabra_clave": "ni",
+        "concepto": "NO HABÍA VIDRIOS",
+        "mundo": "La pantalla muestra los autos intactos y la tarjeta de vidrios rotos tachada.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "En la película no había vidrios rotos.",
+            "fuente": "Loftus & Palmer (1974), Experimento 2."
+          }
+        ]
+      },
+      {
+        "voz": "Aun así, los del «estrellaron» dijeron que sí, más del doble que los otros.",
+        "visual": "Sobre la pantalla sube una tarjeta con barras: una alta para «estrellaron» y dos bajas para los demás. Mía mira sorprendida y sus ojos se abren.",
+        "rotulo": "MÁS DEL DOBLE",
+        "palabra_clave": "doble",
+        "concepto": "MÁS DEL DOBLE",
+        "mundo": "Tarjeta de barras visible sobre la pantalla con los porcentajes de «sí vi vidrios».",
+        "grafico": {
+          "tipo": "barras",
+          "items": [
+            {
+              "etiqueta": "estrellaron",
+              "valor": 32,
+              "unidad": "%"
+            },
+            {
+              "etiqueta": "golpearon",
+              "valor": 14,
+              "unidad": "%"
+            },
+            {
+              "etiqueta": "sin pregunta",
+              "valor": 12,
+              "unidad": "%"
+            }
+          ]
+        },
+        "datos": [
+          {
+            "afirmacion": "Dijeron haber visto vidrios rotos 16 de 50 con 'smashed', 7 de 50 con 'hit' y 6 de 50 en el grupo control.",
+            "fuente": "Loftus & Palmer (1974), Experimento 2, Tabla 3."
+          }
+        ]
+      },
+      {
+        "voz": "Tu cerebro no reproduce el recuerdo. Lo reconstruye y rellena huecos con lo que le dijeron.",
+        "visual": "Dentro de la cabeza transparente de Mía, un rompecabezas con una pieza faltante. Una pieza con la palabra brillante llega flotando y encaja en el hueco.",
+        "rotulo": "RELLENA HUECOS",
+        "palabra_clave": "reconstruye",
+        "concepto": "RELLENA HUECOS",
+        "mundo": "La cabeza de Mía muestra un rompecabezas de recuerdo completado con una pieza nueva en forma de palabra.",
+        "grafico": null,
+        "datos": [
+          {
+            "afirmacion": "Loftus propuso que la información posterior al hecho se integra al recuerdo original, que se reconstruye.",
+            "fuente": "Loftus & Palmer (1974); Loftus, E. F. (2005). Planting misinformation in the human mind. Learning & Memory, 12(4), 361-366."
+          }
+        ]
+      },
+      {
+        "voz": "Tu recuerdo no es una grabación. Se arma de nuevo, y una sola palabra puede cambiarlo.",
+        "visual": "La cabeza de Mía vuelve a ser normal. Ella sonríe tranquila mirando la pantalla, que ahora está vacía. La palabra brillante flota otra vez sobre ella, suave, y la cámara se aleja.",
+        "rotulo": "SE ARMA DE NUEVO",
+        "palabra_clave": "grabación",
+        "concepto": "NO ES GRABACIÓN",
+        "mundo": "Misma sala de cine de la primera escena, Mía tranquila y la palabra brillante flotando sobre ella.",
+        "grafico": null,
+        "datos": []
+      }
+    ],
+    "direccion_arte": {
+      "protagonista": "Mía, una figurita redonda y pequeña, piel cálida, cabello corto negro, suéter turquesa, ojos grandes y expresivos.",
+      "secundarios": "Dos investigadores en bata blanca (una con carpeta, otro con cronómetro), estudiantes figuritas de colores en las butacas, dos autitos de juguete (rojo y azul) en la pantalla.",
+      "ambiente": "Una pequeña sala de cine oscura y acogedora, con butacas rojas y una pantalla grande al frente, vista como maqueta en corte.",
+      "escenario": "oscuro",
+      "partes": "La pantalla con el choque, la palabra brillante flotante, las burbujas de pregunta, el calendario, la tarjeta de vidrios rotos y el rompecabezas transparente dentro de la cabeza de Mía.",
+      "metafora": "El recuerdo es un rompecabezas que el cerebro arma de nuevo cada vez, y una palabra puede ser la pieza que se cuela.",
+      "tono_visual": "memoria: cabeza en corte con cajones o estantes de recuerdos que se abren, se vacían o se ordenan"
+    },
+    "verificacion": {
+      "cambios": [
+        "Escena 8: el guion sugería que el grupo de la pregunta sobre vidrios era el mismo que estimó la velocidad. En realidad, el Experimento 2 usó otros participantes (150 estudiantes en tres grupos: 'smashed', 'hit' y control). Reescribí la voz como «En otro experimento, una semana después, preguntaron a otros estudiantes». También ajusté la afirmación del dato para citar el Experimento 2.",
+        "Verifiqué de memoria, sin buscar en línea, y coincidieron con el artículo original: el año 1974, las velocidades de 40.8 y 31.8 mph (diferencia de 9 mph, o «casi diez»), las cifras de 16/50, 7/50 y 6/50 (32 %, 14 % y 12 %) y que la película no mostraba vidrios rotos. 32 % es más del doble que 14 % y que 12 %, así que «más del doble» es correcto."
+      ],
+      "confianza": "alta"
+    }
+  }
+}
